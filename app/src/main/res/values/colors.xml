@@ -143,4 +143,18 @@
     <color name="md_theme_surfaceContainer_highContrast">#E8E2D4</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#DAD4C6</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#CCC6B9</color>
+    !-- Colores principales -->
+    <color name="green_500">#4CAF50</color>
+    <color name="red_500">#F44336</color>
+    <color name="blue_500">#2196F3</color>
+
+    <!-- Colores de fondo para notificaciones -->
+    <color name="bg_success">#E8F5E9</color>
+    <color name="bg_error">#FFEBEE</color>
+    <color name="bg_info">#E3F2FD</color>
+
+    <!-- Colores para los fondos de los iconos -->
+    <color name="icon_bg_success">#D3EBDA</color>
+    <color name="icon_bg_error">#FFD7D7</color>
+    <color name="icon_bg_info">#CCE5FF</color>
 </resources>

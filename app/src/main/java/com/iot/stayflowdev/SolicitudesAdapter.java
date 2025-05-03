@@ -1,6 +1,7 @@
 package com.iot.stayflowdev;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +42,23 @@ public class SolicitudesAdapter extends RecyclerView.Adapter<SolicitudesAdapter.
             cardSolicitud = itemView.findViewById(R.id.cardSolicitud);
 
             cardSolicitud.setOnClickListener(view -> {
-                Toast.makeText(context, "Solicitud seleccionada: " + solicitud.getPickupLocation(),
-                        Toast.LENGTH_SHORT).show();
+                // Iniciar la actividad de detalles y pasar los datos
+                Intent intent = new Intent(context, DriverInfoSolicitudActivity.class);
+
+                // Pasar todos los datos de la solicitud a la actividad de detalles
+                intent.putExtra("EXTRA_PICKUP_LOCATION", solicitud.getPickupLocation());
+                intent.putExtra("EXTRA_DESTINATION_LOCATION", solicitud.getDestinationLocation());
+                intent.putExtra("EXTRA_DISTANCE", solicitud.getDistance());
+                intent.putExtra("EXTRA_TIME", solicitud.getTiempo());
+                intent.putExtra("EXTRA_ESTIMATED_TIME", solicitud.getEstimatedTime());
+                intent.putExtra("EXTRA_PASSENGER_NAME", solicitud.getPassengerName());
+                intent.putExtra("EXTRA_PASSENGER_PHONE", solicitud.getPassengerPhone());
+                intent.putExtra("EXTRA_PASSENGERS_COUNT", solicitud.getPassengersCount());
+                intent.putExtra("EXTRA_VEHICLE_TYPE", solicitud.getVehicleType());
+                intent.putExtra("EXTRA_NOTES", solicitud.getNotes());
+                intent.putExtra("EXTRA_STATUS", solicitud.getStatus());
+
+                context.startActivity(intent);
             });
         }
     }
