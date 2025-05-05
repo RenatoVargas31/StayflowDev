@@ -14,13 +14,15 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/md_theme_outlineVariant"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:title="Información del vehículo"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
-        app:title="Vehículo"
-        android:textColor="#757575"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="12sp" />
 
     <!-- Contenido principal -->

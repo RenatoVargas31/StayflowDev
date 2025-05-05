@@ -22,8 +22,8 @@
         app:title="Notificación"
         app:titleCentered="true"
         app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
-        android:textStyle="bold"
         android:textColor="?attr/colorOnSurface"
+        android:textStyle="bold"
         android:textSize="20sp" />
 
     <!-- RecyclerView de notificaciones -->

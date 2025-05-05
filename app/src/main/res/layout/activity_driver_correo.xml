@@ -18,8 +18,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="Información de cuenta"
-        app:titleTextColor="@color/white" />
+        app:title="Información del correo"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:textColor="?attr/colorOnSurface"  />
 
     <!-- Contenido principal -->
     <ScrollView

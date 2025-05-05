@@ -17,8 +17,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="Cambiar contraseña"
-        app:titleTextColor="@color/white" />
+        app:title="Actualizar contraseña"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:textColor="?attr/colorOnSurface" />
 
     <ScrollView
         android:layout_width="0dp"
