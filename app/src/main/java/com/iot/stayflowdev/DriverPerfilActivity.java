@@ -52,6 +52,24 @@ public class DriverPerfilActivity extends BaseActivity {
             });
         }
 
+        ConstraintLayout layoutVehiculo = findViewById(R.id.layout_vehicle_model);
+        if (layoutVehiculo != null) {
+            layoutVehiculo.setOnClickListener(v -> {
+                Intent intent = new Intent(DriverPerfilActivity.this, DriverVehiculoActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        ConstraintLayout layoutCorreo = findViewById(R.id.layout_correo);
+        if (layoutCorreo != null) {
+            layoutCorreo.setOnClickListener(v -> {
+                Intent intent = new Intent(DriverPerfilActivity.this, DriverCorreoActivity.class);
+                startActivity(intent);
+            });
+        }
+
+
+
 
 
 

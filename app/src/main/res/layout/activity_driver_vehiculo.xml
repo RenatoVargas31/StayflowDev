@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DriverVehiculoActivity">
+
+    <!-- Barra superior -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_outlineVariant"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+        app:title="Vehículo"
+        android:textColor="#757575"
+        android:textSize="12sp" />
+
+    <!-- Contenido principal -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#FAFAFA"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Sección: Vehículo Actual -->
+            <TextView
+                android:id="@+id/tv_current_vehicle_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vehículo actual"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Tarjeta del vehículo actual -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_current_vehicle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Imagen del vehículo con etiqueta de seleccionado -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp">
+
+                        <ImageView
+                            android:id="@+id/iv_vehicle_photo"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Foto del vehículo"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/pexels_alexgtacar_745150_1592384" />
+
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Seleccionado"
+                            app:chipBackgroundColor="@color/md_theme_tertiaryFixedDim"
+                            app:chipIcon="@drawable/ic_estado"
+                            android:textColor="@color/md_theme_tertiaryFixed_highContrast"
+                            android:layout_gravity="end|top"
+                            android:layout_margin="8dp"/>
+                    </FrameLayout>
+
+                    <!-- Detalles del vehículo -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+
+                        <!-- Detalles del vehículo en forma de lista -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- Placa -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="90dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Placa:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_vehicle_plate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="ABC-123"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Color -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="90dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Color:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_vehicle_color"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Blanco"
+                                    android:textSize="14sp"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Tipo -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="90dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tipo:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_vehicle_type"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Sedán"
+                                    android:textSize="14sp"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Año -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="90dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Año:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_vehicle_year"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="2020"
+                                    android:textSize="14sp"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Fecha última revisión -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="90dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Revisión:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_vehicle_last_check"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="01/03/2025"
+                                    android:textSize="14sp"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Sección: Otros Vehículos -->
+            <TextView
+                android:id="@+id/tv_other_vehicles_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Otros vehículos registrados"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Lista de otros vehículos (ejemplo con 2 vehículos) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_vehicle_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_vehicle_photo_1"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:src="@drawable/pexels_alexgtacar_745150_1592384"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:background="@drawable/circle_background"
+                        android:clipToOutline="true"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_model_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Honda Civic 2018"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/iv_vehicle_photo_1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_plate_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Placa: XYZ-789"
+                        android:textSize="14sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="@id/tv_vehicle_model_1"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_model_1"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_type_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sedán • Gris"
+                        android:textSize="14sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="@id/tv_vehicle_plate_1"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_plate_1"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_select_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Seleccionar"
+                        android:textSize="12sp"
+                        app:cornerRadius="18dp"
+                        android:layout_marginTop="8dp"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_type_1"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_vehicle_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_vehicle_photo_2"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:src="@drawable/pexels_alexgtacar_745150_1592384"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:background="@drawable/circle_background"
+                        android:clipToOutline="true"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_model_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Nissan Sentra 2019"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/iv_vehicle_photo_2"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_plate_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Placa: DEF-456"
+                        android:textSize="14sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="@id/tv_vehicle_model_2"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_model_2"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_type_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sedán • Negro"
+                        android:textSize="14sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="@id/tv_vehicle_plate_2"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_plate_2"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_select_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Seleccionar"
+                        android:textSize="12sp"
+                        app:cornerRadius="18dp"
+                        android:layout_marginTop="8dp"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_vehicle_type_2"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Botón para añadir un nuevo vehículo -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_new_vehicle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Añadir nuevo vehículo"
+                android:textSize="14sp"
+                app:cornerRadius="24dp"
+                app:icon="@drawable/ic_add"
+                app:iconGravity="textStart"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
