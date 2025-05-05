@@ -2,6 +2,7 @@ package com.iot.stayflowdev;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -25,7 +26,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private RecyclerView rvSolicitudesCercanas;
     private TextView tvNoSolicitudes;
@@ -38,15 +39,27 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    protected int getCurrentMenuItemId() {
+        return R.id.nav_inicio;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
-        });
+        }); */
 
         // Inicializar vistas
         rvSolicitudesCercanas = findViewById(R.id.rvSolicitudesCercanas);
@@ -179,12 +192,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     private void configurarRecyclerView() {
+
+        rvSolicitudesCercanas.setLayoutManager(new LinearLayoutManager(this));
+
         adapter = new SolicitudesAdapter();
         adapter.setContext(this);
         adapter.setListaSolicitudes(solicitudes);
 
         rvSolicitudesCercanas.setAdapter(adapter);
-        rvSolicitudesCercanas.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter.notifyDataSetChanged();
+        Log.d("MainActivity", "RecyclerView configurado con " + solicitudes.size() + " elementos");
+
     }
     private void configurarSwitch() {
         statusSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
