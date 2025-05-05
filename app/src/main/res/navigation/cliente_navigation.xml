@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_buscar">
+    <fragment
+        android:id="@+id/nav_buscar"
+        android:name="com.codebnb.stayflow.cliente.BuscarFragment"
+        android:label="cliente_fragment_buscar"
+        tools:layout="@layout/cliente_fragment_buscar" >
+        <action
+            android:id="@+id/action_nav_buscar_to_busquedaHotelFragment"
+            app:destination="@id/busquedaHotelFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_favoritos"
+        android:name="com.codebnb.stayflow.cliente.FavoritoFragment"
+        android:label="cliente_fragment_favorito"
+        tools:layout="@layout/cliente_fragment_favorito"/>
+    <fragment
+        android:id="@+id/nav_reservas"
+        android:name="com.codebnb.stayflow.cliente.ReservaFragment"
+        android:label="cliente_fragment_reserva"
+        tools:layout="@layout/cliente_fragment_reserva" />
+    <fragment
+        android:id="@+id/nav_perfil"
+        android:name="com.codebnb.stayflow.cliente.PerfilFragment"
+        android:label="cliente_fragment_perfil"
+        tools:layout="@layout/cliente_fragment_perfil" />
+    <fragment
+        android:id="@+id/busquedaHotelFragment"
+        android:name="com.codebnb.stayflow.cliente.BusquedaHotelFragment"
+        android:label="cliente_fragment_busqueda_hotel"
+        tools:layout="@layout/cliente_fragment_busqueda_hotel" >
+        <action
+            android:id="@+id/action_busquedaHotelFragment_to_nav_buscar"
+            app:destination="@id/nav_buscar" />
+    </fragment>
+
+</navigation>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Menú del Taxista -->
+    <item
+        android:id="@+id/nav_inicio"
+        android:title="Inicio"
+        android:icon="@drawable/ic_home"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/nav_reservas"
+        android:title="Servicios"
+        android:icon="@drawable/ic_taxi"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/nav_mapa"
+        android:title="Mapa"
+        android:icon="@drawable/ic_mapa"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/nav_perfil"
+        android:title="Perfil"
+        android:icon="@drawable/ic_perfil"
+        app:showAsAction="always"
+        />
+</menu>

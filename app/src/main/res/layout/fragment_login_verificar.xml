@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Título -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verifica tu dirección de email"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_marginBottom="8dp"
+            android:textColor="#000000" />
+
+        <!-- Subtítulo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enviamos un código  de verificación a tu correo,\nescribe el código para continuar"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Input de código -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_email"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="Ícono de correo" />
+
+            <!-- Seis campos para el código -->
+            <EditText
+                android:id="@+id/digit1"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:background="@drawable/code_box" />
+
+            <EditText
+                android:id="@+id/digit2"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/code_box" />
+
+            <EditText
+                android:id="@+id/digit3"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/code_box" />
+
+            <EditText
+                android:id="@+id/digit4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/code_box" />
+
+            <EditText
+                android:id="@+id/digit5"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/code_box" />
+
+            <EditText
+                android:id="@+id/digit6"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/code_box" />
+        </LinearLayout>
+
+        <!-- Botón Verificar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_verificar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Verificar"
+            style="@style/Widget.Material3.Button"
+            app:cornerRadius="24dp"
+            app:backgroundTint="@color/purple_700"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Enviar otro código -->
+        <TextView
+            android:id="@+id/tv_reenviar_codigo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enviar otro código"
+            android:textColor="@color/purple_700"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+</LinearLayout>

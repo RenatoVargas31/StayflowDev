@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".driver.home.HotelActivity">
+
+    <!-- Barra superior -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_outlineVariant"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+        app:title="Detalles"
+        android:textSize="12sp"
+        />
+
+    <ScrollView
+        android:id="@+id/hotel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_hotel_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_theme_outline"
+                app:cardBackgroundColor="@color/white"
+                tools:ignore="MissingConstraints">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <!-- Contenedor para la información del hotel -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                        <!-- Nombre del hotel -->
+                        <TextView
+                            android:id="@+id/tv_hotel_nombre"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Hotel Brisa Dorada"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/md_theme_primary"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                        <!-- Dirección con icono -->
+                        <ImageView
+                            android:id="@+id/iv_direccion_icon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
+                            android:src="@drawable/ic_location"
+                            app:tint="#666666"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_hotel_nombre" />
+
+                        <TextView
+                            android:id="@+id/tv_hotel_direccion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Avenida del Sol 1457, Distrito Playa Serena, Lima 18, Perú"
+                            android:textSize="13sp"
+                            android:textColor="#666666"
+                            app:layout_constraintStart_toEndOf="@id/iv_direccion_icon"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/iv_direccion_icon"
+                            app:layout_constraintBottom_toBottomOf="@id/iv_direccion_icon" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/card_hotel_info"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hacia el Hotel" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hacia el Aeropuerto" />
+            </com.google.android.material.tabs.TabLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                tools:ignore="MissingConstraints"
+                app:layout_constraintTop_toBottomOf="@id/tab_layout">
+
+                <!-- Primer card-->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_hotel_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    tools:ignore="MissingConstraints">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/detalle_solicitud_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <ImageView
+                            android:id="@+id/iv_hotel1"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_hotel"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_nombre_hotel1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Hotel Monte Claro"
+                            android:textColor="#212121"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_hotel1"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tiempo1"
+                            app:layout_constraintTop_toTopOf="@id/iv_hotel1"
+                            app:layout_constraintHorizontal_bias="0" />
+
+                        <TextView
+                            android:id="@+id/tv_tiempo1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hace 5 minutos"
+                            android:textColor="#9E9E9E"
+                            android:textSize="12sp"
+                            app:layout_constraintTop_toTopOf="@id/tv_nombre_hotel1"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_direccion_hotel1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="4dp"
+                            android:text="Av. del Sol 1457, Playa Serena"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_nombre_hotel1"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_nombre_hotel1" />
+
+                        <TextView
+                            android:id="@+id/tv_distancia1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_location"
+                            android:drawablePadding="4dp"
+                            android:text="1.5 km"
+                            android:textColor="@color/md_theme_onPrimaryContainer"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_direccion_hotel1"
+                            app:layout_constraintTop_toBottomOf="@id/tv_direccion_hotel1" />
+
+                        <View
+                            android:id="@+id/divider1"
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="16dp"
+                            android:background="#EEEEEE"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_distancia1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_rechazar1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:text="Rechazar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="@color/md_theme_error"
+                            app:strokeWidth="1dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider1"
+                            app:layout_constraintEnd_toStartOf="@id/btn_aceptar1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_aceptar1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Aceptar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:backgroundTint="@color/md_theme_onTertiaryFixedVariant"
+                            app:cornerRadius="18dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider1"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Segundo card-->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_hotel_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    tools:ignore="MissingConstraints">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/detalle_solicitud_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <ImageView
+                            android:id="@+id/iv_hotel2"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_hotel"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_nombre_hotel2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Hotel Brisa Dorada"
+                            android:textColor="#212121"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_hotel2"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tiempo2"
+                            app:layout_constraintTop_toTopOf="@id/iv_hotel2"
+                            app:layout_constraintHorizontal_bias="0" />
+
+                        <TextView
+                            android:id="@+id/tv_tiempo2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hace 10 minutos"
+                            android:textColor="#9E9E9E"
+                            android:textSize="12sp"
+                            app:layout_constraintTop_toTopOf="@id/tv_nombre_hotel2"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_direccion_hotel2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="4dp"
+                            android:text="Calle Las Palmeras 123, Miraflores"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_nombre_hotel2"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_nombre_hotel2" />
+
+                        <TextView
+                            android:id="@+id/tv_distancia2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_location"
+                            android:drawablePadding="4dp"
+                            android:text="2.3 km"
+                            android:textColor="@color/md_theme_onPrimaryContainer"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_direccion_hotel2"
+                            app:layout_constraintTop_toBottomOf="@id/tv_direccion_hotel2" />
+
+                        <View
+                            android:id="@+id/divider2"
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="16dp"
+                            android:background="#EEEEEE"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_distancia2" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_rechazar2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:text="Rechazar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="@color/md_theme_error"
+                            app:strokeWidth="1dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider2"
+                            app:layout_constraintEnd_toStartOf="@id/btn_aceptar2" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_aceptar2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Aceptar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:backgroundTint="@color/md_theme_onTertiaryFixedVariant"
+                            app:cornerRadius="18dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider2"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Tercer card-->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_hotel_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    tools:ignore="MissingConstraints">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/detalle_solicitud_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <ImageView
+                            android:id="@+id/iv_hotel3"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_hotel"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_nombre_hotel3"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="El Refugio Colonial"
+                            android:textColor="#212121"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_hotel3"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tiempo3"
+                            app:layout_constraintTop_toTopOf="@id/iv_hotel3"
+                            app:layout_constraintHorizontal_bias="0" />
+
+                        <TextView
+                            android:id="@+id/tv_tiempo3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hace 15 minutos"
+                            android:textColor="#9E9E9E"
+                            android:textSize="12sp"
+                            app:layout_constraintTop_toTopOf="@id/tv_nombre_hotel3"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_direccion_hotel3"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="4dp"
+                            android:text="Jr. de la Unión 456, Centro Histórico"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_nombre_hotel3"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_nombre_hotel3" />
+
+                        <TextView
+                            android:id="@+id/tv_distancia3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_location"
+                            android:drawablePadding="4dp"
+                            android:text="3.7 km"
+                            android:textColor="@color/md_theme_onPrimaryContainer"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_direccion_hotel3"
+                            app:layout_constraintTop_toBottomOf="@id/tv_direccion_hotel3" />
+
+                        <View
+                            android:id="@+id/divider3"
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="16dp"
+                            android:background="#EEEEEE"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_distancia3" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_rechazar3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:text="Rechazar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="@color/md_theme_error"
+                            app:strokeWidth="1dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider3"
+                            app:layout_constraintEnd_toStartOf="@id/btn_aceptar3" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_aceptar3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Aceptar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:backgroundTint="@color/md_theme_onTertiaryFixedVariant"
+                            app:cornerRadius="18dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider3"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Cuarto card-->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_hotel_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    tools:ignore="MissingConstraints">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/detalle_solicitud_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <ImageView
+                            android:id="@+id/iv_hotel4"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_hotel"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_nombre_hotel4"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Gran Hotel Pacífico"
+                            android:textColor="#212121"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_hotel4"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tiempo4"
+                            app:layout_constraintTop_toTopOf="@id/iv_hotel4"
+                            app:layout_constraintHorizontal_bias="0" />
+
+                        <TextView
+                            android:id="@+id/tv_tiempo4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hace 20 minutos"
+                            android:textColor="#9E9E9E"
+                            android:textSize="12sp"
+                            app:layout_constraintTop_toTopOf="@id/tv_nombre_hotel4"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_direccion_hotel4"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="4dp"
+                            android:text="Av. Costanera 789, San Miguel"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_nombre_hotel4"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_nombre_hotel4" />
+
+                        <TextView
+                            android:id="@+id/tv_distancia4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_location"
+                            android:drawablePadding="4dp"
+                            android:text="4.2 km"
+                            android:textColor="@color/md_theme_onPrimaryContainer"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tv_direccion_hotel4"
+                            app:layout_constraintTop_toBottomOf="@id/tv_direccion_hotel4" />
+
+                        <View
+                            android:id="@+id/divider4"
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="16dp"
+                            android:background="#EEEEEE"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_distancia4" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_rechazar4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:text="Rechazar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="@color/md_theme_error"
+                            app:strokeWidth="1dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider4"
+                            app:layout_constraintEnd_toStartOf="@id/btn_aceptar4" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_aceptar4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Aceptar"
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:backgroundTint="@color/md_theme_onTertiaryFixedVariant"
+                            app:cornerRadius="18dp"
+                            app:layout_constraintTop_toBottomOf="@id/divider4"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

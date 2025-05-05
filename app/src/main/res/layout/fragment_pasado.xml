@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".driver.reserva.PasadoFragment">
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+            <!-- Reserva 1 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_reserva1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="4dp"
+
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                app:rippleColor="?attr/colorControlHighlight"
+                app:strokeColor="@color/md_theme_outline"
+                app:strokeWidth="1dp">
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/pasado1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_hotel1_icon"
+                        android:layout_width="29dp"
+                        android:layout_height="27dp"
+                        android:contentDescription="Icono de hotel"
+                        android:src="@drawable/ic_hotel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_hotel1_nombre"
+                        android:layout_width="202dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="Juan Pérez Campos"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toEndOf="@+id/iv_hotel1_icon"
+                        app:layout_constraintTop_toTopOf="@+id/iv_hotel1_icon" />
+
+                    <TextView
+                        android:id="@+id/tv_pasajero1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="De: Altura Real Hotel"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="@+id/tv_hotel1_nombre"
+                        app:layout_constraintStart_toStartOf="@+id/tv_hotel1_nombre"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_hotel1_nombre" />
+                    <TextView
+                        android:id="@+id/tv_destino"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="A: Aeropuerto"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="@+id/tv_pasajero1"
+                        app:layout_constraintStart_toStartOf="@+id/tv_pasajero1"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_pasajero1" />
+                    <TextView
+                        android:id="@+id/tv_hora1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Completado"
+                        android:textColor="@android:color/black"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/iv_hotel1_icon" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- ... Aquí puedes seguir añadiendo más elementos ... -->
+
+            <!-- Vista de estado vacío (inicialmente oculta) -->
+            <LinearLayout
+                android:id="@+id/empty_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:contentDescription="No hay reservas pasadas"
+                    android:src="@drawable/freepik__background__21715" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="No tienes reservas pasadas"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
