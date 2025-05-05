@@ -10,10 +10,28 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.StayflowDev"
+        android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".adminHotel.MensajeDetalleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.CheckoutDetalleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.InfoTaxiActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.DetalleReservaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.CheckoutAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.ReservasAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.AdminInicioActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,6 +39,39 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".adminHotel.UbicacionAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.GaleriaAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.HabitacionesAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.ServiciosAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.huesped.TaxiAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.ReportesAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.BaseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.HuespedAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.MensajeriaAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.PerfilAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
