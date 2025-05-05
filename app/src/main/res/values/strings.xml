@@ -1,3 +1,27 @@
 <resources>
-    <string name="app_name">StayflowDev</string>
+    <string name="app_name">StayFlow</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Buscar" />
+    <string name="Favoritos" />
+    <string name="Inicio" />
+    <string name="Reservas" />
+    <string name="Perfil" />
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <!-- SuperAdmin Strings -->
+    <string name="superadmin_title">SuperAdmin</string>
+
+    <!-- Menu Actions -->
+    <string name="action_settings">Configuración</string>
+    <string name="action_users">Usuarios</string>
+    <string name="action_logout">Cerrar Sesión</string>
+
+    <!-- Content Descriptions -->
+    <string name="content_description_settings">Configuración del sistema</string>
+    <string name="content_description_users">Gestión de usuarios</string>
+    <string name="content_description_logout">Cerrar sesión</string>
 </resources>
