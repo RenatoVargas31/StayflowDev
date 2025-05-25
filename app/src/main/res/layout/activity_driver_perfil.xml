@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -8,7 +9,7 @@
     android:layout_height="match_parent"
     tools:context=".DriverPerfilActivity">
 
-    <!-- Barra superior -->
+    <!-- ==================== BARRA SUPERIOR ==================== -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
@@ -30,11 +31,15 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- ==================== CONTENIDO SCROLLEABLE ==================== -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/appbar"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -44,7 +49,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            <!-- Profile Header -->
+
+            <!-- ==================== HEADER DEL PERFIL ==================== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_profile_header"
                 android:layout_width="match_parent"
@@ -53,13 +59,15 @@
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="@color/md_theme_outlineVariant"
                 android:layout_marginHorizontal="1dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="20dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="24dp">
+
                     <!-- Foto de perfil con forma circular -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_profile_picture"
@@ -70,6 +78,7 @@
                         app:shapeAppearanceOverlay="@style/CircleImageView"
                         app:strokeWidth="2dp"
                         app:strokeColor="#EEEEEE" />
+
                     <!-- Información de perfil -->
                     <TextView
                         android:id="@+id/tv_nombre_taxista"
@@ -79,6 +88,7 @@
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="@android:color/black"
                         android:layout_marginTop="16dp" />
+
                     <TextView
                         android:id="@+id/tv_label_taxista"
                         android:layout_width="wrap_content"
@@ -87,6 +97,7 @@
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="#757575"
                         android:layout_marginTop="2dp" />
+
                     <!-- Performance Metrics -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -184,7 +195,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Información del vehículo -->
+            <!-- ==================== INFORMACIÓN DEL VEHÍCULO ==================== -->
             <TextView
                 android:id="@+id/tv_label_vehiculo"
                 android:layout_width="wrap_content"
@@ -194,6 +205,7 @@
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 android:layout_marginBottom="8dp" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_vehicle_info"
                 android:layout_width="match_parent"
@@ -201,11 +213,13 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="@color/white"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="20dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <!-- Vehicle Model -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_vehicle_model"
@@ -339,7 +353,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Información de la cuenta -->
+            <!-- ==================== INFORMACIÓN DE LA CUENTA ==================== -->
             <TextView
                 android:id="@+id/tv_label_cuenta"
                 android:layout_width="wrap_content"
@@ -357,14 +371,14 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="@color/white"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- correo -->
+                    <!-- Correo -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_correo"
                         android:layout_width="match_parent"
@@ -420,7 +434,7 @@
                         android:layout_height="1dp"
                         android:background="#F0F0F0" />
 
-                    <!-- Tarjeta de credito -->
+                    <!-- Tarjeta de crédito -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_tarjetaCredit"
                         android:layout_width="match_parent"
@@ -472,19 +486,21 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Menú inferior
+    <!-- ==================== NAVEGACIÓN INFERIOR ==================== -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
-        style="@style/Widget.Material3.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:elevation="8dp"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/driver_menu" /> -->
+        app:menu="@menu/driver_menu" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

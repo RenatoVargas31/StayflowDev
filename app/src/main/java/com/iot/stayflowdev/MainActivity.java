@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -25,8 +26,7 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class MainActivity extends BaseActivity {
+public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rvSolicitudesCercanas;
     private TextView tvNoSolicitudes;
@@ -37,55 +37,49 @@ public class MainActivity extends BaseActivity {
     private BottomNavigationView bottomNavigation;
     private ImageView notificationIcon;
 
-
-    @Override
-    protected int getLayoutResourceId() {
-        return R.layout.activity_main;
-    }
-
-    @Override
-    protected int getCurrentMenuItemId() {
-        return R.id.nav_inicio;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        /*
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Configurar márgenes para barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
-        }); */
+        });
 
-        // Inicializar vistas
+        //   INICIALIZAR TODAS LAS VISTAS PRIMERO
+        inicializarVistas();
+
+        //   CONFIGURAR TODO EN ORDEN CORRECTO
+        crearDatosDeSolicitudes();
+        configurarRecyclerView();
+        configurarSwitch();
+        configurarBottomNavigation();
+        configurarNotificaciones();
+
+        // Establecer estado inicial
+        actualizarEstadoUI(statusSwitch.isChecked());
+    }
+
+    //   MÉTODO SEPARADO PARA INICIALIZAR VISTAS
+    private void inicializarVistas() {
         rvSolicitudesCercanas = findViewById(R.id.rvSolicitudesCercanas);
         tvNoSolicitudes = findViewById(R.id.tvNoSolicitudes);
         statusSwitch = findViewById(R.id.statusSwitch);
         statusText = findViewById(R.id.statusText);
-        bottomNavigation = findViewById(R.id.bottomNavigation);
         notificationIcon = findViewById(R.id.notification_icon);
+        bottomNavigation = findViewById(R.id.bottomNavigation); //   ESTO FALTABA!
 
-        // Ir a la vista de Notificacion
-        irNotificacion();
-
-        // Configurar el BottomNavigationView
-        configurarBottomNavigation();
-
-        // Crear datos
-        crearDatosDeSolicitudes();
-
-        // Configurar RecyclerView
-        configurarRecyclerView();
-
-        // Configurar Switch
-        configurarSwitch();
-
-        // Establecer estado inicial
-        actualizarEstadoUI(statusSwitch.isChecked());
+        //   VERIFICAR QUE TODAS LAS VISTAS SE ENCONTRARON
+        if (bottomNavigation == null) {
+            Log.e("MainActivity", "Error: bottomNavigation es null");
+        }
+        if (rvSolicitudesCercanas == null) {
+            Log.e("MainActivity", "Error: rvSolicitudesCercanas es null");
+        }
     }
 
     private void crearDatosDeSolicitudes() {
@@ -150,74 +144,96 @@ public class MainActivity extends BaseActivity {
                 "Viajamos con dos niños pequeños. Necesitamos asientos para niños.",
                 "Pendiente"
         ));
+
+        Log.d("MainActivity", "Datos creados: " + solicitudes.size() + " solicitudes");
     }
 
-    private void irNotificacion(){
-        notificationIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    //   MÉTODO SEPARADO PARA CONFIGURAR NOTIFICACIONES
+    private void configurarNotificaciones() {
+        if (notificationIcon != null) {
+            notificationIcon.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, DriverNotificacionActivity.class);
                 startActivity(intent);
+            });
+        }
+    }
+
+    //   CONFIGURACIÓN DE BOTTOM NAVIGATION SIMPLIFICADA
+    private void configurarBottomNavigation() {
+        if (bottomNavigation == null) {
+            Log.e("MainActivity", "bottomNavigation es null, no se puede configurar");
+            return;
+        }
+
+        // ESTABLECER ÍTEM SELECCIONADO
+        bottomNavigation.setSelectedItemId(R.id.nav_inicio);
+
+        // CONFIGURAR LISTENER
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_inicio) {
+                return true; // Ya estamos aquí
+            } else if (itemId == R.id.nav_reservas) {
+                navegarSinAnimacion(DriverReservaActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_mapa) {
+                navegarSinAnimacion(DriverMapaActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_perfil) {
+                navegarSinAnimacion(DriverPerfilActivity.class);
+                return true;
             }
+            return false;
         });
     }
-    private void configurarBottomNavigation() {
-        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
-
-                if (itemId == R.id.nav_inicio) {
-                    // Ya estamos en la actividad principal
-                    return true;
-                } else if (itemId == R.id.nav_reservas) {
-                    // Navegar a DriverReservaActivity
-                    Intent intent = new Intent(MainActivity.this, DriverReservaActivity.class);
-                    startActivity(intent);
-                    return true;
-                } else if (itemId == R.id.nav_mapa) {
-                    // Aquí iría la navegación a la actividad de mapa
-                    Intent intent = new Intent(MainActivity.this, DriverMapaActivity.class);
-                    startActivity(intent);
-                    return true;
-                } else if (itemId == R.id.nav_perfil) {
-                    // Aquí iría la navegación a la actividad de perfil
-                    Intent intent = new Intent(MainActivity.this, DriverPerfilActivity.class);
-                    startActivity(intent);
-                    return true;
-                }
-
-                return false;
-            }
-        });
+    // Metodo para navegar sin animación
+    private void navegarSinAnimacion(Class<?> activityClass) {
+        Intent intent = new Intent(this, activityClass);
+        startActivity(intent);
+        // ELIMINAR ANIMACIÓN COMPLETAMENTE
+        overridePendingTransition(0, 0);
+        finish();
     }
     private void configurarRecyclerView() {
+        if (rvSolicitudesCercanas == null) {
+            Log.e("MainActivity", "rvSolicitudesCercanas es null");
+            return;
+        }
 
+        // CONFIGURAR LAYOUT MANAGER
         rvSolicitudesCercanas.setLayoutManager(new LinearLayoutManager(this));
 
+        // CREAR Y CONFIGURAR ADAPTADOR
         adapter = new SolicitudesAdapter();
         adapter.setContext(this);
         adapter.setListaSolicitudes(solicitudes);
 
         rvSolicitudesCercanas.setAdapter(adapter);
 
-        adapter.notifyDataSetChanged();
         Log.d("MainActivity", "RecyclerView configurado con " + solicitudes.size() + " elementos");
-
     }
+
     private void configurarSwitch() {
-        statusSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                actualizarEstadoUI(isChecked);
-            }
+        if (statusSwitch == null) {
+            Log.e("MainActivity", "statusSwitch es null");
+            return;
+        }
+
+        statusSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            actualizarEstadoUI(isChecked);
         });
     }
+
     private void actualizarEstadoUI(boolean disponible) {
+        if (statusText == null || rvSolicitudesCercanas == null || tvNoSolicitudes == null) {
+            Log.e("MainActivity", "Alguna vista es null en actualizarEstadoUI");
+            return;
+        }
+
         if (disponible) {
             // Usuario disponible
             statusText.setText("Disponible");
-            statusText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
 
             // Mostrar RecyclerView, ocultar mensaje
             rvSolicitudesCercanas.setVisibility(View.VISIBLE);
@@ -225,7 +241,7 @@ public class MainActivity extends BaseActivity {
         } else {
             // Usuario no disponible
             statusText.setText("No disponible");
-            statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
 
             // Ocultar RecyclerView, mostrar mensaje
             rvSolicitudesCercanas.setVisibility(View.GONE);

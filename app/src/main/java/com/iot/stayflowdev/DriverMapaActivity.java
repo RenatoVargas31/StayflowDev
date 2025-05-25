@@ -2,6 +2,8 @@ package com.iot.stayflowdev;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,7 +14,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DriverMapaActivity extends BaseActivity {
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+public class DriverMapaActivity extends AppCompatActivity {
 
     private TextView destinationNameTextView;
     private TextView distanceValueTextView;
@@ -20,94 +24,213 @@ public class DriverMapaActivity extends BaseActivity {
     private TextView arrivalTimeTextView;
     private Button startTripButton;
     private Button contactPassengerButton;
-
-    @Override
-    protected int getLayoutResourceId() {
-        return R.layout.activity_driver_mapa;
-    }
-
-    @Override
-    protected int getCurrentMenuItemId() {
-        return R.id.nav_mapa;
-    }
+    private BottomNavigationView bottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_driver_mapa);
 
-// Inicializar vistas
-        initViews();
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            return insets;
+        });
 
-        // Configurar datos de ejemplo (en una app real, estos vendrían de tu backend)
-        setupExampleData();
+        // Inicializar vistas
+        inicializarVistas();
 
-        // Configurar listeners de botones
-        setupButtonListeners();
+        // Configurar navegación con debug
+        configurarBottomNavigationConDebug();
 
-        // Aquí se cargaría el mapa real (Google Maps o similar)
-        // En una implementación real se podría usar un MapFragment
-        setupMap();
-
-
+        // Resto de configuraciones
+        configurarDatosEjemplo();
+        configurarBotones();
+        configurarMapa();
     }
 
-    private void initViews() {
+    private void inicializarVistas() {
         destinationNameTextView = findViewById(R.id.destination_name);
         distanceValueTextView = findViewById(R.id.distance_value);
         remainingDistanceTextView = findViewById(R.id.remaining_distance);
         arrivalTimeTextView = findViewById(R.id.arrival_time);
         startTripButton = findViewById(R.id.btn_start_trip);
         contactPassengerButton = findViewById(R.id.btn_contact_passenger);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+
+        // ✅ VERIFICAR QUE SE ENCONTRÓ
+        if (bottomNavigation == null) {
+            Log.e("DriverMapaActivity", "❌ ERROR: bottomNavigation es null!");
+        } else {
+            Log.d("DriverMapaActivity", "✅ bottomNavigation encontrado correctamente");
+        }
     }
 
-    private void setupExampleData() {
-        // En una app real, estos datos vendrían de tu backend o servicio
-        destinationNameTextView.setText("Hotel Monte Claro");
-        distanceValueTextView.setText("5 km");
-        remainingDistanceTextView.setText("-2 km");
-        arrivalTimeTextView.setText("15 mins");
-    }
+    // ✅ CONFIGURACIÓN CON DEBUG COMPLETO
+    private void configurarBottomNavigationConDebug() {
+        if (bottomNavigation == null) {
+            Log.e("DriverMapaActivity", "❌ No se puede configurar: bottomNavigation es null");
+            return;
+        }
 
-    private void setupButtonListeners() {
-        startTripButton.setOnClickListener(v -> {
-            // Lógica para iniciar el viaje
-            Toast.makeText(this, "Iniciando viaje...", Toast.LENGTH_SHORT).show();
-            // Aquí podrías iniciar un servicio de ubicación en tiempo real
+        // ✅ VERIFICAR QUE EL MENÚ SE CARGÓ
+        if (bottomNavigation.getMenu() == null || bottomNavigation.getMenu().size() == 0) {
+            Log.e("DriverMapaActivity", "❌ ERROR: El menú no se cargó correctamente");
+            return;
+        }
+
+        // ✅ DEBUG: Mostrar todos los IDs del menú
+        Log.d("DriverMapaActivity", "📋 Ítems del menú encontrados:");
+        for (int i = 0; i < bottomNavigation.getMenu().size(); i++) {
+            MenuItem item = bottomNavigation.getMenu().getItem(i);
+            Log.d("DriverMapaActivity", "- Ítem " + i + ": ID=" + item.getItemId() + ", Título=" + item.getTitle());
+        }
+
+        // ✅ INTENTAR SELECCIONAR CON MULTIPLE VERIFICACIONES
+        try {
+            // Método 1: Selección directa
+            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+            Log.d("DriverMapaActivity", "✅ Intentando seleccionar nav_mapa con ID: " + R.id.nav_mapa);
+
+            // ✅ VERIFICAR SI SE SELECCIONÓ CORRECTAMENTE
+            MenuItem selectedItem = bottomNavigation.getMenu().findItem(R.id.nav_mapa);
+            if (selectedItem != null) {
+                Log.d("DriverMapaActivity", "✅ Ítem nav_mapa encontrado: " + selectedItem.getTitle());
+                selectedItem.setChecked(true); // ✅ FORZAR SELECCIÓN
+            } else {
+                Log.e("DriverMapaActivity", "❌ ERROR: No se encontró el ítem nav_mapa");
+
+                // ✅ MÉTODO ALTERNATIVO: Buscar por posición
+                if (bottomNavigation.getMenu().size() >= 3) {
+                    bottomNavigation.getMenu().getItem(2).setChecked(true); // Posición 2 = Mapa
+                    Log.d("DriverMapaActivity", "✅ Seleccionado por posición (ítem 2)");
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e("DriverMapaActivity", "❌ ERROR al seleccionar ítem: " + e.getMessage());
+        }
+
+        // ✅ USAR POST PARA ASEGURAR QUE SE APLIQUE DESPUÉS DEL LAYOUT
+        bottomNavigation.post(() -> {
+            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+            Log.d("DriverMapaActivity", "✅ Selección aplicada con post()");
         });
 
-        contactPassengerButton.setOnClickListener(v -> {
-            // Lógica para contactar al pasajero
-            Toast.makeText(this, "Contactando al pasajero...", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, DriverChatActivity.class));
+        // Configurar listener
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            Log.d("DriverMapaActivity", "🔄 Ítem seleccionado: " + itemId);
+
+            if (itemId == R.id.nav_mapa) {
+                Log.d("DriverMapaActivity", "✅ Ya en Mapa");
+                return true;
+            } else if (itemId == R.id.nav_inicio) {
+                Log.d("DriverMapaActivity", "🏠 Navegando a Inicio");
+                navegarSinAnimacion(MainActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_reservas) {
+                Log.d("DriverMapaActivity", "📋 Navegando a Reservas");
+                navegarSinAnimacion(DriverReservaActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_perfil) {
+                Log.d("DriverMapaActivity", "👤 Navegando a Perfil");
+                navegarSinAnimacion(DriverPerfilActivity.class);
+                return true;
+            }
+
+            return false;
         });
     }
 
-    private void setupMap() {
-        // En una implementación real, aquí se configuraría el mapa
-        // Por ejemplo, usando Google Maps o alguna otra biblioteca de mapas
+    // ✅ MÉTODO ALTERNATIVO SI EL PROBLEMA PERSISTE
+    private void forzarSeleccionMapa() {
+        if (bottomNavigation != null) {
+            // Método 1: Por ID
+            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
 
-        // Ejemplo con Google Maps (necesitarías agregar las dependencias apropiadas)
-        /*
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        */
+            // Método 2: Por ítem específico
+            MenuItem mapaItem = bottomNavigation.getMenu().findItem(R.id.nav_mapa);
+            if (mapaItem != null) {
+                mapaItem.setChecked(true);
+            }
+
+            // Método 3: Desseleccionar otros y seleccionar mapa
+            for (int i = 0; i < bottomNavigation.getMenu().size(); i++) {
+                bottomNavigation.getMenu().getItem(i).setChecked(false);
+            }
+            if (bottomNavigation.getMenu().size() > 2) {
+                bottomNavigation.getMenu().getItem(2).setChecked(true); // Asumiendo que mapa está en posición 2
+            }
+        }
     }
-}
 
-// Si decides usar Google Maps, implementarías OnMapReadyCallback
-    /*
+    // ✅ LLAMAR EN onResume PARA ASEGURAR SELECCIÓN
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        // Configurar el mapa, agregar marcadores, dibujar ruta, etc.
-        LatLng destination = new LatLng(-12.0464, -77.0428); // Coordenadas de ejemplo
-        googleMap.addMarker(new MarkerOptions().position(destination).title("Hotel Monte Claro"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 15));
-
-        // Dibujar ruta desde ubicación actual hasta destino
-        // Esto requeriría usar la API de Directions de Google Maps
+    protected void onResume() {
+        super.onResume();
+        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
+        if (bottomNavigation != null) {
+            bottomNavigation.post(() -> {
+                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
+            });
+        }
     }
 
+    private void navegarSinAnimacion(Class<?> activityClass) {
+        Intent intent = new Intent(this, activityClass);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+    }
+
+    private void configurarDatosEjemplo() {
+        if (destinationNameTextView != null) {
+            destinationNameTextView.setText("Hotel Monte Claro");
+        }
+        if (distanceValueTextView != null) {
+            distanceValueTextView.setText("5 km");
+        }
+        if (remainingDistanceTextView != null) {
+            remainingDistanceTextView.setText("-2 km");
+        }
+        if (arrivalTimeTextView != null) {
+            arrivalTimeTextView.setText("15 mins");
+        }
+    }
+
+    private void configurarBotones() {
+        if (startTripButton != null) {
+            startTripButton.setOnClickListener(v -> {
+                Toast.makeText(this, "Iniciando viaje...", Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        if (contactPassengerButton != null) {
+            contactPassengerButton.setOnClickListener(v -> {
+                Toast.makeText(this, "Contactando al pasajero...", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, DriverChatActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+    }
+
+    private void configurarMapa() {
+        Log.d("DriverMapaActivity", "Mapa configurado (placeholder)");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        navegarSinAnimacion(MainActivity.class);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        navegarSinAnimacion(MainActivity.class);
+        return true;
+    }
 }
-}
-     */

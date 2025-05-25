@@ -31,9 +31,6 @@
             android:name=".DriverTarjetaCreditoActivity"
             android:exported="false" />
         <activity
-            android:name=".BaseActivity"
-            android:exported="false" />
-        <activity
             android:name=".DriverInfoSolicitudActivity"
             android:exported="false" />
         <activity

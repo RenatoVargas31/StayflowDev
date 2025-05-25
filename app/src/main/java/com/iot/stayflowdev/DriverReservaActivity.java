@@ -2,6 +2,7 @@ package com.iot.stayflowdev;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -16,42 +17,44 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DriverReservaActivity extends BaseActivity implements ReservasAdapter.OnReservaClickListener {
+public class DriverReservaActivity extends AppCompatActivity implements ReservasAdapter.OnReservaClickListener {
 
     private TabLayout tabLayout;
     private RecyclerView recyclerView;
     private ReservasAdapter adapter;
     private LinearLayout emptyView;
+    private BottomNavigationView bottomNavigation;
 
     // Cambiar de Reserva a ReservaModel
     private List<ReservaModel> reservasEnCurso = new ArrayList<>();
     private List<ReservaModel> reservasPasadas = new ArrayList<>();
     private List<ReservaModel> reservasCanceladas = new ArrayList<>();
 
-    @Override
-    protected int getLayoutResourceId() {
-        return R.layout.activity_driver_reserva;
-    }
-
-    @Override
-    protected int getCurrentMenuItemId() {
-        return R.id.nav_reservas;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_driver_reserva);
+
+        // Configurar márgenes para barras del sistema
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            return insets;
+        });
 
         // Inicializar vistas
-        tabLayout = findViewById(R.id.tabLayout);
-        recyclerView = findViewById(R.id.recyclerViewReservas);
-        emptyView = findViewById(R.id.empty_view);
+        inicializarVistas();
 
+        // Configurar BottomNavigationView con navegación fluida
+        configurarBottomNavigationFluido();
         // Configurar RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
@@ -88,6 +91,55 @@ public class DriverReservaActivity extends BaseActivity implements ReservasAdapt
         });
     }
 
+    //  MÉTODO PARA INICIALIZAR VISTAS
+    private void inicializarVistas() {
+        tabLayout = findViewById(R.id.tabLayout);
+        recyclerView = findViewById(R.id.recyclerViewReservas);
+        emptyView = findViewById(R.id.empty_view);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+    }
+
+    // CONFIGURACIÓN DE BOTTOM NAVIGATION CON ANIMACIÓN FLUIDA
+    private void configurarBottomNavigationFluido() {
+        if (bottomNavigation == null) {
+            Log.e("DriverReservaActivity", "bottomNavigation es null");
+            return;
+        }
+
+        // Establecer ítem seleccionado
+        bottomNavigation.setSelectedItemId(R.id.nav_reservas);
+
+        // Configurar listener con navegación sin animación
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            // Evitar acción si ya estamos en la actividad actual
+            if (itemId == R.id.nav_reservas) {
+                return true;
+            }
+
+            // Navegación según el ítem seleccionado
+            if (itemId == R.id.nav_inicio) {
+                navegarSinAnimacion(MainActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_mapa) {
+                navegarSinAnimacion(DriverMapaActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_perfil) {
+                navegarSinAnimacion(DriverPerfilActivity.class);
+                return true;
+            }
+
+            return false;
+        });
+    }
+    // MÉTODO PARA NAVEGAR SIN ANIMACIÓN
+    private void navegarSinAnimacion(Class<?> activityClass) {
+        Intent intent = new Intent(this, activityClass);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+    }
     // Método para cambiar los datos en el RecyclerView según la pestaña seleccionada
     private void cambiarDatosPorTab(int position) {
         switch (position) {
@@ -135,6 +187,14 @@ public class DriverReservaActivity extends BaseActivity implements ReservasAdapt
         reservasCanceladas.add(new ReservaModel(5, "Miguel Castro", "Hotel Mirador", "Centro Comercial",
                 "2.0 Km", "22 de Abril", "09:15", R.drawable.ic_hotel, "cancelado"));
     }
+
+    @Override
+    public void onBackPressed() {
+        // Redirigir a MainActivity cuando se presiona el botón atrás
+        super.onBackPressed();
+        navegarSinAnimacion(MainActivity.class);
+    }
+
     // Implementación del listener de clic en reserva
     @Override
     public void onReservaClick(ReservaModel reserva) {
