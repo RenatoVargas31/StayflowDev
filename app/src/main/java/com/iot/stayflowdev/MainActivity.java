@@ -1,7 +1,15 @@
 package com.iot.stayflowdev;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +21,9 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -26,6 +37,10 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rvSolicitudesCercanas;
@@ -36,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private List<SolicitudModel> solicitudes;
     private BottomNavigationView bottomNavigation;
     private ImageView notificationIcon;
+
+    // Variables para notificaciones
+    private String channelId = "channelDefaultPri";
+    private String gpsChannelId = "channelGPSAlert";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Crear canales de notificación primero
+        crearCanalesNotificacion();
+
         //   INICIALIZAR TODAS LAS VISTAS PRIMERO
         inicializarVistas();
 
@@ -62,7 +84,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Establecer estado inicial
         actualizarEstadoUI(statusSwitch.isChecked());
+
+        // Verificar GPS al iniciar la app
+        verificarEstadoGPS();
     }
+
+
+
 
     //   MÉTODO SEPARADO PARA INICIALIZAR VISTAS
     private void inicializarVistas() {
@@ -81,6 +109,127 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "Error: rvSolicitudesCercanas es null");
         }
     }
+
+
+    private void crearCanalesNotificacion() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            // Canal para notificaciones generales
+            NotificationChannel channelDefault = new NotificationChannel(
+                    channelId,
+                    "Canal notificaciones default",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channelDefault.setDescription("Canal para notificaciones con prioridad default");
+
+            // Canal para alertas de GPS (alta prioridad)
+            NotificationChannel channelGPS = new NotificationChannel(
+                    gpsChannelId,
+                    "Alertas de GPS",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channelGPS.setDescription("Notificaciones importantes sobre el estado del GPS");
+            channelGPS.enableVibration(true);
+            channelGPS.setVibrationPattern(new long[]{0, 500, 1000});
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channelDefault);
+            notificationManager.createNotificationChannel(channelGPS);
+
+            askPermission();
+        }
+    }
+
+    private void askPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{POST_NOTIFICATIONS},
+                    101);
+        }
+    }
+
+    // Método para verificar el estado del GPS
+    private void verificarEstadoGPS() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!isGpsEnabled) {
+            mostrarNotificacionGPS();
+        }
+    }
+
+    // Método para mostrar notificación de GPS
+    private void mostrarNotificacionGPS() {
+        // Intent para abrir configuración de ubicación
+        Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        PendingIntent gpsPendingIntent = PendingIntent.getActivity(
+                this,
+                100,
+                gpsIntent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
+
+        // Intent para cuando se toque la notificación (volver a MainActivity)
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        PendingIntent mainPendingIntent = PendingIntent.getActivity(
+                this,
+                101,
+                mainIntent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, gpsChannelId)
+                .setSmallIcon(R.drawable.ic_location) // Asegúrate de tener este ícono
+                .setContentTitle("GPS Desactivado")
+                .setContentText("Activa la ubicación para recibir solicitudes de viaje cercanas")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("Para poder recibir solicitudes de viaje y mostrar tu ubicación a los pasajeros, necesitas activar el GPS en la configuración de tu dispositivo."))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(mainPendingIntent)
+                .setAutoCancel(true)
+                .setVibrate(new long[]{0, 500, 1000})
+                .setLights(0xFFFF6B00, 300, 1000) // Luz naranja
+                // Agregar botón de acción para ir directo a configuración
+                .addAction(R.drawable.ic_exclamation, "Activar GPS", gpsPendingIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(999, builder.build()); // ID único para notificación GPS
+        }
+    }
+
+    // Método para verificar GPS cuando el usuario cambia el estado del switch
+    private boolean verificarGPSParaServicio() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!isGpsEnabled) {
+            mostrarNotificacionGPS();
+            Toast.makeText(this, "Activa el GPS para ponerte disponible", Toast.LENGTH_SHORT).show();
+            return false; // GPS no disponible
+        }
+
+        return true; // GPS disponible
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Si el switch está activado pero el GPS se desactivó
+        if (statusSwitch != null && statusSwitch.isChecked()) {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            if (!isGpsEnabled) {
+                statusSwitch.setOnCheckedChangeListener(null);
+                statusSwitch.setChecked(false);
+                configurarSwitch();
+                actualizarEstadoUI(false);
+                mostrarNotificacionGPS();
+            }
+        }
+    }
+
 
     private void crearDatosDeSolicitudes() {
         solicitudes = new ArrayList<>();
@@ -220,6 +369,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         statusSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // Si intenta activar, verificar GPS primero
+                if (!verificarGPSParaServicio()) {
+                    // GPS no disponible - revertir el switch
+                    buttonView.setOnCheckedChangeListener(null); // Quitar listener temporalmente
+                    buttonView.setChecked(false); // Revertir a false
+                    configurarSwitch(); // Volver a configurar listener
+                    return; // No actualizar UI
+                }
+            }
+
+            // Si llegamos aquí, actualizar la UI normalmente
             actualizarEstadoUI(isChecked);
         });
     }

@@ -1,6 +1,13 @@
 package com.iot.stayflowdev;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,6 +16,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -35,7 +45,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
     private List<ReservaModel> reservasEnCurso = new ArrayList<>();
     private List<ReservaModel> reservasPasadas = new ArrayList<>();
     private List<ReservaModel> reservasCanceladas = new ArrayList<>();
-
+    private String channelId = "channelReservas";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +59,8 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
+
+        crearCanalNotificacion();
 
         // Inicializar vistas
         inicializarVistas();
@@ -89,7 +101,57 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
                 // No necesitamos hacer nada aquí
             }
         });
+
+        // ACTIVAR NOTIFICACIÓN AL FINAL
+        mostrarNotificacionReservasActivas();
     }
+
+    private void crearCanalNotificacion() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Canal notificaciones de reservas",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Canal para notificaciones de reservas con prioridad default");
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+            askPermission();
+        }
+    }
+
+    private void askPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(DriverReservaActivity.this,
+                    new String[]{POST_NOTIFICATIONS}, 102);
+        }
+    }
+
+    // Este método ya está correcto según el PPT
+    public void mostrarNotificacionReservasActivas() {
+        int reservasActivas = reservasEnCurso.size();
+
+        Intent intent = new Intent(this, DriverReservaActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_carro)
+                .setContentTitle("Reservas Activas")
+                .setContentText("Tienes " + reservasActivas + " reservas activas")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(100, builder.build());
+        }
+    }
+
 
     //  MÉTODO PARA INICIALIZAR VISTAS
     private void inicializarVistas() {
@@ -187,6 +249,8 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         reservasCanceladas.add(new ReservaModel(5, "Miguel Castro", "Hotel Mirador", "Centro Comercial",
                 "2.0 Km", "22 de Abril", "09:15", R.drawable.ic_hotel, "cancelado"));
     }
+
+
 
     @Override
     public void onBackPressed() {
