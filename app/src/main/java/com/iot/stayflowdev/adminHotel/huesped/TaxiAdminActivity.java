@@ -82,5 +82,36 @@ public class TaxiAdminActivity extends AppCompatActivity {
 
         taxis.add(new Taxi("María López", "ML012", "Llegado",
                 "23-06-25 04:15 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+        taxis.add(new Taxi("Luis Ramírez", "LR789", "En camino",
+                "23-06-25 03:00 pm", "Aeropuerto → Hotel", R.drawable.img_guest_placeholder));
+
+
     }
 }

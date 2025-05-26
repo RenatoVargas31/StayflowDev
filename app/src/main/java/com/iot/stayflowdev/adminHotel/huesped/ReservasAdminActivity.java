@@ -83,5 +83,20 @@ public class ReservasAdminActivity extends AppCompatActivity {
         reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
                 R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
 
+        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
+                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+
+        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
+                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+
+        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
+                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+
+        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
+                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+
+        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
+                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+
     }
 }

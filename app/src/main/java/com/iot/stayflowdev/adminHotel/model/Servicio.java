@@ -1,36 +1,36 @@
 package com.iot.stayflowdev.adminHotel.model;
 
 public class Servicio {
+    private int id;
     private String nombre;
-    private int porcentaje;
-    private String monto;
-
-    // Campos nuevos
     private String descripcion;
     private String precio;
+    private boolean esGratis;
 
-    public Servicio(String nombre, int porcentaje, String monto) {
-        this.nombre = nombre;
-        this.porcentaje = porcentaje;
-        this.monto = monto;
-    }
-
-    // Constructor extra para administración
-    public Servicio(String nombre, String descripcion, String precio) {
+    public Servicio(int id, String nombre, String descripcion, String precio, boolean esGratis) {
+        this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
+        this.esGratis = esGratis;
     }
 
+    public Servicio(String nombre, String descripcion, String precio, boolean esGratis) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.esGratis = esGratis;
+    }
+
+    public int getId() { return id; }
     public String getNombre() { return nombre; }
-    public int getPorcentaje() { return porcentaje; }
-    public String getMonto() { return monto; }
     public String getDescripcion() { return descripcion; }
     public String getPrecio() { return precio; }
+    public boolean isEsGratis() { return esGratis; }
 
+    public void setId(int id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setPorcentaje(int porcentaje) { this.porcentaje = porcentaje; }
-    public void setMonto(String monto) { this.monto = monto; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public void setPrecio(String precio) { this.precio = precio; }
+    public void setEsGratis(boolean esGratis) { this.esGratis = esGratis; }
 }

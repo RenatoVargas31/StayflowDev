@@ -68,6 +68,7 @@ public class ReportesAdminActivity extends AppCompatActivity {
         recyclerServicios.setLayoutManager(new LinearLayoutManager(this));
         recyclerUsuarios.setLayoutManager(new LinearLayoutManager(this));
 
+        /*
         servicioAdapter = new ServicioAdapter(new ArrayList<>());
         usuarioAdapter = new UsuarioAdapter(new ArrayList<>());
 
@@ -97,6 +98,8 @@ public class ReportesAdminActivity extends AppCompatActivity {
         usuarios.add(new Usuario("Juan Pérez", 80, "S/.1000"));
         usuarios.add(new Usuario("Ana Torres", 65, "S/.800"));
         usuarios.add(new Usuario("Luis Gómez", 20, "S/.200"));
+        usuarios.add(new Usuario("Luisa Paverti", 20, "S/.100"));
+
 
         servicioAdapter.updateData(servicios);
         usuarioAdapter.updateData(usuarios);
@@ -130,5 +133,7 @@ public class ReportesAdminActivity extends AppCompatActivity {
 
         servicioAdapter.updateData(servicios);
         usuarioAdapter.updateData(usuarios);
+
+         */
     }
 }

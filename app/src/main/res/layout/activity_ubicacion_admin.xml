@@ -88,7 +88,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        android:hint="Ingrese la dirección exacta"
                         app:startIconDrawable="@drawable/ic_location"
                         app:endIconMode="clear_text"
                         app:boxBackgroundColor="?attr/colorSurfaceContainerLowest"
