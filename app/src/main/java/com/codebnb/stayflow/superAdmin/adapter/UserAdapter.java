@@ -28,7 +28,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     public UserAdapter(List<User> userList, OnUserClickListener listener) {
-        this.userList = userList;
+        this.userList = new ArrayList<>(userList);
         this.userListFull = new ArrayList<>(userList);
         this.listener = listener;
     }
@@ -68,7 +68,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         });
     }
 
-
     @Override
     public int getItemCount() {
         return userList.size();
@@ -82,35 +81,39 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     public void filterByType(String userType) {
-        userList.clear();
-
+        List<User> filteredList = new ArrayList<>();
+        
         if (userType.equals("Todos")) {
-            userList.addAll(userListFull);
+            filteredList.addAll(userListFull);
         } else {
             for (User user : userListFull) {
                 if (user.getRole().equals(userType)) {
-                    userList.add(user);
+                    filteredList.add(user);
                 }
             }
         }
 
+        userList.clear();
+        userList.addAll(filteredList);
         notifyDataSetChanged();
     }
 
     public void filterByText(String searchText) {
-        userList.clear();
-
+        List<User> filteredList = new ArrayList<>();
+        
         if (searchText.isEmpty()) {
-            userList.addAll(userListFull);
+            filteredList.addAll(userListFull);
         } else {
             String searchTextLower = searchText.toLowerCase();
             for (User user : userListFull) {
                 if (user.getName().toLowerCase().contains(searchTextLower)) {
-                    userList.add(user);
+                    filteredList.add(user);
                 }
             }
         }
 
+        userList.clear();
+        userList.addAll(filteredList);
         notifyDataSetChanged();
     }
 

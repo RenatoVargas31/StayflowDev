@@ -165,6 +165,8 @@ public class DateRangeDialogFragment extends DialogFragment {
     }
 
     private void highlightSelectedField() {
+        if (getContext() == null) return;
+
         if (isSelectingStartDate) {
             textInputStartDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.purple_700));
             textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.gray));
@@ -173,5 +175,4 @@ public class DateRangeDialogFragment extends DialogFragment {
             textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.purple_700));
         }
     }
-
 }

@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permisos para notificaciones -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,35 +18,26 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
-        <activity
-            android:name=".driver.home.DetallesHotelActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.home.HotelActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.mapa.ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.perfil.CambiarContrasenaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.perfil.CorreoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.perfil.TarjetaCreditoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.perfil.VehiculoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.reserva.DetallesReservaPasadoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".driver.reserva.DetallesReservaActivity"
-            android:exported="false" />
+
         <activity android:name=".superAdmin.AddHotelAdminActivity"
                   android:exported="false" />
+        <activity android:name=".superAdmin.GestionActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.InicioActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.PerfilActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.ReportesActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.ReportDetailActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.FilterReportActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.LogsActivity"
+                  android:exported="false" />
+        <activity android:name=".superAdmin.UserDetailActivity"
+                  android:exported="false" />
+
         <!--
 <activity
             android:name=".DriverActivity"
@@ -55,6 +52,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Receivers para notificaciones periódicas -->
+        <receiver
+            android:name=".utils.ReportsCheckReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".utils.LogsCheckReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".utils.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
