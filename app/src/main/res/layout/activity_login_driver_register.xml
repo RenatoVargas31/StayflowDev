@@ -5,9 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".LoginDriverRegister">
 
-    <!-- Barra superior azul -->
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="0dp"
@@ -21,7 +20,6 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp">
 
-        <!-- Botón de cerrar (X) -->
         <ImageView
             android:id="@+id/btn_close"
             android:layout_width="24dp"
@@ -29,13 +27,11 @@
             android:src="@drawable/ic_close"
             android:contentDescription="Cerrar" />
 
-        <!-- Espacio flexible para centrar el texto -->
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
-        <!-- Título StayFlow -->
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
@@ -51,57 +47,75 @@
             android:layout_weight="1" />
     </LinearLayout>
 
+
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_login"
-        android:layout_width="386dp"
-        android:layout_height="523dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="#7A7ADE"
-        android:padding="24dp"
         app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#7A7ADE"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
-        <!-- Contenido del inicio de sesión -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
             android:padding="24dp"
+            android:orientation="vertical"
+            android:gravity="center"
             android:background="@android:color/white">
 
-            <!-- LOGO DE LA APP -->
-            <ImageView
-                android:id="@+id/logo_app"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginBottom="24dp"
-                android:contentDescription="Logo de StayFlow"
-                android:src="@mipmap/ic_launcher" />
-
-            <!-- Texto debajo del logo -->
+            <!-- Título -->
             <TextView
-                android:id="@+id/tv_login_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="INICIA SESIÓN PARA TU RESERVA"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:text="Agrega los datos de tu vehículo"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:layout_marginBottom="8dp"
+                android:textAlignment="center" />
 
-            <!-- Campo de correo -->
+            <!-- Subtítulo -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registrar la información de tu auto es importante\npara garantizar la seguridad."
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Vista previa de la imagen del vehículo -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/img_preview_vehicle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_car_placeholder"
+                    android:contentDescription="Vista previa del vehículo"
+                    android:background="#F0F0F0" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Placa -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Correo electrónico"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 app:boxBackgroundMode="filled"
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxCornerRadiusBottomEnd="20dp"
@@ -110,63 +124,66 @@
                 app:boxCornerRadiusTopStart="20dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_email"
+                    android:id="@+id/et_placa"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
+                    android:hint="Ingresar placa"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo de contraseña -->
+            <!-- Modelo -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:hint="Contraseña"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 app:boxBackgroundMode="filled"
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxCornerRadiusBottomEnd="20dp"
                 app:boxCornerRadiusBottomStart="20dp"
                 app:boxCornerRadiusTopEnd="20dp"
-                app:boxCornerRadiusTopStart="20dp"
-                app:endIconMode="password_toggle">
+                app:boxCornerRadiusTopStart="20dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_password"
+                    android:id="@+id/et_modelo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"
+                    android:hint="Ingresar modelo"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Botón iniciar sesión -->
+            <!-- Botón para cargar imagen -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_login"
+                android:id="@+id/btn_cargar_imagen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cargar imagen"
+                app:iconTint="@android:color/white"
+                app:iconPadding="8dp"
                 style="@style/Widget.Material3.Button"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Iniciar sesión"
-                android:textColor="@android:color/white"
-                app:backgroundTint="#3C3C7C"
                 app:cornerRadius="15dp"
-                app:iconPadding="8dp" />
+                app:backgroundTint="#3C3C7C"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="32dp" />
 
-            <!-- Texto de recuperación -->
-            <TextView
-                android:id="@+id/tv_olvide_password"
-                android:layout_width="wrap_content"
+            <!-- Botón Continuar -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_continuar_registro_driver"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Olvidé mi contraseña"
-                android:textColor="#3C3C7C"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:text="Continuar"
+                style="@style/Widget.Material3.Button"
+                app:cornerRadius="15dp"
+                app:iconTint="@android:color/white"
+                app:iconGravity="textEnd"
+                app:backgroundTint="#3C3C7C"
+                android:textColor="@android:color/white" />
         </LinearLayout>
+
 
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".LoginCargarFotoActivity">
 
-    <!-- Barra superior azul -->
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="0dp"
@@ -49,7 +47,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Contenido de login (reemplaza al fragment) -->
+
     <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -64,69 +62,74 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5">
 
+
         <LinearLayout
-            android:id="@+id/login_box"
-            android:layout_width="354dp"
-            android:layout_height="398dp"
-            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
             android:orientation="vertical"
-            android:padding="24dp"
-            tools:context=".LoginActivity">
+            android:gravity="center"
+            android:padding="32dp">
 
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/icon_perfil"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_marginBottom="16dp"
-                android:contentDescription="Ícono de perfil"
-                android:src="@drawable/ic_perfil"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
-
+            <!-- Título y descripción -->
             <TextView
-                android:id="@+id/text_inicio_login"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:gravity="center"
-                android:text="Inicia sesión para poder obtener información de ofertas,\ndescuentos y reservas"
-                android:textAlignment="center"
+                android:text="Completa tu perfil"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:textColor="#000000"
-                android:textSize="16sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_iniciar_sesion"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="250dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Iniciar sesión"
-                android:textColor="@android:color/white"
-                app:backgroundTint="#3C3C7C"
-                app:cornerRadius="16dp" />
-
-            <TextView
-                android:id="@+id/text_no_cuenta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="¿No tienes cuenta?"
-                android:textColor="#000000"
-                android:textSize="14sp" />
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sube una foto para personalizar tu cuenta y hacerla más reconocible"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Imagen de perfil por defecto -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/profile_image"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:src="@drawable/ic_perfil"
+                android:contentDescription="Imagen de perfil"
+                android:scaleType="centerInside"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                android:backgroundTint="#EDE3FB"
+                android:background="@drawable/circle_background"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Botón para seleccionar imagen -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_select_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Seleccionar una foto de perfil"
+                style="@style/Widget.Material3.Button"
+                app:cornerRadius="15dp"
+                app:backgroundTint="#3C3C7C"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_registrar"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="250dp"
+                android:id="@+id/btn_omitir_finalizar"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Registrarse"
-                android:textColor="@android:color/white"
+                android:text="Omitir y finalizar"
+                style="@style/Widget.Material3.Button"
+                app:cornerRadius="15dp"
                 app:backgroundTint="#3C3C7C"
-                app:cornerRadius="16dp" />
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permisos para acceder a la galería -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,6 +18,18 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".LoginCargarFotoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginDriverRegister"
+            android:exported="false" />
+        <activity
+            android:name=".LoginCrearPassActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginIngCorreoActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginVerificarActivity"
             android:exported="false" />
         <activity
@@ -23,9 +40,6 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +47,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>
+

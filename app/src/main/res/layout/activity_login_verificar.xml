@@ -7,4 +7,203 @@
     android:layout_height="match_parent"
     tools:context=".LoginVerificarActivity">
 
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#3C3C7C"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <!-- Botón de cerrar (X) -->
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            android:contentDescription="Cerrar" />
+
+        <!-- Espacio flexible para centrar el texto -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <!-- Título StayFlow -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="StayFlow"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_login"
+        android:layout_width="386dp"
+        android:layout_height="523dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="#7A7ADE"
+        android:padding="24dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:background="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <!-- Título -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Verifica tu dirección de email"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="#000000" />
+
+                <!-- Subtítulo -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enviamos un código  de verificación a tu correo,\nescribe el código para continuar"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="32dp" />
+
+                <!-- Input de código -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="24dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_email"
+                        android:layout_marginEnd="16dp"
+                        android:contentDescription="Ícono de correo" />
+
+                    <!-- Seis campos para el código -->
+                    <EditText
+                        android:id="@+id/digit1"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:maxLength="1"
+                        android:background="@drawable/code_box" />
+
+                    <EditText
+                        android:id="@+id/digit2"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:maxLength="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/code_box" />
+
+                    <EditText
+                        android:id="@+id/digit3"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:maxLength="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/code_box" />
+
+                    <EditText
+                        android:id="@+id/digit4"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:maxLength="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/code_box" />
+
+                    <EditText
+                        android:id="@+id/digit5"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/code_box"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:maxLength="1" />
+
+                    <EditText
+                        android:id="@+id/digit6"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:maxLength="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/code_box" />
+                </LinearLayout>
+
+                <!-- Botón Verificar -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_verificar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Verificar"
+                    style="@style/Widget.Material3.Button"
+                    app:cornerRadius="15dp"
+                    app:backgroundTint="#3C3C7C"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Enviar otro código -->
+                <TextView
+                    android:id="@+id/tv_reenviar_codigo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enviar otro código"
+                    android:textColor="#3C3C7C"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+
