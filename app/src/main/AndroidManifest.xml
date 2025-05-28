@@ -58,9 +58,6 @@
             android:name=".adminHotel.ReportesAdminActivity"
             android:exported="false" />
         <activity
-            android:name=".adminHotel.BaseActivity"
-            android:exported="false" />
-        <activity
             android:name=".adminHotel.HuespedAdminActivity"
             android:exported="false" />
         <activity

@@ -1,4 +1,4 @@
-package com.iot.stayflowdev.adminHotel.huesped;
+package com.iot.stayflowdev.adminHotel;
 
 import android.os.Bundle;
 import android.view.View;
