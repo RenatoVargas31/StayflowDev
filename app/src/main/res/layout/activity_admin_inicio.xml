@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".adminHotel.AdminInicioActivity">
+
+    <!-- Toolbar de Material Design -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="4dp"
+        app:title="Stayflow"
+        app:titleCentered="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/notification_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_notifications"
+            android:layout_gravity="end|center_vertical" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- Contenedor desplazable (ScrollView) -->
+    <ScrollView
+        android:id="@+id/rootAdminInicio"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        android:background="?android:colorBackground"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <!-- Texto superior -->
+            <TextView
+                android:id="@+id/titulo_admin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hola, Administrador"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="?attr/colorOnBackground" />
+
+            <!-- Imagen bienvenida -->
+            <ImageView
+                android:id="@+id/imagen_admin"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:src="@drawable/ic_admin_inicio"
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="20dp"
+                android:contentDescription="Bienvenida visual" />
+
+            <TextView
+                android:id="@+id/texto_bienvenida"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bienvenido a la plataforma. Aquí podrás registrar los datos de tu hotel asignado, gestionar check-outs y mucho más."
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginBottom="28dp"
+                android:textColor="?attr/colorOnBackground" />
+
+            <!-- Card con nombre del hotel -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="@color/md_theme_primaryContainer">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Belmond Palace Resort Hotel"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
+                        android:textColor="@color/md_theme_onPrimaryContainer" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Visualiza y/o ingresa la siguiente información para tu hotel"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/md_theme_onPrimaryContainer" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Grid con botones centrado - MODIFICADO -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="80dp">
+
+                <!-- Definimos un tamaño específico para todos los botones -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/grid_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <!-- Primera fila de botones -->
+                    <include
+                        android:id="@+id/includeBtnUbicacion"
+                        layout="@layout/card_admin_boton_hotel"
+                        android:layout_width="130dp"
+                        android:layout_height="130dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <include
+                        android:id="@+id/includeBtnGaleria"
+                        layout="@layout/card_admin_boton_hotel"
+                        android:layout_width="130dp"
+                        android:layout_height="130dp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/includeBtnUbicacion" />
+
+                    <!-- Segunda fila de botones -->
+                    <include
+                        android:id="@+id/includeBtnHabitaciones"
+                        layout="@layout/card_admin_boton_hotel"
+                        android:layout_width="130dp"
+                        android:layout_height="130dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintTop_toBottomOf="@id/includeBtnUbicacion"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <include
+                        android:id="@+id/includeBtnServicios"
+                        layout="@layout/card_admin_boton_hotel"
+                        android:layout_width="130dp"
+                        android:layout_height="130dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintTop_toBottomOf="@id/includeBtnGaleria"
+                        app:layout_constraintStart_toEndOf="@id/includeBtnHabitaciones" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Menú inferior -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        style="@style/Widget.Material3.BottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_admin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
