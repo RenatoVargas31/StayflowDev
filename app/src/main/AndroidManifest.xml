@@ -40,7 +40,6 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:name=".adminHotel.MensajeDetalleActivity"
             android:exported="false" />
         <activity
             android:name=".adminHotel.huesped.CheckoutDetalleActivity"
@@ -59,12 +58,7 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.AdminInicioActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:exported="false">
         </activity>
         <activity
             android:name=".MainActivity"
@@ -97,9 +91,7 @@
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
             android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+
     </application>
 
 </manifest>
