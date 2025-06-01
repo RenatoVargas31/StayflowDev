@@ -1,7 +1,5 @@
 <resources>
-    <string name="app_name">StayFlow</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="Buscar" />
     <string name="Favoritos" />
     <string name="Inicio" />
@@ -24,4 +22,7 @@
     <string name="content_description_settings">Configuración del sistema</string>
     <string name="content_description_users">Gestión de usuarios</string>
     <string name="content_description_logout">Cerrar sesión</string>
+    <string name="app_name">StayflowDev</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

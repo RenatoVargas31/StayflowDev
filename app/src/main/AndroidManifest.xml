@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Permisos para ubicación -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Permisos para vibración -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Permisos para acceder a la galería -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -15,6 +21,50 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:theme="@style/Theme.StayflowDev"
+        tools:targetApi="31" >
+        <activity
+            android:name=".Driver.Activity.DriverInicioActivity"
+            android:exported="false" />
+        <!-- Dentro de <application> -->
+        <receiver
+            android:name=".Driver.Activity.DriverReservaActivity$ResumenDiarioReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".Driver.Activity.DriverReservaInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverCambioContraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverCorreoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverVehiculoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverTarjetaCreditoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverInfoSolicitudActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverNotificacionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverMapaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverPerfilActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Driver.Activity.DriverReservaActivity"
+            android:exported="false" />
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
@@ -62,7 +112,8 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="false" >
+
         </activity>
         <activity
             android:name=".adminHotel.UbicacionAdminActivity"
@@ -95,4 +146,3 @@
     </application>
 
 </manifest>
-
