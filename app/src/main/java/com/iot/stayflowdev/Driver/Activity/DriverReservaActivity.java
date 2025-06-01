@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 
@@ -25,10 +25,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.iot.stayflowdev.Driver.Adapter.ReservasAdapter;
+import com.iot.stayflowdev.Driver.Model.ReservaModel;
+import com.iot.stayflowdev.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,7 +184,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
 
             // Navegación según el ítem seleccionado
             if (itemId == R.id.nav_inicio) {
-                navegarSinAnimacion(MainActivity.class);
+                navegarSinAnimacion(DriverInicioActivity.class);
                 return true;
             } else if (itemId == R.id.nav_mapa) {
                 navegarSinAnimacion(DriverMapaActivity.class);
@@ -256,7 +258,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
     public void onBackPressed() {
         // Redirigir a MainActivity cuando se presiona el botón atrás
         super.onBackPressed();
-        navegarSinAnimacion(MainActivity.class);
+        navegarSinAnimacion(DriverInicioActivity.class);
     }
 
     // Implementación del listener de clic en reserva

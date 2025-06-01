@@ -6,7 +6,7 @@
     android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DriverTarjetaCreditoActivity">
+    tools:context=".Driver.Activity.DriverTarjetaCreditoActivity">
 
     <!-- Barra superior -->
     <com.google.android.material.appbar.MaterialToolbar

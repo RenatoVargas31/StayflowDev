@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,15 +11,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -33,15 +30,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.materialswitch.MaterialSwitch;
-import com.google.android.material.navigation.NavigationBarView;
+import com.iot.stayflowdev.Driver.Adapter.SolicitudesAdapter;
+import com.iot.stayflowdev.Driver.Model.SolicitudModel;
+import com.iot.stayflowdev.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 
-
-public class MainActivity extends AppCompatActivity {
+public class DriverInicioActivity extends AppCompatActivity {
 
     private RecyclerView rvSolicitudesCercanas;
     private TextView tvNoSolicitudes;
@@ -60,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_driver_inicio);
 
         // Configurar márgenes para barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -142,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
                         PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this,
+            ActivityCompat.requestPermissions(DriverInicioActivity.this,
                     new String[]{POST_NOTIFICATIONS},
                     101);
         }
@@ -170,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Intent para cuando se toque la notificación (volver a MainActivity)
-        Intent mainIntent = new Intent(this, MainActivity.class);
+        Intent mainIntent = new Intent(this, DriverInicioActivity.class);
         PendingIntent mainPendingIntent = PendingIntent.getActivity(
                 this,
                 101,
@@ -301,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
     private void configurarNotificaciones() {
         if (notificationIcon != null) {
             notificationIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, DriverNotificacionActivity.class);
+                Intent intent = new Intent(DriverInicioActivity.this, DriverNotificacionActivity.class);
                 startActivity(intent);
             });
         }

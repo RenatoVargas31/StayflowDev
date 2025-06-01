@@ -6,7 +6,7 @@
     android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DriverChatActivity">
+    tools:context=".Driver.Activity.DriverChatActivity">
 
     <!-- Barra superior -->
     <com.google.android.material.appbar.MaterialToolbar

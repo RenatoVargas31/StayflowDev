@@ -1,8 +1,9 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -13,26 +14,21 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DriverCorreoActivity extends AppCompatActivity {
+import com.iot.stayflowdev.R;
 
-    private Button btnCambiarCorreo;
+public class DriverCambioContraActivity extends AppCompatActivity {
+
+    private Button btnCancel, btnSave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_correo);
+        setContentView(R.layout.activity_driver_cambio_contra);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-        });
-
-        btnCambiarCorreo = findViewById(R.id.btn_change_password);
-        btnCambiarCorreo.setOnClickListener(v -> {
-            // Navegar a la actividad de cambio de contraseña
-            startActivity(new Intent(DriverCorreoActivity.this, DriverCambioContraActivity.class));
-
         });
 
         // Configurar la Toolbar como ActionBar
@@ -43,14 +39,21 @@ public class DriverCorreoActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
+        btnSave = findViewById(R.id.btn_save);
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(DriverCambioContraActivity.this, DriverCorreoActivity.class));
+            }
+        });
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            startActivity(new Intent(DriverCorreoActivity.this, DriverPerfilActivity.class));
+            startActivity(new Intent(DriverCambioContraActivity.this, DriverCorreoActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

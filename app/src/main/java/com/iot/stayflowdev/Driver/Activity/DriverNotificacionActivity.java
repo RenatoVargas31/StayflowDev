@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -14,6 +14,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.iot.stayflowdev.Driver.Adapter.NotificacionAdapter;
+import com.iot.stayflowdev.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Fragmento;
 
 import android.os.Bundle;
 
@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.iot.stayflowdev.R;
 
 /**
  * A simple {@link Fragment} subclass.

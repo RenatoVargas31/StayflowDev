@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Model;
 
 public class ReservaModel {
 

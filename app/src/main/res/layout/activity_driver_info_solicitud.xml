@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    tools:context=".DriverInfoSolicitudActivity">
+    tools:context=".Driver.Activity.DriverInfoSolicitudActivity">
 
     <!-- Barra superior -->
     <com.google.android.material.appbar.MaterialToolbar

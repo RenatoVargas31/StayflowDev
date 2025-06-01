@@ -1,5 +1,6 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -11,13 +12,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DriverVehiculoActivity extends AppCompatActivity {
+import com.iot.stayflowdev.R;
+
+public class DriverChatActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_vehiculo);
+        setContentView(R.layout.activity_driver_chat);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -37,7 +40,7 @@ public class DriverVehiculoActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed(); // vuelve a la actividad anterior
+            startActivity(new Intent(this, DriverMapaActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -1,15 +1,10 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
@@ -17,6 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.iot.stayflowdev.R;
 
 public class DriverPerfilActivity extends AppCompatActivity {
 
@@ -93,7 +89,7 @@ public class DriverPerfilActivity extends AppCompatActivity {
             // Navegación según el ítem seleccionado
             if (itemId == R.id.nav_inicio) {
                 Log.d("DriverPerfilActivity", "🏠 Navegando a Inicio");
-                navegarSinAnimacion(MainActivity.class);
+                navegarSinAnimacion(DriverInicioActivity.class);
                 return true;
             } else if (itemId == R.id.nav_reservas) {
                 Log.d("DriverPerfilActivity", "📋 Navegando a Reservas");
@@ -164,7 +160,7 @@ public class DriverPerfilActivity extends AppCompatActivity {
     public void onBackPressed() {
         // Redirigir a MainActivity cuando se presiona el botón atrás
         super.onBackPressed();
-        navegarSinAnimacion(MainActivity.class);
+        navegarSinAnimacion(DriverInicioActivity.class);
         // ✅ NO LLAMAR super.onBackPressed() después de navegar
     }
 
@@ -183,7 +179,7 @@ public class DriverPerfilActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        navegarSinAnimacion(MainActivity.class);
+        navegarSinAnimacion(DriverInicioActivity.class);
         return true;
     }
 }

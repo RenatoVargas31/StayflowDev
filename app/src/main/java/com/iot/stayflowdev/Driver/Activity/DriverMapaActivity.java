@@ -1,4 +1,4 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.iot.stayflowdev.R;
 
 public class DriverMapaActivity extends AppCompatActivity {
 
@@ -128,7 +129,7 @@ public class DriverMapaActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_inicio) {
                 Log.d("DriverMapaActivity", "🏠 Navegando a Inicio");
-                navegarSinAnimacion(MainActivity.class);
+                navegarSinAnimacion(DriverInicioActivity.class);
                 return true;
             } else if (itemId == R.id.nav_reservas) {
                 Log.d("DriverMapaActivity", "📋 Navegando a Reservas");
@@ -225,12 +226,12 @@ public class DriverMapaActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        navegarSinAnimacion(MainActivity.class);
+        navegarSinAnimacion(DriverInicioActivity.class);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        navegarSinAnimacion(MainActivity.class);
+        navegarSinAnimacion(DriverInicioActivity.class);
         return true;
     }
 }

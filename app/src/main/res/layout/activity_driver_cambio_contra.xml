@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:background="#FFFFFF"
     android:layout_height="match_parent"
-    tools:context=".DriverCambioContraActivity">
+    tools:context=".Driver.Activity.DriverCambioContraActivity">
     <!-- Barra superior -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"

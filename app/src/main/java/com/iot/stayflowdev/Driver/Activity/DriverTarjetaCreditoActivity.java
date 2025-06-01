@@ -1,6 +1,5 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -12,18 +11,21 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DriverChatActivity extends AppCompatActivity {
+import com.iot.stayflowdev.R;
+
+public class DriverTarjetaCreditoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_chat);
+        setContentView(R.layout.activity_driver_tarjeta_credito);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
 
         // Configurar la Toolbar como ActionBar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -33,12 +35,13 @@ public class DriverChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            startActivity(new Intent(this, DriverMapaActivity.class));
+            onBackPressed(); // vuelve a la actividad anterior
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -1,7 +1,9 @@
-package com.iot.stayflowdev;
+package com.iot.stayflowdev.Driver.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -11,19 +13,29 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DriverTarjetaCreditoActivity extends AppCompatActivity {
+import com.iot.stayflowdev.R;
+
+public class DriverCorreoActivity extends AppCompatActivity {
+
+    private Button btnCambiarCorreo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_tarjeta_credito);
+        setContentView(R.layout.activity_driver_correo);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        btnCambiarCorreo = findViewById(R.id.btn_change_password);
+        btnCambiarCorreo.setOnClickListener(v -> {
+            // Navegar a la actividad de cambio de contraseña
+            startActivity(new Intent(DriverCorreoActivity.this, DriverCambioContraActivity.class));
+
+        });
 
         // Configurar la Toolbar como ActionBar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -33,15 +45,14 @@ public class DriverTarjetaCreditoActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-
     }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed(); // vuelve a la actividad anterior
+            startActivity(new Intent(DriverCorreoActivity.this, DriverPerfilActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
