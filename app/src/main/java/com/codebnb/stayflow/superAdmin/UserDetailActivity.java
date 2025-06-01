@@ -42,7 +42,7 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_user_detail;
+        return R.layout.superadmin_user_detail;
     }
 
     @Override

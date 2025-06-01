@@ -37,7 +37,7 @@ public class ReportesActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_reportes_superadmin;
+        return R.layout.superadmin_reportes_superadmin;
     }
 
     @Override

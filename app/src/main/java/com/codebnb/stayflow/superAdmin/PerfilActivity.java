@@ -13,7 +13,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_perfil_superadmin;
+        return R.layout.superadmin_perfil_superadmin;
     }
 
     @Override

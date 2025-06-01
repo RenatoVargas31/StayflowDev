@@ -167,7 +167,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_gestion_superadmin;
+        return R.layout.superadmin_fragment_gestion_superadmin;
     }
 
     @Override

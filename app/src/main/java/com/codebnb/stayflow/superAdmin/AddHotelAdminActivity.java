@@ -34,7 +34,7 @@ public class AddHotelAdminActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_admin_form_activity);
+        setContentView(R.layout.superadmin_add_admin_form_activity);
 
         // Configurar Toolbar con navegación hacia atrás
         MaterialToolbar toolbar = findViewById(R.id.toolbar);

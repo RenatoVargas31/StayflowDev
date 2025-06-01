@@ -11,7 +11,7 @@ public class InicioActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.base_superadmin_activity;
+        return R.layout.superadmin_base_superadmin_activity;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class InicioActivity extends BaseSuperAdminActivity {
         super.onCreate(savedInstanceState);
 
         // Inflar el contenido específico de esta activity en el content_frame
-        LayoutInflater.from(this).inflate(R.layout.fragment_inicio_superadmin,
+        LayoutInflater.from(this).inflate(R.layout.superadmin_inicio_superadmin,
                 findViewById(R.id.content_frame), true);
 
         // Configurar listeners específicos de esta pantalla

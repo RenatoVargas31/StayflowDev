@@ -24,7 +24,7 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Cargar el layout base
-        setContentView(R.layout.base_superadmin_activity);
+        setContentView(R.layout.superadmin_base_superadmin_activity);
 
         // Inicializar los menús
         initMenus();
