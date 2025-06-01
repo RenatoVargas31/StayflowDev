@@ -234,7 +234,7 @@
                     android:layout_height="wrap_content"
                     android:minWidth="100dp"
                     android:text="Barras"
-                    android:backgroundTint="@color/purple_700"
+                    android:backgroundTint="@color/green_500"
                     android:textColor="#FFFFFF" />
 
                 <Button
@@ -244,7 +244,7 @@
                     android:minWidth="100dp"
                     android:text="Lineal"
                     android:backgroundTint="@android:color/transparent"
-                    android:textColor="@color/purple_700" />
+                    android:textColor="@color/green_500" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
