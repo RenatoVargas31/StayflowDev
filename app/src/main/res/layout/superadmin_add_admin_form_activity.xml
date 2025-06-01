@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="StayFlow" />
+
+    <!-- Contenedor del formulario con padding - Primera Sección -->
+    <LinearLayout
+        android:id="@+id/sectionInfoPersonal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <!-- Título del formulario -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Información personal"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Campo Nombres -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutNombres"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:endIconMode="clear_text"
+                    app:endIconDrawable="@drawable/ic_cancel"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextNombres"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nombres"
+                        android:inputType="textPersonName"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Campo Apellidos -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutApellidos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:endIconMode="clear_text"
+                    app:endIconDrawable="@drawable/ic_cancel"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextApellidos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Apellidos"
+                        android:inputType="textPersonName"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Campo Correo -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutCorreo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:endIconMode="clear_text"
+                    app:endIconDrawable="@drawable/ic_cancel"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextCorreo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Correo"
+                        android:inputType="textEmailAddress"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Campo Teléfono -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutTelefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:endIconMode="clear_text"
+                    app:endIconDrawable="@drawable/ic_cancel"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextTelefono"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Teléfono"
+                        android:inputType="phone"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Tipo de documento (Dropdown) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutTipoDocumento"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/dropdownTipoDocumento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Tipo de documento"
+                        android:inputType="none"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Número de documento -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutNumeroDocumento"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:endIconMode="clear_text"
+                    app:endIconDrawable="@drawable/ic_cancel"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextNumeroDocumento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Número de documento"
+                        android:inputType="number"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Botón Continuar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonContinuar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Continuar"
+            android:padding="12dp"
+            android:layout_margin="16dp"
+            app:backgroundTint="@color/md_theme_inversePrimary_mediumContrast"
+            android:textColor="@android:color/black"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
+
+    <!-- Segunda parte del formulario: credenciales -->
+    <LinearLayout
+        android:id="@+id/sectionCredenciales"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="16dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Credenciales de acceso"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Contraseña -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:passwordToggleEnabled="true"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Contraseña"
+                        android:inputType="textPassword"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Confirmar contraseña -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:passwordToggleEnabled="true"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextConfirmPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Confirmar contraseña"
+                        android:inputType="textPassword"
+                        android:background="#F0F0F0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Estado del usuario -->
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchHabilitado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cuenta habilitada"
+                    android:checked="true"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Botón Guardar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGuardar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar"
+            android:padding="12dp"
+            android:layout_margin="16dp"
+            app:backgroundTint="@color/md_theme_inversePrimary_mediumContrast"
+            android:textColor="@android:color/black"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
+
+</LinearLayout>
