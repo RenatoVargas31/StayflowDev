@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.adminHotel.huesped.MensajeDetalleActivity;
+import com.iot.stayflowdev.adminHotel.MensajeDetalleActivity;
 import com.iot.stayflowdev.adminHotel.model.Mensaje;
 
 import java.util.List;
