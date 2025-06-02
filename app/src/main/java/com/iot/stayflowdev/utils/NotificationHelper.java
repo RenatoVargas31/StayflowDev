@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.utils;
+package com.iot.stayflowdev.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,8 +10,8 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.codebnb.stayflow.R;
-import com.codebnb.stayflow.superAdmin.InicioActivity;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.superAdmin.InicioActivity;
 
 public class NotificationHelper {
     private static final String CHANNEL_ID = "StayFlowChannel";

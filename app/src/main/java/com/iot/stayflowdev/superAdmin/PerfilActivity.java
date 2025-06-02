@@ -1,7 +1,7 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.os.Bundle;
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 
 public class PerfilActivity extends BaseSuperAdminActivity {
 

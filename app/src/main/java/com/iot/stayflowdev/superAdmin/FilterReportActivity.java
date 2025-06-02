@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +9,9 @@ import android.widget.EditText;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.codebnb.stayflow.R;
-import com.codebnb.stayflow.superAdmin.adapter.HotelAdapter;
-import com.codebnb.stayflow.superAdmin.model.Hotel;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.superAdmin.adapter.HotelAdapter;
+import com.iot.stayflowdev.superAdmin.model.Hotel;
 
 import java.util.ArrayList;
 import java.util.List;

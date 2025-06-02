@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin.adapter;
+package com.iot.stayflowdev.superAdmin.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.codebnb.stayflow.R;
-import com.codebnb.stayflow.superAdmin.model.User;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.superAdmin.model.User;
 
 import java.util.ArrayList;
 import java.util.List;

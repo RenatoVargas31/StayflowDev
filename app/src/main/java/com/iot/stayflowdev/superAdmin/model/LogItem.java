@@ -1,8 +1,8 @@
-package com.codebnb.stayflow.superAdmin.model;
+package com.iot.stayflowdev.superAdmin.model;
 
 import androidx.annotation.DrawableRes;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 
 public class LogItem {
     public static final String CATEGORY_ALL = "all";

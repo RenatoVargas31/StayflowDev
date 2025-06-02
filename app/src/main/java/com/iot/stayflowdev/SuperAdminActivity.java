@@ -1,17 +1,17 @@
-package com.codebnb.stayflow;
+package com.iot.stayflowdev;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.codebnb.stayflow.superAdmin.InicioActivity;
-import com.codebnb.stayflow.superAdmin.GestionActivity;
-import com.codebnb.stayflow.superAdmin.ReportesActivity;
-import com.codebnb.stayflow.superAdmin.PerfilActivity;
+import com.iot.stayflowdev.superAdmin.InicioActivity;
+import com.iot.stayflowdev.superAdmin.GestionActivity;
+import com.iot.stayflowdev.superAdmin.ReportesActivity;
+import com.iot.stayflowdev.superAdmin.PerfilActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.codebnb.stayflow.utils.PeriodicNotificationManager;
+import com.iot.stayflowdev.utils.PeriodicNotificationManager;
 
 public class SuperAdminActivity extends AppCompatActivity {
 

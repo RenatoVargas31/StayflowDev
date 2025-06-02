@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin.model;
+package com.iot.stayflowdev.superAdmin.model;
 
 public class Hotel {
     private final String id;          // opcional si lo necesitas

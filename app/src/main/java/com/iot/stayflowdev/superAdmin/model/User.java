@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin.model;
+package com.iot.stayflowdev.superAdmin.model;
 
 public class User {
     private String name;

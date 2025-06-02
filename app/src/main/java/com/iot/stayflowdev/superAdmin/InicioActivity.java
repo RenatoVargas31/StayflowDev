@@ -1,10 +1,10 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 import com.google.android.material.button.MaterialButton;
 
 public class InicioActivity extends BaseSuperAdminActivity {

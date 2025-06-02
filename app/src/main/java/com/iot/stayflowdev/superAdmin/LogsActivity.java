@@ -1,10 +1,10 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
-import com.codebnb.stayflow.R;
-import com.codebnb.stayflow.superAdmin.adapter.LogsAdapter;
-import com.codebnb.stayflow.superAdmin.model.LogItem;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.superAdmin.adapter.LogsAdapter;
+import com.iot.stayflowdev.superAdmin.model.LogItem;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import java.util.ArrayList;

@@ -157,4 +157,6 @@
     <color name="icon_bg_success">#D3EBDA</color>
     <color name="icon_bg_error">#FFD7D7</color>
     <color name="icon_bg_info">#CCE5FF</color>
+
+    <color name="ic_banner_superadmin_background">#FFFFFF</color> <!-- Puedes cambiar el color -->
 </resources>

@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.utils;
+package com.iot.stayflowdev.utils;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.SystemClock;
 
 public class PeriodicNotificationManager {
     private static final String ACTION_CHECK_REPORTS = "com.codebnb.stayflow.CHECK_REPORTS";

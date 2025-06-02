@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.BarData;
@@ -88,10 +88,10 @@ public class ReportDetailActivity extends AppCompatActivity {
         buttonBack.setOnClickListener(v -> finish());
 
         // Establece los colores iniciales correctamente
-        buttonBarras.setBackgroundColor(getResources().getColor(R.color.purple_700)); // Fondo activo
+        buttonBarras.setBackgroundColor(getResources().getColor(R.color.blue_500)); // Fondo activo
         buttonBarras.setTextColor(Color.WHITE); // Texto activo
         buttonLineal.setBackgroundColor(Color.TRANSPARENT); // Fondo inactivo
-        buttonLineal.setTextColor(getResources().getColor(R.color.purple_700)); // Texto inactivo
+        buttonLineal.setTextColor(getResources().getColor(R.color.blue_500)); // Texto inactivo
 
         // Mostrar barra por defecto
         barChart.setVisibility(View.VISIBLE);
@@ -108,10 +108,10 @@ public class ReportDetailActivity extends AppCompatActivity {
             lineChart.setVisibility(View.GONE);
 
             // Actualiza apariencia de botones
-            buttonBarras.setBackgroundColor(getResources().getColor(R.color.purple_700));
+            buttonBarras.setBackgroundColor(getResources().getColor(R.color.blue_500));
             buttonBarras.setTextColor(Color.WHITE);
             buttonLineal.setBackgroundColor(Color.TRANSPARENT);
-            buttonLineal.setTextColor(getResources().getColor(R.color.purple_700));
+            buttonLineal.setTextColor(getResources().getColor(R.color.blue_500));
         });
 
         buttonLineal.setOnClickListener(v -> {
@@ -119,10 +119,10 @@ public class ReportDetailActivity extends AppCompatActivity {
             barChart.setVisibility(View.GONE);
 
             // Actualiza apariencia de botones
-            buttonLineal.setBackgroundColor(getResources().getColor(R.color.purple_700));
+            buttonLineal.setBackgroundColor(getResources().getColor(R.color.blue_500));
             buttonLineal.setTextColor(Color.WHITE);
             buttonBarras.setBackgroundColor(Color.TRANSPARENT);
-            buttonBarras.setTextColor(getResources().getColor(R.color.purple_700));
+            buttonBarras.setTextColor(getResources().getColor(R.color.blue_500));
         });
     }
 

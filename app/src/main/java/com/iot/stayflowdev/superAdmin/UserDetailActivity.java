@@ -1,11 +1,11 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.SwitchCompat;
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 
 public class UserDetailActivity extends BaseSuperAdminActivity {
 

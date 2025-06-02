@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.utils;
+package com.iot.stayflowdev.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

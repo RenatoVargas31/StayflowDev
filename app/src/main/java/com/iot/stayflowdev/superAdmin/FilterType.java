@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 public enum FilterType {
     CUSTOM_RANGE,

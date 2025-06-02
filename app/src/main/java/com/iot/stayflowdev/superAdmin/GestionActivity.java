@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,10 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.codebnb.stayflow.R;
-import com.codebnb.stayflow.superAdmin.adapter.UserAdapter;
-import com.codebnb.stayflow.superAdmin.model.User;
-import com.codebnb.stayflow.utils.LocalStorageManager;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.superAdmin.adapter.UserAdapter;
+import com.iot.stayflowdev.superAdmin.model.User;
+import com.iot.stayflowdev.utils.LocalStorageManager;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;

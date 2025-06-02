@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -168,11 +168,11 @@ public class DateRangeDialogFragment extends DialogFragment {
         if (getContext() == null) return;
 
         if (isSelectingStartDate) {
-            textInputStartDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.purple_700));
-            textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.gray));
+            textInputStartDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.blue_500));
+            textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.md_theme_onBackground));
         } else {
-            textInputStartDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.gray));
-            textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.purple_700));
+            textInputStartDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.md_theme_onBackground));
+            textInputEndDate.setBoxStrokeColor(ContextCompat.getColor(getContext(), R.color.blue_500));
         }
     }
 }

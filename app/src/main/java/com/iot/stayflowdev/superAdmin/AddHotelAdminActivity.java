@@ -1,4 +1,4 @@
-package com.codebnb.stayflow.superAdmin;
+package com.iot.stayflowdev.superAdmin;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +10,7 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.codebnb.stayflow.R;
+import com.iot.stayflowdev.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
