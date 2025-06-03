@@ -4,10 +4,13 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -34,6 +37,9 @@ public class LoginRegisterActivity extends AppCompatActivity {
     // Campos del formulario
     private TextInputEditText etNombre, etDni, etFechaNacimiento, etCelular;
     private TextInputLayout tilNombre, tilDni, tilFechaNacimiento, tilCelular;
+    private RadioGroup rgTipoDocumento;
+    private RadioButton rbDni, rbCarnet;
+    private boolean isDniSelected = true;
 
     // Calendario para el selector de fecha
     private Calendar calendar;
@@ -79,9 +85,22 @@ public class LoginRegisterActivity extends AppCompatActivity {
         btnRegistroTaxista.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navegar a la pantalla de registro de taxista
-                Intent intent = new Intent(LoginRegisterActivity.this, LoginDriverRegister.class);
-                startActivity(intent);
+                // Validar el formulario antes de permitir el registro como taxista
+                if (validarFormulario()) {
+                    // Navegar a la pantalla de registro de taxista
+                    Intent intent = new Intent(LoginRegisterActivity.this, LoginDriverRegister.class);
+                    // Pasar los datos del usuario al siguiente formulario
+                    intent.putExtra("nombre", etNombre.getText().toString().trim());
+                    intent.putExtra("documento", etDni.getText().toString().trim());
+                    intent.putExtra("tipoDocumento", isDniSelected ? "DNI" : "Carné de extranjería");
+                    intent.putExtra("fechaNacimiento", etFechaNacimiento.getText().toString().trim());
+                    intent.putExtra("celular", etCelular.getText().toString().trim());
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(LoginRegisterActivity.this,
+                            "Debes completar correctamente todos los campos del formulario",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -90,6 +109,11 @@ public class LoginRegisterActivity extends AppCompatActivity {
         // Botones
         btnContinuar = findViewById(R.id.btn_continuar);
         btnRegistroTaxista = findViewById(R.id.btn_registro_taxista);
+
+        // RadioGroup y RadioButtons para tipo de documento
+        rgTipoDocumento = findViewById(R.id.rg_tipo_documento);
+        rbDni = findViewById(R.id.rb_dni);
+        rbCarnet = findViewById(R.id.rb_carnet);
 
         // TextInputEditText
         etNombre = findViewById(R.id.et_nombre);
@@ -105,6 +129,25 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }
 
     private void configurarListeners() {
+        // Configurar listener para el RadioGroup
+        rgTipoDocumento.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_dni) {
+                // DNI seleccionado - 8 dígitos
+                isDniSelected = true;
+                tilDni.setHint("Ingresar DNI (8 dígitos)");
+                tilDni.setCounterMaxLength(8);
+                etDni.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
+                etDni.setText(""); // Limpiar campo para evitar problemas
+            } else {
+                // Carné de extranjería seleccionado - hasta 20 dígitos
+                isDniSelected = false;
+                tilDni.setHint("Ingresar carné de extranjería");
+                tilDni.setCounterMaxLength(20);
+                etDni.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+                etDni.setText(""); // Limpiar campo para evitar problemas
+            }
+        });
+
         // Validación en tiempo real para el nombre
         etNombre.addTextChangedListener(new TextWatcher() {
             @Override
@@ -119,7 +162,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
             }
         });
 
-        // Validación en tiempo real para el DNI
+        // Validación en tiempo real para el DNI/carné
         etDni.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -178,22 +221,31 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }
 
     private boolean validarDni() {
-        String dni = etDni.getText().toString().trim();
+        String documento = etDni.getText().toString().trim();
 
-        if (TextUtils.isEmpty(dni)) {
-            tilDni.setError("El DNI es obligatorio");
+        if (TextUtils.isEmpty(documento)) {
+            tilDni.setError("El documento de identidad es obligatorio");
             return false;
         }
 
-        if (dni.length() != 8) {
-            tilDni.setError("El DNI debe tener 8 dígitos");
-            return false;
+        if (isDniSelected) {
+            // Validación para DNI (8 dígitos)
+            if (documento.length() != 8) {
+                tilDni.setError("El DNI debe tener 8 dígitos");
+                return false;
+            }
+        } else {
+            // Validación para carné de extranjería (hasta 20 dígitos)
+            if (documento.length() < 4 || documento.length() > 20) {
+                tilDni.setError("El carné debe tener entre 4 y 20 caracteres");
+                return false;
+            }
         }
 
         try {
-            long dniNum = Long.parseLong(dni);
+            long numeroDoc = Long.parseLong(documento);
         } catch (NumberFormatException e) {
-            tilDni.setError("El DNI debe contener solo números");
+            tilDni.setError("El documento debe contener solo números");
             return false;
         }
 
@@ -295,3 +347,4 @@ public class LoginRegisterActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 }
+
