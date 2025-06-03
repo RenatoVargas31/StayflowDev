@@ -98,7 +98,7 @@
                 android:layout_height="120dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="8dp">
 
                 <ImageView
                     android:id="@+id/img_preview_vehicle"
@@ -110,8 +110,20 @@
                     android:background="#F0F0F0" />
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Botón para cargar imagen desde la galería -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cargar_imagen"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cargar imagen"
+                android:textColor="#3C3C7C"
+                app:strokeColor="#3C3C7C"
+                android:layout_marginBottom="16dp" />
+
             <!-- Placa -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_placa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -121,19 +133,25 @@
                 app:boxCornerRadiusBottomEnd="20dp"
                 app:boxCornerRadiusBottomStart="20dp"
                 app:boxCornerRadiusTopEnd="20dp"
-                app:boxCornerRadiusTopStart="20dp">
+                app:boxCornerRadiusTopStart="20dp"
+                app:helperText="Formato: ABC-123"
+                app:counterEnabled="true"
+                app:counterMaxLength="7">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_placa"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Ingresar placa"
+                    android:maxLength="7"
+                    android:inputType="textCapCharacters"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Modelo -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_modelo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
@@ -143,30 +161,19 @@
                 app:boxCornerRadiusBottomEnd="20dp"
                 app:boxCornerRadiusBottomStart="20dp"
                 app:boxCornerRadiusTopEnd="20dp"
-                app:boxCornerRadiusTopStart="20dp">
+                app:boxCornerRadiusTopStart="20dp"
+                app:counterEnabled="true"
+                app:counterMaxLength="25">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_modelo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Ingresar modelo"
+                    android:hint="Ingresar modelo de auto"
+                    android:maxLength="25"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Botón para cargar imagen -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_cargar_imagen"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Cargar imagen"
-                app:iconTint="@android:color/white"
-                app:iconPadding="8dp"
-                style="@style/Widget.Material3.Button"
-                app:cornerRadius="15dp"
-                app:backgroundTint="#3C3C7C"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="32dp" />
 
             <!-- Botón Continuar -->
             <com.google.android.material.button.MaterialButton
