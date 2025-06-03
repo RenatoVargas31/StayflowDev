@@ -11,15 +11,30 @@
     <!-- Barra superior -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#e0d9cc"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/md_theme_primary"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="Detalles de la Solicitud"
-        app:titleCentered="true"
-        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detalles de Solicitud"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- ScrollView para contener todo el contenido -->
     <androidx.core.widget.NestedScrollView
@@ -206,6 +221,47 @@
                         app:layout_constraintStart_toEndOf="@+id/vehiculoIcon"
                         app:layout_constraintTop_toTopOf="@+id/vehiculoIcon"
                         app:layout_constraintBottom_toBottomOf="@+id/vehiculoIcon" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:id="@+id/divider2"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tipoVehiculo" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="14sp"
+                        app:layout_constraintTop_toBottomOf="@+id/divider2">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/notasTitulo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Nota del Pasajero"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/notasContenido"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Llevo dos maletas grandes. Por favor ayuda con equipaje. Soy sordo, prefiero comunicación por mensajes."
+                            android:textColor="?attr/colorOnSurface"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/notasTitulo" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -438,7 +494,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Tarjeta de Notas Adicionales -->
+            <!-- Tarjeta de Notas Adicionales
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/notasCard"
                 android:layout_width="match_parent"
@@ -482,13 +538,13 @@
                         app:layout_constraintTop_toBottomOf="@+id/notasTitulo" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView> -->
 
             <!-- Espacio adicional al final del scroll -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/notasCard" />
+                app:layout_constraintTop_toBottomOf="@+id/recorridoCard" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
