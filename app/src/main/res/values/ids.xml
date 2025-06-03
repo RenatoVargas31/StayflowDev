@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tv_nombre" type="id" />
+    <item name="iv_icon" type="id" />
+    <item name="tv_distancia" type="id" />
+    <item name="card_reserva" type="id" />
+</resources>

@@ -9,8 +9,8 @@ public class ReservaModel {
     private String distancia;
     private String fecha;
     private String hora;
-    private int tipoIcono; // Recursos de drawable (R.drawable.ic_hotel o R.drawable.ic_aeropuerto)
-    private String estado; // "en_curso", "pasado" o "cancelado"
+    private int tipoIcono;
+    private String estado;
 
     // Constructor
     public ReservaModel(int id, String nombrePasajero, String origen, String destino,

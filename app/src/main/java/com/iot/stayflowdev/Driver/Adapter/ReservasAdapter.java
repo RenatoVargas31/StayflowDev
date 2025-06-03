@@ -37,7 +37,7 @@ public class ReservasAdapter  extends RecyclerView.Adapter<ReservasAdapter.Reser
     @Override
     public ReservaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_reserva, parent, false);
+                .inflate(R.layout.item_driver_reserva, parent, false);
         return new ReservaViewHolder(view);
     }
 
@@ -73,11 +73,11 @@ public class ReservasAdapter  extends RecyclerView.Adapter<ReservasAdapter.Reser
 
         public ReservaViewHolder(@NonNull View itemView) {
             super(itemView);
-           // icono = itemView.findViewById(R.id.iv_icon);
-           // nombre = itemView.findViewById(R.id.tv_nombre);
+           icono = itemView.findViewById(R.id.iv_icon);
+           nombre = itemView.findViewById(R.id.tv_nombre);
             origen = itemView.findViewById(R.id.tv_origen);
             destino = itemView.findViewById(R.id.tv_destino);
-          //  distancia = itemView.findViewById(R.id.tv_distancia);
+          distancia = itemView.findViewById(R.id.tv_distancia);
             fechaHora = itemView.findViewById(R.id.tv_fecha_hora);
         }
     }
