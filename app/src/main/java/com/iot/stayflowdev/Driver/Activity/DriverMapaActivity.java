@@ -15,7 +15,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.iot.stayflowdev.R;
+import com.mapbox.geojson.Point;
+import com.mapbox.maps.CameraOptions;
+import com.mapbox.maps.MapView;
+import com.mapbox.maps.Style;
 
 public class DriverMapaActivity extends AppCompatActivity {
 
@@ -26,6 +31,11 @@ public class DriverMapaActivity extends AppCompatActivity {
     private Button startTripButton;
     private Button contactPassengerButton;
     private BottomNavigationView bottomNavigation;
+
+    private MapView mapView;
+    private FloatingActionButton fabCurrentLocation;
+    private TextView routeText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +70,23 @@ public class DriverMapaActivity extends AppCompatActivity {
         contactPassengerButton = findViewById(R.id.btn_contact_passenger);
         bottomNavigation = findViewById(R.id.bottomNavigation);
 
+        // Nuevas vistas para Mapbox
+        mapView = findViewById(R.id.mapView);
+        fabCurrentLocation = findViewById(R.id.fab_current_location);
+        routeText = findViewById(R.id.route_text);
+
         // ✅ VERIFICAR QUE SE ENCONTRÓ
         if (bottomNavigation == null) {
             Log.e("DriverMapaActivity", "❌ ERROR: bottomNavigation es null!");
         } else {
             Log.d("DriverMapaActivity", "✅ bottomNavigation encontrado correctamente");
+        }
+
+        // Verificar MapView
+        if (mapView == null) {
+            Log.e("DriverMapaActivity", "❌ ERROR: mapView es null!");
+        } else {
+            Log.d("DriverMapaActivity", "✅ mapView encontrado correctamente");
         }
     }
 
@@ -145,48 +167,6 @@ public class DriverMapaActivity extends AppCompatActivity {
         });
     }
 
-    // ✅ MÉTODO ALTERNATIVO SI EL PROBLEMA PERSISTE
-    private void forzarSeleccionMapa() {
-        if (bottomNavigation != null) {
-            // Método 1: Por ID
-            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-
-            // Método 2: Por ítem específico
-            MenuItem mapaItem = bottomNavigation.getMenu().findItem(R.id.nav_mapa);
-            if (mapaItem != null) {
-                mapaItem.setChecked(true);
-            }
-
-            // Método 3: Desseleccionar otros y seleccionar mapa
-            for (int i = 0; i < bottomNavigation.getMenu().size(); i++) {
-                bottomNavigation.getMenu().getItem(i).setChecked(false);
-            }
-            if (bottomNavigation.getMenu().size() > 2) {
-                bottomNavigation.getMenu().getItem(2).setChecked(true); // Asumiendo que mapa está en posición 2
-            }
-        }
-    }
-
-    // ✅ LLAMAR EN onResume PARA ASEGURAR SELECCIÓN
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
-        if (bottomNavigation != null) {
-            bottomNavigation.post(() -> {
-                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
-            });
-        }
-    }
-
-    private void navegarSinAnimacion(Class<?> activityClass) {
-        Intent intent = new Intent(this, activityClass);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
     private void configurarDatosEjemplo() {
         if (destinationNameTextView != null) {
             destinationNameTextView.setText("Hotel Monte Claro");
@@ -206,6 +186,8 @@ public class DriverMapaActivity extends AppCompatActivity {
         if (startTripButton != null) {
             startTripButton.setOnClickListener(v -> {
                 Toast.makeText(this, "Iniciando viaje...", Toast.LENGTH_SHORT).show();
+                // Aquí podrías iniciar el tracking del viaje en el mapa
+                iniciarViaje();
             });
         }
 
@@ -217,10 +199,132 @@ public class DriverMapaActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
             });
         }
+
+        // Configurar botón de ubicación actual
+        if (fabCurrentLocation != null) {
+            fabCurrentLocation.setOnClickListener(v -> {
+                centrarEnUbicacionActual();
+            });
+        }
     }
 
+    // ✅ CONFIGURACIÓN COMPLETA DEL MAPA CON MAPBOX
     private void configurarMapa() {
-        Log.d("DriverMapaActivity", "Mapa configurado (placeholder)");
+        if (mapView == null) {
+            Log.e("DriverMapaActivity", "❌ No se puede configurar: mapView es null");
+            return;
+        }
+
+        Log.d("DriverMapaActivity", "🗺️ Configurando Mapbox...");
+
+        try {
+            // Configurar la cámara inicial centrada en Lima, Perú
+            CameraOptions initialCamera = new CameraOptions.Builder()
+                    .center(Point.fromLngLat(-77.0428, -12.0464)) // Lima, Perú
+                    .zoom(12.0)
+                    .pitch(0.0)
+                    .bearing(0.0)
+                    .build();
+
+            // Aplicar la configuración de cámara
+            mapView.getMapboxMap().setCamera(initialCamera);
+
+            // Cargar el estilo del mapa
+            mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
+                Log.d("DriverMapaActivity", "✅ Estilo del mapa cargado correctamente");
+                // Aquí puedes agregar marcadores, rutas, etc.
+                configurarElementosDelMapa();
+            });
+
+            Log.d("DriverMapaActivity", "✅ Mapa configurado exitosamente");
+
+        } catch (Exception e) {
+            Log.e("DriverMapaActivity", "❌ Error al configurar el mapa: " + e.getMessage());
+        }
+    }
+
+    private void configurarElementosDelMapa() {
+        // Aquí puedes agregar:
+        // - Marcadores para origen y destino
+        // - Ruta entre puntos
+        // - Ubicación actual del conductor
+        Log.d("DriverMapaActivity", "🎯 Configurando elementos del mapa (marcadores, rutas, etc.)");
+
+        // Actualizar el texto de la ruta
+        if (routeText != null) {
+            routeText.setText("Ruta hacia Hotel Monte Claro");
+        }
+    }
+
+    private void iniciarViaje() {
+        Log.d("DriverMapaActivity", "🚗 Iniciando viaje - actualizando mapa");
+        // Aquí puedes:
+        // - Cambiar el estilo del mapa
+        // - Iniciar tracking de ubicación
+        // - Mostrar navegación paso a paso
+        if (routeText != null) {
+            routeText.setText("Viaje en progreso - Sigue la ruta");
+        }
+    }
+
+    private void centrarEnUbicacionActual() {
+        Log.d("DriverMapaActivity", "📍 Centrando en ubicación actual");
+        // Aquí implementarías la lógica para obtener la ubicación actual
+        // y centrar el mapa en esa posición
+        Toast.makeText(this, "Centrando en ubicación actual...", Toast.LENGTH_SHORT).show();
+    }
+
+    // ✅ LLAMAR EN onResume PARA ASEGURAR SELECCIÓN
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
+        if (bottomNavigation != null) {
+            bottomNavigation.post(() -> {
+                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
+            });
+        }
+    }
+
+    // ✅ CICLO DE VIDA DEL MAPA - MUY IMPORTANTE
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mapView != null) {
+            mapView.onStart();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mapView != null) {
+            mapView.onStop();
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mapView != null) {
+            mapView.onLowMemory();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mapView != null) {
+            mapView.onDestroy();
+        }
+    }
+
+    private void navegarSinAnimacion(Class<?> activityClass) {
+        Intent intent = new Intent(this, activityClass);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
     }
 
     @Override

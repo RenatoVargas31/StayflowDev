@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -24,6 +25,10 @@ public class LoginIngCorreoActivity extends AppCompatActivity {
     private MaterialButton btnMandarCodigo;
     private TextInputEditText etEmail;
     private TextInputLayout tilEmail;
+    private TextView tvTitulo;
+    private TextView tvSubtitulo;
+
+    private boolean esRecuperacionPassword = false;
 
     // Patrón para validar correos con dominios comunes
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -42,12 +47,40 @@ public class LoginIngCorreoActivity extends AppCompatActivity {
         });
 
         // Inicializar vistas
+        inicializarVistas();
+
+        // Verificar si es un flujo de recuperación de contraseña
+        verificarFlujoRecuperacion();
+
+        // Configurar listener del botón mandar código
+        configurarListeners();
+    }
+
+    private void inicializarVistas() {
         btnMandarCodigo = findViewById(R.id.btn_mandar);
         etEmail = findViewById(R.id.et_email);
+        tvTitulo = findViewById(R.id.tv_titulo);
+        tvSubtitulo = findViewById(R.id.tv_subtitulo);
 
         // Obtener la referencia al TextInputLayout (para mostrar errores)
         tilEmail = (TextInputLayout) etEmail.getParent().getParent();
+    }
 
+    private void verificarFlujoRecuperacion() {
+        // Verificar si el intent tiene el extra "esRecuperacionPassword"
+        if (getIntent().hasExtra("esRecuperacionPassword")) {
+            esRecuperacionPassword = getIntent().getBooleanExtra("esRecuperacionPassword", false);
+
+            if (esRecuperacionPassword) {
+                // Cambiar textos para flujo de recuperación de contraseña
+                tvTitulo.setText("Recupera tu contraseña");
+                tvSubtitulo.setText("Ingresa tu correo electrónico para recibir un código de verificación");
+                btnMandarCodigo.setText("Recuperar contraseña");
+            }
+        }
+    }
+
+    private void configurarListeners() {
         // Configurar listener del botón mandar código
         btnMandarCodigo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +88,13 @@ public class LoginIngCorreoActivity extends AppCompatActivity {
                 if (validarEmail()) {
                     // Navegar a la pantalla de verificación
                     Intent intent = new Intent(LoginIngCorreoActivity.this, LoginVerificarActivity.class);
+
+                    // Pasar el flag de recuperación de contraseña si es el caso
+                    if (esRecuperacionPassword) {
+                        intent.putExtra("esRecuperacionPassword", true);
+                        intent.putExtra("email", etEmail.getText().toString().trim());
+                    }
+
                     startActivity(intent);
                 }
             }

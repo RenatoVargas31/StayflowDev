@@ -119,14 +119,52 @@
                         android:inputType="textPersonName" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- DNI -->
+                <!-- DNI/Carné de Extranjería - RadioGroup -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tipo de documento"
+                        android:textSize="14sp"
+                        android:textColor="#3C3C7C"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioGroup
+                        android:id="@+id/rg_tipo_documento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <RadioButton
+                            android:id="@+id/rb_dni"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DNI"
+                            android:checked="true"
+                            android:layout_marginEnd="16dp"/>
+
+                        <RadioButton
+                            android:id="@+id/rb_carnet"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Carné de extranjería"/>
+                    </RadioGroup>
+                </LinearLayout>
+
+                <!-- DNI/Carné de extranjería -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_dni"
                     style="@style/Widget.Material3.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="DNI (8 dígitos)"
+                    android:hint="Ingresar DNI o carnét de extranjería"
                     android:padding="5dp"
                     app:boxBackgroundMode="filled"
                     app:boxBackgroundColor="#FFFFFF"
