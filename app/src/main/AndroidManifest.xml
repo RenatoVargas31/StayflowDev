@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Permisos para ubicación -->
+    <!-- Include this permission to grab user's general location -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Include only if your app benefits from precise location access. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Permisos para vibración -->
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permisos para acceder a la galería -->
+    <!-- Permiso de internet para Mapbox -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Permisos para acceder a la galería -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <!-- Permiso para acceso al estado de la red -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
@@ -23,26 +28,36 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
-
-        <activity android:name=".superAdmin.AddHotelAdminActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.GestionActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.InicioActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.PerfilActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.ReportesActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.ReportDetailActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.FilterReportActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.LogsActivity"
-                  android:exported="false" />
-        <activity android:name=".superAdmin.UserDetailActivity"
-                  android:exported="false" />
-        
+        <activity
+            android:name=".Driver.Activity.DriverPruebaMapa"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.AddHotelAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.GestionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.InicioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.PerfilActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.ReportesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.ReportDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.FilterReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.LogsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.UserDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".Driver.Activity.DriverInicioActivity"
             android:exported="true">
@@ -52,7 +67,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <!--
         <activity
             android:name=".SuperAdminActivity"
@@ -144,8 +158,7 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.AdminInicioActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".adminHotel.UbicacionAdminActivity"
             android:exported="false" />
@@ -172,10 +185,7 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
-            android:exported="false" />
-
-
-        <!-- Receivers para notificaciones periódicas -->
+            android:exported="false" /> <!-- Receivers para notificaciones periódicas -->
         <receiver
             android:name=".utils.ReportsCheckReceiver"
             android:enabled="true"

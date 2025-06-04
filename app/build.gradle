@@ -33,6 +33,9 @@ android {
 }
 
 dependencies {
+
+    implementation 'com.mapbox.maps:android:11.12.2'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
     // ViewModel y LiveData
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.6.1"
     implementation "androidx.lifecycle:lifecycle-livedata:2.6.1"
