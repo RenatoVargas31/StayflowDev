@@ -1,6 +1,7 @@
 plugins {
     id('com.android.application')
     id('androidx.navigation.safeargs')
+    id('com.google.gms.google-services')
 }
 
 android {
@@ -38,15 +39,15 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata:2.6.1"
 
     // Glide (para imágenes)
-    implementation "com.github.bumptech.glide:glide:4.15.1"
-    annotationProcessor "com.github.bumptech.glide:compiler:4.15.1"
+    implementation libs.glide.v4151
+    annotationProcessor libs.compiler.v4151
 
     // Room
     implementation "androidx.room:room-runtime:2.5.2"
     annotationProcessor "androidx.room:room-compiler:2.5.2"
 
     // Material Design
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation libs.material.v1110
 
     // Navigation
     implementation "androidx.navigation:navigation-ui:2.7.7"
@@ -61,12 +62,12 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 
     // Activity
-    implementation "androidx.activity:activity:1.8.2"
+    implementation libs.activity.v182
 
     // Testing
-    testImplementation "junit:junit:4.13.2"
-    androidTestImplementation "androidx.test.ext:junit:1.1.5"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    testImplementation libs.junit
+    androidTestImplementation libs.junit.v115
+    androidTestImplementation libs.espresso.core.v351
     implementation libs.play.services.maps
     implementation libs.play.services.location
     implementation libs.lifecycle.viewmodel
@@ -87,5 +88,8 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation libs.mpandroidchart
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation libs.gson
+    // Firebase
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.firestore
 }

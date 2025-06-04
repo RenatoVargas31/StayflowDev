@@ -1,7 +1,15 @@
 [versions]
+activityVersion = "1.8.2"
 agp = "8.9.2"
+androidxJunit = "1.1.5"
 cardview = "1.0.0"
+compiler = "4.15.1"
+espressoCoreVersion = "3.5.1"
+firebaseBom = "33.14.0"
 glide = "4.16.0"
+glideVersion = "4.15.1"
+googleMaterial = "1.11.0"
+gson = "2.11.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -19,18 +27,27 @@ recyclerview = "1.4.0"
 roomRuntimeAndroid = "2.7.1"
 
 [libraries]
+activity-v182 = { module = "androidx.activity:activity", version.ref = "activityVersion" }
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
+compiler-v4151 = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
+espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-v4151 = { module = "com.github.bumptech.glide:glide", version.ref = "glideVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "lifecycleViewmodel" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewmodel" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+material-v1110 = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
 material-v170 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
 navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationUi" }
