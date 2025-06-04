@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Permisos para vibración -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permisos para acceder a la galería -->
     <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permisos para acceder a la galería -->
     <!-- Permiso de internet para Mapbox -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -69,33 +69,6 @@
             android:exported="false" />
         <activity
             android:name=".Driver.Activity.DriverPruebaMapa"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.AddHotelAdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.GestionActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.InicioActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.PerfilActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.ReportesActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.ReportDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.FilterReportActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.LogsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.UserDetailActivity"
             android:exported="false" />
         <activity
             android:name=".Driver.Activity.DriverInicioActivity"
@@ -193,8 +166,10 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.AdminInicioActivity"
-            android:exported="false"></activity>
-            android:exported="false"/>
+            android:exported="false">
+
+        </activity>
+
         <activity
             android:name=".adminHotel.UbicacionAdminActivity"
             android:exported="false" />
