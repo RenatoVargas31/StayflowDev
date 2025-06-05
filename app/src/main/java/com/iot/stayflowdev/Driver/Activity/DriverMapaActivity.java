@@ -1,6 +1,7 @@
 package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -16,13 +17,20 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.iot.stayflowdev.Driver.Helper.LocationHelper;
 import com.iot.stayflowdev.R;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.Style;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
-public class DriverMapaActivity extends AppCompatActivity {
+
+public class DriverMapaActivity extends AppCompatActivity implements LocationHelper.LocationUpdateListener{
 
     private TextView destinationNameTextView;
     private TextView distanceValueTextView;
@@ -36,6 +44,12 @@ public class DriverMapaActivity extends AppCompatActivity {
     private FloatingActionButton fabCurrentLocation;
     private TextView routeText;
 
+    // ✅ NUEVA VARIABLE PARA EL HELPER DE UBICACIÓN
+    private LocationHelper locationHelper;
+    private boolean locationPermissionGranted = false;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private boolean autoFollowLocation = true; // TRUE = sigue automáticamente tu ubicación
+    private boolean isFirstLocationUpdate = true; // Para el zoom inicial
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,18 +63,259 @@ public class DriverMapaActivity extends AppCompatActivity {
             return insets;
         });
 
+        locationHelper = new LocationHelper(this, this);
+        // VERIFICAR PERMISOS
+        verificarPermisosUbicacion();
+
         // Inicializar vistas
         inicializarVistas();
-
-        // Configurar navegación con debug
         configurarBottomNavigationConDebug();
-
-        // Resto de configuraciones
         configurarDatosEjemplo();
         configurarBotones();
         configurarMapa();
     }
 
+    private void verificarPermisosUbicacion() {
+        if (locationHelper.hasLocationPermission()) {
+            locationPermissionGranted = true;
+            Log.d("DriverMapaActivity", "✅ Permisos de ubicación concedidos");
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
+                Log.d("DriverMapaActivity", "✅ Permisos concedidos por el usuario");
+                // Iniciar ubicación después de obtener permisos
+                iniciarUbicacionTiempoReal();
+            } else {
+                locationPermissionGranted = false;
+                Toast.makeText(this, "Se necesitan permisos de ubicación", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    // ✅ CONFIGURACIÓN DEL MAPA (IGUAL QUE ANTES)
+    private void configurarMapa() {
+        if (mapView == null) {
+            Log.e("DriverMapaActivity", "❌ MapView es null");
+            return;
+        }
+
+        Log.d("DriverMapaActivity", "🗺️ Configurando Mapbox...");
+
+        try {
+            CameraOptions initialCamera = new CameraOptions.Builder()
+                    .center(Point.fromLngLat(-77.0428, -12.0464)) // Lima
+                    .zoom(15.0)
+                    .pitch(0.0)
+                    .bearing(0.0)
+                    .build();
+
+            mapView.getMapboxMap().setCamera(initialCamera);
+
+            mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
+                Log.d("DriverMapaActivity", "✅ Estilo del mapa cargado");
+
+                // INICIAR UBICACIÓN DESPUÉS DE CARGAR EL MAPA
+                if (locationPermissionGranted) {
+                    iniciarUbicacionTiempoReal();
+                }
+
+                configurarElementosDelMapa();
+            });
+
+        } catch (Exception e) {
+            Log.e("DriverMapaActivity", "❌ Error configurando mapa: " + e.getMessage());
+        }
+    }
+
+    // ✅ UBICACIÓN EN TIEMPO REAL - VERSIÓN NATIVA DE ANDROID
+    private void iniciarUbicacionTiempoReal() {
+        if (locationHelper == null) {
+            Log.e("DriverMapaActivity", "❌ LocationHelper es null");
+            return;
+        }
+
+        // Mostrar estado inicial
+        mostrarEstadoInicial();
+
+        // Iniciar con el helper
+        boolean success = locationHelper.startLocationTracking();
+        if (!success) {
+            Log.e("DriverMapaActivity", "❌ No se pudo iniciar ubicación");
+        }
+    }
+
+    @Override
+    public void onLocationUpdate(Location location, String address, String timeString) {
+        Log.d("DriverMapaActivity", "📍 Ubicación actualizada: " + address);
+
+        // Actualizar el TextView con la información completa
+        mostrarUbicacionConDireccion(location, address, timeString);
+
+        // ✅ MOVER EL MAPA AUTOMÁTICAMENTE A TU UBICACIÓN
+        if (autoFollowLocation) {
+            moverMapaATuUbicacion(location);
+        }
+    }
+    private void moverMapaATuUbicacion(Location location) {
+        if (mapView == null || mapView.getMapboxMap() == null) {
+            return;
+        }
+
+        try {
+            Point userLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+
+            // Configurar zoom según si es la primera vez o no
+            double zoomLevel;
+            if (isFirstLocationUpdate) {
+                zoomLevel = 17.0; // Zoom más cercano la primera vez
+                isFirstLocationUpdate = false;
+            } else {
+                // Mantener el zoom actual del usuario
+                zoomLevel = mapView.getMapboxMap().getCameraState().getZoom();
+                // Asegurar un zoom mínimo
+                if (zoomLevel < 15.0) {
+                    zoomLevel = 16.0;
+                }
+            }
+
+            CameraOptions cameraOptions = new CameraOptions.Builder()
+                    .center(userLocation)
+                    .zoom(zoomLevel)
+                    .build();
+
+            // ✅ MOVIMIENTO SUAVE Y AUTOMÁTICO
+            mapView.getMapboxMap().setCamera(cameraOptions);
+
+            Log.d("DriverMapaActivity", "✅ Mapa movido automáticamente a nueva ubicación");
+
+        } catch (Exception e) {
+            Log.e("DriverMapaActivity", "❌ Error moviendo mapa: " + e.getMessage());
+        }
+    }
+
+    // ✅ IMPLEMENTAR INTERFACE LocationUpdateListener - ERROR DE UBICACIÓN
+    @Override
+    public void onLocationError(String error) {
+        Log.e("DriverMapaActivity", "❌ Error de ubicación: " + error);
+
+        if (routeText != null) {
+            runOnUiThread(() -> {
+                routeText.setText("❌ " + error + "\n🚗 Ruta hacia Hotel Monte Claro");
+            });
+        }
+
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+    }
+
+    // ✅ IMPLEMENTAR INTERFACE LocationUpdateListener - CAMBIO DE PROVEEDOR
+    @Override
+    public void onProviderStateChanged(String provider, boolean enabled) {
+        String message = provider + (enabled ? " habilitado" : " deshabilitado");
+        Log.d("DriverMapaActivity", "🔄 " + message);
+
+        if (provider.equals(LocationManager.GPS_PROVIDER)) {
+            if (enabled) {
+                mostrarEstadoInicial();
+                Toast.makeText(this, "GPS habilitado", Toast.LENGTH_SHORT).show();
+            } else {
+                if (routeText != null) {
+                    runOnUiThread(() -> {
+                        routeText.setText("❌ GPS desactivado\nActiva el GPS para obtener ubicación");
+                    });
+                }
+                Toast.makeText(this, "GPS deshabilitado", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // ✅ MOSTRAR UBICACIÓN CON DIRECCIÓN REAL EN EL TEXTVIEW
+    private void mostrarUbicacionConDireccion(Location location, String direccion, String hora) {
+        if (routeText != null) {
+            String ubicacionTexto = String.format(
+                    "📍%s\n🎯 Precisión: %.0fm | 🕐 %s",
+                    direccion,
+                    location.getAccuracy(),
+                    hora
+            );
+
+            runOnUiThread(() -> {
+                routeText.setText(ubicacionTexto);
+            });
+        }
+    }
+
+    // ✅ MOSTRAR ESTADO INICIAL
+    private void mostrarEstadoInicial() {
+        if (routeText != null) {
+            runOnUiThread(() -> {
+                routeText.setText("📡 Obteniendo tu ubicación actual...");
+            });
+        }
+    }
+
+    // ✅ GESTIÓN DEL CICLO DE VIDA SIMPLIFICADA
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Tu código existente para bottomNavigation
+        if (bottomNavigation != null) {
+            bottomNavigation.post(() -> {
+                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
+            });
+        }
+
+        // Reanudar ubicación usando el helper
+        if (locationPermissionGranted && locationHelper != null && !locationHelper.isTracking()) {
+            Log.d("DriverMapaActivity", "🔄 Reanudando ubicación");
+            locationHelper.startLocationTracking();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Pausar ubicación usando el helper
+        if (locationHelper != null) {
+            locationHelper.stopLocationTracking();
+            Log.d("DriverMapaActivity", "🔄 Ubicación pausada");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Limpiar recursos del helper
+        if (locationHelper != null) {
+            locationHelper.cleanup();
+            locationHelper = null;
+        }
+
+        // Destruir mapa
+        if (mapView != null) {
+            mapView.onDestroy();
+        }
+
+        Log.d("DriverMapaActivity", "🗑️ Recursos liberados");
+    }
+
+    // ✅ RESTO DE TUS MÉTODOS EXISTENTES (SIN CAMBIOS)
     private void inicializarVistas() {
         destinationNameTextView = findViewById(R.id.destination_name);
         distanceValueTextView = findViewById(R.id.distance_value);
@@ -90,7 +345,7 @@ public class DriverMapaActivity extends AppCompatActivity {
         }
     }
 
-    // ✅ CONFIGURACIÓN CON DEBUG COMPLETO
+    // ✅ CONFIGURACIÓN CON DEBUG COMPLETO (SIN CAMBIOS)
     private void configurarBottomNavigationConDebug() {
         if (bottomNavigation == null) {
             Log.e("DriverMapaActivity", "❌ No se puede configurar: bottomNavigation es null");
@@ -186,7 +441,6 @@ public class DriverMapaActivity extends AppCompatActivity {
         if (startTripButton != null) {
             startTripButton.setOnClickListener(v -> {
                 Toast.makeText(this, "Iniciando viaje...", Toast.LENGTH_SHORT).show();
-                // Aquí podrías iniciar el tracking del viaje en el mapa
                 iniciarViaje();
             });
         }
@@ -200,46 +454,41 @@ public class DriverMapaActivity extends AppCompatActivity {
             });
         }
 
-        // Configurar botón de ubicación actual
+        // ✅ ACTUALIZAR EL BOTÓN FAB - AHORA CONTROLA EL SEGUIMIENTO AUTOMÁTICO
         if (fabCurrentLocation != null) {
             fabCurrentLocation.setOnClickListener(v -> {
-                centrarEnUbicacionActual();
+                toggleAutoFollow();
             });
         }
     }
+    private void toggleAutoFollow() {
+        autoFollowLocation = !autoFollowLocation;
 
-    // ✅ CONFIGURACIÓN COMPLETA DEL MAPA CON MAPBOX
-    private void configurarMapa() {
-        if (mapView == null) {
-            Log.e("DriverMapaActivity", "❌ No se puede configurar: mapView es null");
-            return;
-        }
+        if (autoFollowLocation) {
+            // Activar seguimiento automático
+            Toast.makeText(this, "🎯 Seguimiento automático activado", Toast.LENGTH_SHORT).show();
 
-        Log.d("DriverMapaActivity", "🗺️ Configurando Mapbox...");
+            // Inmediatamente centrar en ubicación actual
+            if (locationHelper != null) {
+                Point currentLocation = locationHelper.getCurrentLocation();
+                if (currentLocation != null) {
+                    CameraOptions cameraOptions = new CameraOptions.Builder()
+                            .center(currentLocation)
+                            .zoom(17.0)
+                            .build();
+                    mapView.getMapboxMap().setCamera(cameraOptions);
+                }
+            }
 
-        try {
-            // Configurar la cámara inicial centrada en Lima, Perú
-            CameraOptions initialCamera = new CameraOptions.Builder()
-                    .center(Point.fromLngLat(-77.0428, -12.0464)) // Lima, Perú
-                    .zoom(12.0)
-                    .pitch(0.0)
-                    .bearing(0.0)
-                    .build();
+            // Cambiar ícono del FAB para mostrar que está activo
+            // fabCurrentLocation.setImageResource(R.drawable.ic_gps_fixed); // Si tienes este ícono
 
-            // Aplicar la configuración de cámara
-            mapView.getMapboxMap().setCamera(initialCamera);
+        } else {
+            // Desactivar seguimiento automático
+            Toast.makeText(this, "📍 Seguimiento manual - mueve el mapa libremente", Toast.LENGTH_SHORT).show();
 
-            // Cargar el estilo del mapa
-            mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
-                Log.d("DriverMapaActivity", "✅ Estilo del mapa cargado correctamente");
-                // Aquí puedes agregar marcadores, rutas, etc.
-                configurarElementosDelMapa();
-            });
-
-            Log.d("DriverMapaActivity", "✅ Mapa configurado exitosamente");
-
-        } catch (Exception e) {
-            Log.e("DriverMapaActivity", "❌ Error al configurar el mapa: " + e.getMessage());
+            // Cambiar ícono del FAB para mostrar que está inactivo
+            // fabCurrentLocation.setImageResource(R.drawable.ic_location); // Ícono original
         }
     }
 
@@ -267,27 +516,6 @@ public class DriverMapaActivity extends AppCompatActivity {
         }
     }
 
-    private void centrarEnUbicacionActual() {
-        Log.d("DriverMapaActivity", "📍 Centrando en ubicación actual");
-        // Aquí implementarías la lógica para obtener la ubicación actual
-        // y centrar el mapa en esa posición
-        Toast.makeText(this, "Centrando en ubicación actual...", Toast.LENGTH_SHORT).show();
-    }
-
-    // ✅ LLAMAR EN onResume PARA ASEGURAR SELECCIÓN
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
-        if (bottomNavigation != null) {
-            bottomNavigation.post(() -> {
-                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
-            });
-        }
-    }
-
-    // ✅ CICLO DE VIDA DEL MAPA - MUY IMPORTANTE
     @Override
     protected void onStart() {
         super.onStart();
@@ -309,14 +537,6 @@ public class DriverMapaActivity extends AppCompatActivity {
         super.onLowMemory();
         if (mapView != null) {
             mapView.onLowMemory();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mapView != null) {
-            mapView.onDestroy();
         }
     }
 
