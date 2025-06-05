@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_buscar"
+        android:title="Buscar"
+        android:icon="@drawable/ic_buscar"
+        />
+    <item
+        android:id="@+id/menu_favoritos"
+        android:title="Favoritos"
+        android:icon="@drawable/ic_love"
+        />
+    <item
+        android:id="@+id/menu_reservas"
+        android:title="Reservas"
+        android:icon="@drawable/ic_reservas"
+        />
+    <item
+        android:id="@+id/menu_perfil"
+        android:title="Perfil"
+        android:icon="@drawable/ic_perfil"
+        />
+</menu>
