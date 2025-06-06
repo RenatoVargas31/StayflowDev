@@ -9,11 +9,8 @@
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permisos para acceder a la galería -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permisos para acceder a la galería -->
     <!-- Permiso de internet para Mapbox -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Permiso para acceso al estado de la red -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Permiso para acceso al estado de la red -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -31,13 +28,19 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".superAdmin.SuperAdminActivity"
-            android:exported="true" >
+            android:name=".LoginFireBaseActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".superAdmin.SuperAdminActivity"
+            android:exported="false">
+
         </activity>
         <activity
             android:name=".superAdmin.AddHotelAdminActivity"
@@ -71,9 +74,7 @@
             android:exported="false" />
         <activity
             android:name=".Driver.Activity.DriverInicioActivity"
-            android:exported="false">
-        </activity>
-
+            android:exported="false"></activity>
         <!--
         <activity
             android:name=".SuperAdminActivity"
@@ -165,10 +166,7 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.AdminInicioActivity"
-            android:exported="false">
-
-        </activity>
-
+            android:exported="false"></activity>
         <activity
             android:name=".adminHotel.UbicacionAdminActivity"
             android:exported="false" />
@@ -195,10 +193,7 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
-            android:exported="false" />
-
-
-        <!-- Receivers para notificaciones periódicas -->
+            android:exported="false" /> <!-- Receivers para notificaciones periódicas -->
         <receiver
             android:name=".superAdmin.utils.ReportsCheckReceiver"
             android:enabled="true"
@@ -225,8 +220,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
     </application>
 
 </manifest>
-
