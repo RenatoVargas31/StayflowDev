@@ -1,4 +1,4 @@
-package com.iot.stayflowdev.utils;
+package com.iot.stayflowdev.superAdmin.utils;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -7,9 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import androidx.core.content.ContextCompat;
+
 public class PeriodicNotificationManager {
-    private static final String ACTION_CHECK_REPORTS = "com.codebnb.stayflow.CHECK_REPORTS";
-    private static final String ACTION_CHECK_LOGS = "com.codebnb.stayflow.CHECK_LOGS";
+    private static final String ACTION_CHECK_REPORTS = "com.iot.stayflowdev.utils.ReportsCheckReceiver";
+    private static final String ACTION_CHECK_LOGS = "com.iot.stayflowdev.utils.LogsCheckReceiver";
     private static final long REPORTS_CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutos
     private static final long LOGS_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
@@ -25,17 +27,12 @@ public class PeriodicNotificationManager {
         this.alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         
         // Registrar los receivers
-        context.registerReceiver(reportsReceiver, new IntentFilter(ACTION_CHECK_REPORTS));
-        context.registerReceiver(logsReceiver, new IntentFilter(ACTION_CHECK_LOGS));
+        ContextCompat.registerReceiver(context, reportsReceiver, new IntentFilter(ACTION_CHECK_REPORTS), ContextCompat.RECEIVER_NOT_EXPORTED);
+        ContextCompat.registerReceiver(context, logsReceiver, new IntentFilter(ACTION_CHECK_LOGS), ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     public void startPeriodicChecks() {
-        // Verificar si las notificaciones están habilitadas
-        if (!localStorageManager.getSettings().isNotificationsEnabled()) {
-            return;
-        }
-
-        // Programar verificación de reportes
+        // Configurar el check de reportes
         Intent reportsIntent = new Intent(context, ReportsCheckReceiver.class);
         reportsIntent.setAction(ACTION_CHECK_REPORTS);
         PendingIntent reportsPendingIntent = PendingIntent.getBroadcast(
@@ -45,17 +42,7 @@ public class PeriodicNotificationManager {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Enviar notificación inmediatamente
-        context.sendBroadcast(reportsIntent);
-
-        alarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + REPORTS_CHECK_INTERVAL,
-                REPORTS_CHECK_INTERVAL,
-                reportsPendingIntent
-        );
-
-        // Programar verificación de logs
+        // Configurar el check de logs
         Intent logsIntent = new Intent(context, LogsCheckReceiver.class);
         logsIntent.setAction(ACTION_CHECK_LOGS);
         PendingIntent logsPendingIntent = PendingIntent.getBroadcast(
@@ -65,8 +52,13 @@ public class PeriodicNotificationManager {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Enviar notificación inmediatamente
-        context.sendBroadcast(logsIntent);
+        // Programar las alarmas
+        alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + REPORTS_CHECK_INTERVAL,
+                REPORTS_CHECK_INTERVAL,
+                reportsPendingIntent
+        );
 
         alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
@@ -76,8 +68,19 @@ public class PeriodicNotificationManager {
         );
     }
 
+    public void cleanup() {
+        stopPeriodicChecks();
+        try {
+            context.unregisterReceiver(reportsReceiver);
+            context.unregisterReceiver(logsReceiver);
+        } catch (IllegalArgumentException e) {
+            // Los receivers ya están desregistrados
+        }
+    }
+
     public void stopPeriodicChecks() {
         Intent reportsIntent = new Intent(context, ReportsCheckReceiver.class);
+        reportsIntent.setAction(ACTION_CHECK_REPORTS);
         PendingIntent reportsPendingIntent = PendingIntent.getBroadcast(
                 context,
                 0,
@@ -86,6 +89,7 @@ public class PeriodicNotificationManager {
         );
 
         Intent logsIntent = new Intent(context, LogsCheckReceiver.class);
+        logsIntent.setAction(ACTION_CHECK_LOGS);
         PendingIntent logsPendingIntent = PendingIntent.getBroadcast(
                 context,
                 1,
@@ -103,7 +107,7 @@ public class PeriodicNotificationManager {
             if (ACTION_CHECK_REPORTS.equals(intent.getAction())) {
                 long lastCheck = localStorageManager.getLastReportCheck();
                 long currentTime = System.currentTimeMillis();
-                
+
                 // Si han pasado más de 10 minutos desde la última revisión
                 if (currentTime - lastCheck >= REPORTS_CHECK_INTERVAL) {
                     notificationHelper.showSystemNotification(
@@ -120,30 +124,12 @@ public class PeriodicNotificationManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CHECK_LOGS.equals(intent.getAction())) {
-                // Aquí deberías implementar la lógica para verificar logs críticos
-                // Este es un ejemplo de cómo podría ser
-                checkCriticalLogs();
+                // Implementar la lógica de verificación de logs
+                notificationHelper.showSystemNotification(
+                        "Verificación de Logs",
+                        "Se ha realizado una verificación de logs del sistema."
+                );
             }
         }
     };
-
-    private void checkCriticalLogs() {
-        // Ejemplo de log crítico
-        String criticalLog = "Error crítico en el sistema de pagos: Fallo en la transacción #12345";
-        if (criticalLog != null) {
-            notificationHelper.showSystemNotification(
-                    "Log Crítico Detectado",
-                    criticalLog
-            );
-        }
-    }
-
-    public void cleanup() {
-        try {
-            context.unregisterReceiver(reportsReceiver);
-            context.unregisterReceiver(logsReceiver);
-        } catch (IllegalArgumentException e) {
-            // Los receivers ya están desregistrados
-        }
-    }
-} 
+}

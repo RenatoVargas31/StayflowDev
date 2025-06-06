@@ -1,303 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".cliente.PerfilFragment">
+    android:background="@color/md_theme_background"
+    android:fillViewport="true">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <LinearLayout
+        <!-- Sección de Perfil -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-            <!-- Profile Header -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_profile_header"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/md_theme_outlineVariant"
-                android:layout_marginHorizontal="1dp"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/imageViewProfile"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_person"
+                    android:background="@drawable/circle_bg"
+                    android:padding="16dp"
+                    app:tint="@color/md_theme_primary"/>
+
+                <TextView
+                    android:id="@+id/textViewName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Super Admin"
+                    android:textSize="24sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/textViewEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="superadmin@stayflow.com"
+                    android:textColor="@color/md_theme_onSurfaceVariant"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Sección de Notificaciones -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Configuración de Notificaciones"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Notificaciones de Reportes -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="24dp">
-                    <!-- Foto de perfil con forma circular -->
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/iv_profile_picture"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/christopher_campbell_rdeovte7vos_unsplash"
-                        app:shapeAppearanceOverlay="@style/CircleImageView"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="#EEEEEE" />
-                    <!-- Información de perfil -->
+                    android:layout_marginBottom="16dp">
+
                     <TextView
-                        android:id="@+id/tv_nombre_taxista"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ana María"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textColor="@android:color/black"
-                        android:layout_marginTop="16dp" />
+                        android:text="Notificaciones de Reportes"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchReportes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activar notificaciones de reportes"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutPeriodicidadReportes"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Seleccione cada cuánto desea recibir notificaciones"
+                        app:startIconDrawable="@drawable/ic_notification"
+                        app:endIconMode="dropdown_menu"
+                        app:helperText="Las notificaciones le recordarán revisar los reportes pendientes"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownPeriodicidadReportes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="16dp"
+                            android:minHeight="48dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-            <!-- Información del vehículo -->
-            <TextView
-                android:id="@+id/tv_label_vehiculo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Datos personales"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_vehicle_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginBottom="16dp">
+
+                <!-- Notificaciones de Logs -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-                    <!-- Vehicle Model -->
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_vehicle_model"
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notificaciones de Logs"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchLogs"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground">
+                        android:text="Activar notificaciones de logs"
+                        android:layout_marginBottom="8dp"/>
 
-                        <ImageView
-                            android:id="@+id/iv_coche_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_person"
-                            android:padding="8dp"
-                            android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_coche_icon"
-                            app:layout_constraintStart_toEndOf="@id/iv_coche_icon"
-                            app:layout_constraintTop_toTopOf="@id/iv_coche_icon">
-
-                            <TextView
-                                android:id="@+id/tv_modelo_vehiculo"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Nombre completo"
-                                android:textColor="@android:color/black"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_marca_anio"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Ana María López Vega"
-                                android:textColor="#757575"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#F0F0F0" />
-                    <!-- SOAT Information -->
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_soat"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutUmbralLogs"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp">
-                        <ImageView
-                            android:id="@+id/iv_soat_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_person_id"
-                            android:padding="8dp"
-                            android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                        android:hint="Umbral de logs para notificar">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextUmbralLogs"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_soat_icon"
-                            app:layout_constraintStart_toEndOf="@id/iv_soat_icon"
-                            app:layout_constraintTop_toTopOf="@id/iv_soat_icon">
-
-                            <TextView
-                                android:id="@+id/tv_soat_label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Documento de identidad"
-                                android:textColor="@android:color/black"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_soat_numero"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="74573212"
-                                android:textColor="#757575"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#F0F0F0" />
+                            android:inputType="number"/>
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-            <!-- Información de la cuenta -->
-            <TextView
-                android:id="@+id/tv_label_cuenta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Detalles de la cuenta"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_account_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginBottom="16dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <!-- correo -->
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_correo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground">
-                        <ImageView
-                            android:id="@+id/iv_correo_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_correo"
-                            android:padding="8dp"
-                            android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginStart="16dp"
-                            app:layout_constraintStart_toEndOf="@id/iv_correo_icon"
-                            app:layout_constraintTop_toTopOf="@id/iv_correo_icon"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_correo_icon">
-                            <TextView
-                                android:id="@+id/tv_correo"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Correo eletrónico"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@android:color/black" />
-                            <TextView
-                                android:id="@+id/tv_correo_user"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="jperez@gmail.com"
-                                android:textSize="14sp"
-                                android:textColor="#757575" />
-                        </LinearLayout>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#F0F0F0" />
-                    <!-- Tarjeta de credito -->
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_tarjetaCredit"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground">
-                        <ImageView
-                            android:id="@+id/iv_tarjetaCredit"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_credit_card"
-                            android:padding="8dp"
-                            android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginStart="16dp"
-                            app:layout_constraintStart_toEndOf="@id/iv_tarjetaCredit"
-                            app:layout_constraintTop_toTopOf="@id/iv_tarjetaCredit"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_tarjetaCredit">
-                            <TextView
-                                android:id="@+id/tv_tarejta"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Tarjeta de crédito"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@android:color/black" />
-                            <TextView
-                                android:id="@+id/tv_tarejta_User"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Visa **** 4567"
-                                android:textSize="14sp"
-                                android:textColor="#757575" />
-                        </LinearLayout>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Guardar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGuardar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar Cambios"
+            android:padding="12dp"
+            app:cornerRadius="8dp"/>
+
+    </LinearLayout>
+</ScrollView>

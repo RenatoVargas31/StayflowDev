@@ -44,6 +44,7 @@ public class InicioActivity extends BaseSuperAdminActivity {
             btnLogs.setOnClickListener(v -> {
                 Intent intent = new Intent(InicioActivity.this, LogsActivity.class);
                 startActivity(intent);
+                overridePendingTransition(0, 0);
             });
         }
 
@@ -51,6 +52,7 @@ public class InicioActivity extends BaseSuperAdminActivity {
             btnUsers.setOnClickListener(v -> {
                 Intent intent = new Intent(InicioActivity.this, PerfilActivity.class);
                 startActivity(intent);
+                overridePendingTransition(0, 0);
             });
         }
     }

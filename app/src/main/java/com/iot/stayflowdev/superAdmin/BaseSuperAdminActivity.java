@@ -99,6 +99,8 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
                     // Evitar acumulación de activities en el stack
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
+                    // Eliminar la transición de animación
+                    overridePendingTransition(0, 0);
                     finish(); // Cerrar la activity actual
                     return true;
                 }
@@ -128,6 +130,28 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Si estamos en la pantalla de inicio, minimizar la app
+        if (this instanceof InicioActivity) {
+            moveTaskToBack(true);
+        } else if (this instanceof UserDetailActivity) {
+            // Si estamos en detalles de usuario, volver a gestión
+            Intent intent = new Intent(this, GestionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        } else {
+            // Si no estamos en inicio ni en detalles, volver a la pantalla de inicio
+            Intent intent = new Intent(this, InicioActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        }
     }
 
     // Método para obtener el título de la toolbar (puede ser sobrescrito)

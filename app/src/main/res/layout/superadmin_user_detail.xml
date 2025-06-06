@@ -35,6 +35,7 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:src="@drawable/ic_person"
+                    app:tint="@color/md_theme_primary"
                     android:background="#E0E0E0"
                     android:scaleType="centerCrop"
                     android:contentDescription="Foto de perfil"/>
@@ -186,6 +187,7 @@
                     android:background="#EEEEEE"
                     android:padding="8dp"
                     android:src="@drawable/ic_phone"
+                    app:tint="@color/md_theme_primary"
                     android:contentDescription="Icono Teléfono" />
 
                 <LinearLayout
@@ -241,6 +243,7 @@
                     android:background="#EEEEEE"
                     android:padding="8dp"
                     android:src="@drawable/ic_settings_24dp"
+                    app:tint="@color/md_theme_primary"
                     android:contentDescription="Icono Estado" />
 
                 <LinearLayout

@@ -1,4 +1,4 @@
-package com.iot.stayflowdev.utils;
+package com.iot.stayflowdev.superAdmin.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -43,8 +43,13 @@ public class NotificationHelper {
     }
 
     public void showNotification(String title, String message, String type) {
-        // Verificar si las notificaciones están habilitadas
+        // Verificar si las notificaciones están habilitadas en la configuración
         if (!localStorageManager.getSettings().isNotificationsEnabled()) {
+            return;
+        }
+
+        // Verificar si tenemos permiso para mostrar notificaciones
+        if (!PermissionHelper.hasNotificationPermission(context)) {
             return;
         }
 
@@ -67,18 +72,22 @@ public class NotificationHelper {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
-        // Mostrar la notificación
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        try {
+            // Mostrar la notificación
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
 
-        // Guardar la notificación en el almacenamiento local
-        LocalStorageManager.NotificationItem notification = new LocalStorageManager.NotificationItem();
-        notification.setId(String.valueOf(System.currentTimeMillis()));
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setTimestamp(System.currentTimeMillis());
-        notification.setRead(false);
-        notification.setType(type);
-        localStorageManager.addNotification(notification);
+            // Guardar la notificación en el almacenamiento local
+            LocalStorageManager.NotificationItem notification = new LocalStorageManager.NotificationItem();
+            notification.setId(String.valueOf(System.currentTimeMillis()));
+            notification.setTitle(title);
+            notification.setMessage(message);
+            notification.setTimestamp(System.currentTimeMillis());
+            notification.setRead(false);
+            notification.setType(type);
+            localStorageManager.addNotification(notification);
+        } catch (SecurityException e) {
+            // Si no tenemos permiso para mostrar notificaciones, no hacemos nada
+        }
     }
 
     // Método para mostrar notificación de nueva reserva
@@ -105,4 +114,4 @@ public class NotificationHelper {
         String title = "Error";
         showNotification(title, message, "error");
     }
-} 
+}

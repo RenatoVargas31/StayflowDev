@@ -3,13 +3,13 @@ package com.iot.stayflowdev.superAdmin.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.superAdmin.model.User;
 
@@ -23,8 +23,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private OnUserClickListener listener;
 
     public interface OnUserClickListener {
-        void onDetailsClick(int position);
-        void onStatusChanged(int position, boolean isEnabled);
+        void onDetailsClick(User user);
+        void onStatusChanged(User user, boolean isEnabled, String reason);
     }
 
     public UserAdapter(List<User> userList, OnUserClickListener listener) {
@@ -56,14 +56,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         // 🟢 Vuelve a asignar el listener después de setChecked
         holder.switchUserStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (listener != null) {
-                listener.onStatusChanged(holder.getAdapterPosition(), isChecked);
+                listener.onStatusChanged(user, isChecked, null);
+                // Actualizar el texto del estado
                 holder.textViewUserStatus.setText(isChecked ? "Habilitado" : "Deshabilitado");
             }
         });
 
-        holder.imageViewDetails.setOnClickListener(v -> {
+        // Hacer que toda la tarjeta sea clickeable
+        holder.cardUser.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onDetailsClick(holder.getAdapterPosition());
+                listener.onDetailsClick(user);
             }
         });
     }
@@ -117,19 +119,38 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         notifyDataSetChanged();
     }
 
+    public void filterTaxistasByStatus(String status) {
+        List<User> filteredList = new ArrayList<>();
+        
+        for (User user : userListFull) {
+            if (user.getRole().equals("Taxista")) {
+                if (status.equals("Todos")) {
+                    filteredList.add(user);
+                } else if (status.equals("Pendientes") && !user.isEnabled()) {
+                    filteredList.add(user);
+                } else if (status.equals("Habilitados") && user.isEnabled()) {
+                    filteredList.add(user);
+                }
+            }
+        }
+
+        userList.clear();
+        userList.addAll(filteredList);
+        notifyDataSetChanged();
+    }
+
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewUserName, textViewUserRole, textViewUserStatus, textViewDetails;
+        MaterialCardView cardUser;
+        TextView textViewUserName, textViewUserRole, textViewUserStatus;
         SwitchCompat switchUserStatus;
-        ImageView imageViewDetails;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardUser = itemView.findViewById(R.id.cardUser);
             textViewUserName = itemView.findViewById(R.id.textViewUserName);
             textViewUserRole = itemView.findViewById(R.id.textViewUserRole);
             textViewUserStatus = itemView.findViewById(R.id.textViewUserStatus);
-            textViewDetails = itemView.findViewById(R.id.textViewDetails);
             switchUserStatus = itemView.findViewById(R.id.switchUserStatus);
-            imageViewDetails = itemView.findViewById(R.id.imageViewDetails);
         }
     }
 }

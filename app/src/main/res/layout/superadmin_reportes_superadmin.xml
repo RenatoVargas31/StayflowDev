@@ -10,6 +10,69 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Chip Group para filtrado -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupFiltro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTodos"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Todos"
+                        app:checkedIconVisible="false"
+                        app:chipIcon="@drawable/ic_directions_walk"
+                        app:chipIconTint="@color/md_theme_primary"
+                        app:chipIconVisible="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAdmins"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Perú"
+                        app:checkedIconVisible="false"
+                        app:chipIcon="@drawable/ic_group_fill"
+                        app:chipIconTint="@color/md_theme_primary"
+                        app:chipIconVisible="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTaxistas"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Argentina"
+                        app:checkedIconVisible="false"
+                        app:chipIcon="@drawable/ic_local_taxi"
+                        app:chipIconTint="@color/md_theme_primary"
+                        app:chipIconVisible="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipClientes"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chile"
+                        app:checkedIconVisible="false"
+                        app:chipIcon="@drawable/ic_person"
+                        app:chipIconTint="@color/md_theme_primary"
+                        app:chipIconVisible="true" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+
             <!-- Barra de búsqueda -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

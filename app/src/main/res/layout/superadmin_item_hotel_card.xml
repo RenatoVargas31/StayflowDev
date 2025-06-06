@@ -1,34 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardHotel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="0dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
     app:strokeWidth="0dp"
-    app:cardBackgroundColor="#F5F5F5">
+    app:cardBackgroundColor="@color/md_theme_surface"
+    android:clickable="true"
+    android:focusable="true"
+    app:rippleColor="@color/md_theme_primaryContainer"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="12dp">
 
-        <!-- Imagen del hotel (placeholder) -->
+        <!-- Imagen del hotel -->
         <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#E0E0E0">
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/circle_bg"
+            android:backgroundTint="@color/md_theme_primaryContainer">
 
             <ImageView
                 android:id="@+id/imageViewHotel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_apartment"
-                app:tint="@color/md_theme_onPrimaryContainer"
-                android:padding="16dp"
-                android:contentDescription="Imagen del hotel" />
+                android:padding="12dp"
+                android:contentDescription="Imagen del hotel"
+                app:tint="@color/md_theme_onPrimaryContainer" />
         </FrameLayout>
 
         <!-- Información del hotel -->
@@ -37,16 +45,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp">
 
             <TextView
                 android:id="@+id/textViewHotelName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Hotel 1"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#000000" />
+                android:textColor="@color/md_theme_onSurface"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/textViewHotelDescription"
@@ -54,9 +65,12 @@
                 android:layout_height="wrap_content"
                 android:text="Lorem ipsum dolor sit amet"
                 android:textSize="14sp"
-                android:textColor="#757575"
-                android:layout_marginTop="4dp" />
+                android:textColor="@color/md_theme_onSurfaceVariant"
+                android:layout_marginTop="2dp"
+                android:maxLines="2"
+                android:ellipsize="end" />
 
+            <!-- Estado del reporte -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -69,23 +83,17 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_bar_chart_4_bars_24dp"
-                    app:tint="@color/md_theme_onSurface_highContrast"
+                    app:tint="@color/md_theme_primary"
                     android:contentDescription="Icono de reportes" />
 
                 <TextView
                     android:id="@+id/textViewReports"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reporte"
+                    android:text="Ver reporte"
                     android:textSize="12sp"
-                    android:layout_marginStart="4dp" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <!-- Puede agregar más elementos aquí si se necesita -->
+                    android:textColor="@color/md_theme_primary"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

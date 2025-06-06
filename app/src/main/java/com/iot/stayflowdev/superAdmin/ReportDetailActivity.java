@@ -1,14 +1,20 @@
 package com.iot.stayflowdev.superAdmin;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.iot.stayflowdev.R;
 import com.github.mikephil.charting.charts.BarChart;
@@ -19,7 +25,19 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.io.image.ImageDataFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +46,7 @@ import java.util.Locale;
 public class ReportDetailActivity extends AppCompatActivity {
 
     private static final String TAG = "ReportDetailActivity";
-    public static final String EXTRA_HOTEL_NAME = "hotel_name";
+    public static final String EXTRA_HOTEL_NAME = "HOTEL_NAME";
     public static final String EXTRA_FILTER_TYPE = "filter_type";
     public static final String EXTRA_START_DATE = "start_date";
     public static final String EXTRA_END_DATE = "end_date";
@@ -64,6 +82,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
     private void initViews() {
         ImageButton buttonBack = findViewById(R.id.buttonBack);
+        ImageButton buttonExport = findViewById(R.id.buttonExport);
         TextView titleTextView = findViewById(R.id.textViewReportTitle);
         TextView totalResText = findViewById(R.id.textViewTotalReservas);
         TextView completadasText = findViewById(R.id.textViewCompletadas);
@@ -86,12 +105,13 @@ public class ReportDetailActivity extends AppCompatActivity {
         periodText.setText(getFilterTitle());
 
         buttonBack.setOnClickListener(v -> finish());
+        buttonExport.setOnClickListener(v -> exportToPdf());
 
         // Establece los colores iniciales correctamente
-        buttonBarras.setBackgroundColor(getResources().getColor(R.color.blue_500)); // Fondo activo
-        buttonBarras.setTextColor(Color.WHITE); // Texto activo
-        buttonLineal.setBackgroundColor(Color.TRANSPARENT); // Fondo inactivo
-        buttonLineal.setTextColor(getResources().getColor(R.color.blue_500)); // Texto inactivo
+        buttonBarras.setBackgroundColor(getResources().getColor(R.color.blue_500));
+        buttonBarras.setTextColor(Color.WHITE);
+        buttonLineal.setBackgroundColor(Color.TRANSPARENT);
+        buttonLineal.setTextColor(getResources().getColor(R.color.blue_500));
 
         // Mostrar barra por defecto
         barChart.setVisibility(View.VISIBLE);
@@ -165,5 +185,116 @@ public class ReportDetailActivity extends AppCompatActivity {
         lineChart.setData(lineData);
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();
+    }
+
+    private void exportToPdf() {
+        try {
+            // Crear directorio si no existe
+            File directory = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "StayflowReports");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            // Crear nombre de archivo con fecha
+            String fileName = "Reporte_" + hotelName.replace(" ", "_") + "_" + 
+                            new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                            .format(new Date()) + ".pdf";
+            File file = new File(directory, fileName);
+
+            // Crear PDF
+            PdfWriter writer = new PdfWriter(new FileOutputStream(file));
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            // Título
+            Paragraph title = new Paragraph("Reporte de " + hotelName)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(20);
+            document.add(title);
+
+            // Período
+            Paragraph period = new Paragraph(getFilterTitle())
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(14);
+            document.add(period);
+
+            // Tabla de estadísticas
+            Table table = new Table(2);
+            table.setWidth(UnitValue.createPercentValue(100));
+            
+            addTableRow(table, "Total Reservas", "145");
+            addTableRow(table, "Reservas Completadas", "75");
+            addTableRow(table, "Reservas Canceladas", "21");
+            addTableRow(table, "Monto Generado", "$ 10,567");
+            
+            document.add(table);
+
+            // Capturar y agregar el gráfico actual
+            try {
+                // Obtener el gráfico actual (barra o línea)
+                View chartView = barChart.getVisibility() == View.VISIBLE ? barChart : lineChart;
+                
+                // Crear un bitmap del gráfico
+                chartView.setDrawingCacheEnabled(true);
+                chartView.buildDrawingCache();
+                Bitmap chartBitmap = Bitmap.createBitmap(chartView.getDrawingCache());
+                chartView.setDrawingCacheEnabled(false);
+
+                // Convertir el bitmap a bytes
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                chartBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] bitmapData = stream.toByteArray();
+
+                // Crear imagen para el PDF
+                Image chartImage = new Image(ImageDataFactory.create(bitmapData));
+                
+                // Ajustar el tamaño de la imagen para que se ajuste al ancho de la página
+                float pageWidth = pdf.getDefaultPageSize().getWidth() - 50; // 50 puntos de margen
+                float imageWidth = chartImage.getImageWidth();
+                float imageHeight = chartImage.getImageHeight();
+                float ratio = imageHeight / imageWidth;
+                chartImage.setWidth(pageWidth);
+                chartImage.setHeight(pageWidth * ratio);
+
+                // Agregar título del gráfico
+                Paragraph chartTitle = new Paragraph("Gráfico de Reservas")
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontSize(14)
+                        .setMarginTop(20);
+                document.add(chartTitle);
+
+                // Agregar la imagen al PDF
+                document.add(chartImage);
+            } catch (Exception e) {
+                Log.e(TAG, "Error al agregar el gráfico al PDF", e);
+            }
+
+            document.close();
+
+            // Compartir el PDF
+            sharePdf(file);
+
+            Toast.makeText(this, "Reporte exportado exitosamente", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error al exportar PDF", e);
+            Toast.makeText(this, "Error al exportar el reporte", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void addTableRow(Table table, String label, String value) {
+        table.addCell(new Paragraph(label));
+        table.addCell(new Paragraph(value));
+    }
+
+    private void sharePdf(File file) {
+        Uri uri = FileProvider.getUriForFile(this,
+                getApplicationContext().getPackageName() + ".provider",
+                file);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/pdf");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(intent, "Compartir Reporte"));
     }
 }

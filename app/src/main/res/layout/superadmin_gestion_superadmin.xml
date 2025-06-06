@@ -10,7 +10,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Chip Group para filtrado -->
+        <!-- Filtro principal -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,10 +30,9 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
                     android:text="Todos"
                     app:checkedIconVisible="false"
-                    app:chipIcon="@drawable/ic_directions_walk"
+                    app:chipIcon="@drawable/ic_group_fill"
                     app:chipIconTint="@color/md_theme_primary"
                     app:chipIconVisible="true" />
 
@@ -45,6 +44,7 @@
                     android:text="Administradores"
                     app:checkedIconVisible="false"
                     app:chipIcon="@drawable/ic_group_fill"
+                    app:chipIconTint="@color/md_theme_primary"
                     app:chipIconVisible="true" />
 
                 <com.google.android.material.chip.Chip
@@ -68,15 +68,66 @@
                     app:chipIcon="@drawable/ic_person"
                     app:chipIconTint="@color/md_theme_primary"
                     app:chipIconVisible="true" />
-
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
+        <!-- Subfiltro para taxistas -->
+        <HorizontalScrollView
+            android:id="@+id/subFilterScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupTaxistaFiltro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTaxistasTodos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Todos los Taxistas"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_local_taxi"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTaxistasPendientes"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Solicitudes Pendientes"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_pending"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTaxistasHabilitados"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Taxistas Habilitados"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <!-- Barra de búsqueda -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
             app:cardBackgroundColor="#F5F5F5">
@@ -110,15 +161,25 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#F5F5F5">
+
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- RecyclerView para mostrar los usuarios -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewUsers"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="4dp"
             android:clipToPadding="false"
-            android:paddingBottom="80dp" /> <!-- Aumentamos padding para que el FAB no oculte contenido -->
+            android:paddingBottom="100dp" />
 
     </LinearLayout>
 
@@ -128,10 +189,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="16dp"
         android:text="Agregar Administrador de Hotel"
         app:icon="@drawable/ic_add_circle"
         app:chipIconTint="@color/md_theme_inversePrimary_mediumContrast"/>
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

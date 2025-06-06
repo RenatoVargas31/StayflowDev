@@ -4,8 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.HorizontalScrollView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -15,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.superAdmin.adapter.UserAdapter;
 import com.iot.stayflowdev.superAdmin.model.User;
-import com.iot.stayflowdev.utils.LocalStorageManager;
+import com.iot.stayflowdev.superAdmin.utils.LocalStorageManager;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -31,6 +35,8 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
     private EditText searchEditText;
     private ExtendedFloatingActionButton fabAddHotelAdmin;
     private ChipGroup chipGroupFiltro;
+    private ChipGroup chipGroupTaxistaFiltro;
+    private HorizontalScrollView subFilterScrollView;
     private ActivityResultLauncher<Intent> addAdminLauncher;
     private LocalStorageManager localStorageManager;
 
@@ -45,6 +51,8 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         // Inicializar vistas
         recyclerViewUsers = findViewById(R.id.recyclerViewUsers);
         chipGroupFiltro = findViewById(R.id.chipGroupFiltro);
+        chipGroupTaxistaFiltro = findViewById(R.id.chipGroupTaxistaFiltro);
+        subFilterScrollView = findViewById(R.id.subFilterScrollView);
         searchEditText = findViewById(R.id.searchEditText);
         fabAddHotelAdmin = findViewById(R.id.fabAddHotelAdmin);
 
@@ -88,16 +96,22 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
 
             if (selectedId == R.id.chipTodos) {
                 filterType = "Todos";
-                fabAddHotelAdmin.show(); // Mostrar botón
+                fabAddHotelAdmin.show();
+                subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipAdmins) {
                 filterType = "Admin";
-                fabAddHotelAdmin.show(); // Mostrar botón
+                fabAddHotelAdmin.show();
+                subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipTaxistas) {
                 filterType = "Taxista";
-                fabAddHotelAdmin.hide(); // Ocultar botón
+                fabAddHotelAdmin.hide();
+                subFilterScrollView.setVisibility(View.VISIBLE);
+                // Seleccionar "Todos los Taxistas" por defecto
+                chipGroupTaxistaFiltro.check(R.id.chipTaxistasTodos);
             } else if (selectedId == R.id.chipClientes) {
                 filterType = "Cliente";
-                fabAddHotelAdmin.hide(); // Ocultar botón
+                fabAddHotelAdmin.hide();
+                subFilterScrollView.setVisibility(View.GONE);
             }
 
             // Guardar el filtro seleccionado
@@ -106,6 +120,22 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
             localStorageManager.saveFilters(filters);
 
             userAdapter.filterByType(filterType);
+        });
+
+        // Configurar listener para el subfiltro de taxistas
+        chipGroupTaxistaFiltro.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+
+            int selectedId = checkedIds.get(0);
+            String subFilterType = "Todos";
+
+            if (selectedId == R.id.chipTaxistasPendientes) {
+                subFilterType = "Pendientes";
+            } else if (selectedId == R.id.chipTaxistasHabilitados) {
+                subFilterType = "Habilitados";
+            }
+
+            userAdapter.filterTaxistasByStatus(subFilterType);
         });
 
         // Configurar listener para la búsqueda
@@ -167,7 +197,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.superadmin_fragment_gestion_superadmin;
+        return R.layout.superadmin_gestion_superadmin;
     }
 
     @Override
@@ -210,9 +240,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
     }
 
     @Override
-    public void onDetailsClick(int position) {
-        User user = userList.get(position);
-
+    public void onDetailsClick(User user) {
         // Crear intent para UserDetailActivity en lugar de fragment
         Intent intent = new Intent(GestionActivity.this, UserDetailActivity.class);
         intent.putExtra("USER_NAME", user.getName());
@@ -223,12 +251,69 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
     }
 
     @Override
-    public void onStatusChanged(int position, boolean isEnabled) {
-        User user = userList.get(position);
-        user.setEnabled(isEnabled);
-        // Aquí podrías implementar la lógica para guardar el estado en una DB
-        Toast.makeText(this,
-                user.getName() + " " + (isEnabled ? "habilitado" : "deshabilitado"),
-                Toast.LENGTH_SHORT).show();
+    public void onStatusChanged(User user, boolean isEnabled, String reason) {
+        // Crear el diálogo de confirmación
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle(isEnabled ? "Habilitar Usuario" : "Deshabilitar Usuario");
+        
+        // Crear el layout para el diálogo
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 30, 50, 30);
+
+        // Agregar el mensaje de confirmación
+        TextView messageView = new TextView(this);
+        messageView.setText("¿Estás seguro que deseas " + (isEnabled ? "habilitar" : "deshabilitar") + " a " + user.getName() + "?");
+        messageView.setTextSize(16);
+        layout.addView(messageView);
+
+        // Agregar espacio
+        layout.addView(new View(this), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                20));
+
+        // Agregar campo para la razón
+        EditText reasonInput = new EditText(this);
+        reasonInput.setHint("Ingrese la razón del cambio");
+        reasonInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        reasonInput.setMinLines(2);
+        reasonInput.setMaxLines(4);
+        layout.addView(reasonInput);
+
+        builder.setView(layout);
+
+        // Configurar los botones
+        builder.setPositiveButton("Confirmar", (dialog, which) -> {
+            String reasonText = reasonInput.getText().toString().trim();
+            if (reasonText.isEmpty()) {
+                Toast.makeText(this, "Por favor ingrese una razón", Toast.LENGTH_SHORT).show();
+                // Revertir el switch y actualizar la vista
+                user.setEnabled(!isEnabled);
+                userAdapter.notifyDataSetChanged();
+                return;
+            }
+            
+            // Actualizar el estado del usuario
+            user.setEnabled(isEnabled);
+            
+            // Mostrar mensaje de confirmación
+            String message = user.getName() + " ha sido " + (isEnabled ? "habilitado" : "deshabilitado");
+            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                    .setAction("Deshacer", v -> {
+                        user.setEnabled(!isEnabled);
+                        userAdapter.notifyDataSetChanged();
+                    })
+                    .show();
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> {
+            // Revertir el switch a su estado anterior
+            user.setEnabled(!isEnabled);
+            userAdapter.notifyDataSetChanged();
+        });
+
+        // Mostrar el diálogo
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.superAdmin.model.Hotel;
 
@@ -47,7 +48,12 @@ public class HotelAdapter
         holder.textViewHotelName.setText(hotel.getName());
         holder.textViewHotelDescription.setText(hotel.getDescription());
 
-        holder.itemView.setOnClickListener(v -> listener.onHotelClick(hotel));
+        // Hacer que toda la tarjeta sea clickeable
+        holder.cardHotel.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onHotelClick(hotel);
+            }
+        });
     }
 
     @Override
@@ -63,24 +69,26 @@ public class HotelAdapter
     private final Filter hotelFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<Hotel> filtered = new ArrayList<>();
+            List<Hotel> filteredList = new ArrayList<>();
+
             if (constraint == null || constraint.length() == 0) {
-                filtered.addAll(hotelListFull);
+                filteredList.addAll(hotelListFull);
             } else {
-                String pattern = constraint.toString().toLowerCase().trim();
-                for (Hotel h : hotelListFull) {
-                    if (h.getName().toLowerCase().contains(pattern)) {
-                        filtered.add(h);
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (Hotel hotel : hotelListFull) {
+                    if (hotel.getName().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(hotel);
                     }
                 }
             }
+
             FilterResults results = new FilterResults();
-            results.values = filtered;
+            results.values = filteredList;
+            results.count = filteredList.size();
             return results;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void publishResults(CharSequence constraint, FilterResults results) {
             hotelList.clear();
             hotelList.addAll((List<Hotel>) results.values);
@@ -89,12 +97,13 @@ public class HotelAdapter
     };
 
     static class HotelViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewHotelName;
-        TextView textViewHotelDescription;
+        MaterialCardView cardHotel;
+        TextView textViewHotelName, textViewHotelDescription;
 
-        HotelViewHolder(@NonNull View itemView) {
+        public HotelViewHolder(@NonNull View itemView) {
             super(itemView);
-            textViewHotelName        = itemView.findViewById(R.id.textViewHotelName);
+            cardHotel = itemView.findViewById(R.id.cardHotel);
+            textViewHotelName = itemView.findViewById(R.id.textViewHotelName);
             textViewHotelDescription = itemView.findViewById(R.id.textViewHotelDescription);
         }
     }

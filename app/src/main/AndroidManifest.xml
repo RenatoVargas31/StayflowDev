@@ -18,6 +18,7 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -30,7 +31,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".cliente.ClienteBuscarActivity"
+            android:name=".superAdmin.SuperAdminActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -199,21 +200,33 @@
 
         <!-- Receivers para notificaciones periódicas -->
         <receiver
-            android:name=".utils.ReportsCheckReceiver"
+            android:name=".superAdmin.utils.ReportsCheckReceiver"
             android:enabled="true"
             android:exported="false" />
         <receiver
-            android:name=".utils.LogsCheckReceiver"
+            android:name=".superAdmin.utils.LogsCheckReceiver"
             android:enabled="true"
             android:exported="false" />
         <receiver
-            android:name=".utils.BootReceiver"
+            android:name=".superAdmin.utils.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>
+

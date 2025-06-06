@@ -25,6 +25,19 @@
                 android:contentDescription="Volver"
                 android:src="@drawable/ic_arrow_back" />
 
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/buttonExport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Exportar reporte"
+                android:src="@drawable/ic_download" />
+
         </LinearLayout>
 
         <TextView
@@ -234,7 +247,7 @@
                     android:layout_height="wrap_content"
                     android:minWidth="100dp"
                     android:text="Barras"
-                    android:backgroundTint="@color/green_500"
+                    android:backgroundTint="@android:color/transparent"
                     android:textColor="#FFFFFF" />
 
                 <Button
