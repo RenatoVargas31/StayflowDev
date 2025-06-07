@@ -170,5 +170,18 @@
             android:padding="12dp"
             app:cornerRadius="8dp"/>
 
+        <!-- Botón Cerrar Sesión -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Cerrar Sesión"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/md_theme_error"
+            android:textColor="@color/md_theme_error"/>
+
     </LinearLayout>
 </ScrollView>
