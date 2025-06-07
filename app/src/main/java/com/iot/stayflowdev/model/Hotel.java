@@ -3,6 +3,8 @@ package com.iot.stayflowdev.model;
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.PropertyName;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +22,5 @@ public class Hotel {
     @PropertyName("ubicacion")
     private String ubicacion;
     @PropertyName("fotos")
-    private String[] fotos; // Lista de URLs de fotos del hotel (4-6 fotos)
+    private List<String> fotos; // Lista de URLs de fotos del hotel (4-6 fotos)
 }
