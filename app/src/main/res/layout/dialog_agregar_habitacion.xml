@@ -9,8 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        >
+        android:padding="24dp">
 
         <!-- Selector tipo de habitación -->
         <com.google.android.material.textfield.TextInputLayout
@@ -28,27 +27,56 @@
                 android:inputType="none"
                 android:focusable="false"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Capacidad -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Cantidad"
+            app:helperText="Ingrese la cantidad de habitaciones disponibles">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCantidad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Adultos -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="Capacidad"
-            app:suffixText="personas"
-            >
+            android:hint="Capacidad adultos"
+            app:suffixText="adultos">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCapacidad"
+                android:id="@+id/etAdultos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:maxLength="4"
+                android:maxLength="1"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Niños -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Capacidad niños"
+            app:suffixText="niños">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNinos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Tamaño -->
@@ -68,7 +96,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Precio -->
@@ -89,10 +116,7 @@
                 android:inputType="numberDecimal"
                 android:maxLength="4"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
-
     </LinearLayout>
-
 </ScrollView>

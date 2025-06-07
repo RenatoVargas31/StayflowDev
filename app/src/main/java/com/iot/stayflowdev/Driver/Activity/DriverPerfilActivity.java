@@ -1,10 +1,15 @@
 package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
@@ -12,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.iot.stayflowdev.R;
 
 public class DriverPerfilActivity extends AppCompatActivity {
@@ -23,6 +29,8 @@ public class DriverPerfilActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_driver_perfil);
+        setSupportActionBar(findViewById(R.id.toolbar)); // Si tienes un toolbar
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -182,4 +190,43 @@ public class DriverPerfilActivity extends AppCompatActivity {
         navegarSinAnimacion(DriverInicioActivity.class);
         return true;
     }
+
+    // Inflar el menú
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.profile_menu, menu);
+        return true;
+    }
+
+    // Manejar eventos del menú
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            Log.d("DriverPerfilActivity", "Botón de logout presionado");
+            cerrarSesion();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // Método para cerrar sesión
+    private void cerrarSesion() {
+        // 1. Cerrar sesión en Firebase
+        FirebaseAuth.getInstance().signOut();
+
+        // 2. Limpiar SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        sharedPreferences.edit().clear().apply();
+
+        // 3. Mostrar mensaje
+        Toast.makeText(this, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show();
+
+        // 4. Redirigir al login
+        Intent intent = new Intent(this, com.iot.stayflowdev.LoginFireBaseActivity.class);
+        // Flags para limpiar la pila de actividades
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
 }

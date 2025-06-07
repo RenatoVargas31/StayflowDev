@@ -4,14 +4,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.adminHotel.model.Habitacion;
+import com.iot.stayflowdev.model.Habitacion;
 
 import java.util.List;
 
@@ -37,17 +36,20 @@ public class HabitacionAdapter extends RecyclerView.Adapter<HabitacionAdapter.Ha
     public void onBindViewHolder(@NonNull HabitacionViewHolder holder, int position) {
         Habitacion habitacion = habitacionList.get(position);
         holder.tvTipo.setText(habitacion.getTipo());
-        holder.tvCapacidad.setText("Capacidad: " + habitacion.getCapacidad() + " personas");
+        holder.tvCapacidad.setText("Capacidad: " + habitacion.getCapacidad().getAdultos()
+                + " adultos, " + habitacion.getCapacidad().getNinos() + " niños");
         holder.tvTamano.setText("Tamaño: " + habitacion.getTamano() + " m²");
-        holder.tvPrecio.setText(String.format("Precio: S/. %.2f", habitacion.getPrecio()));
+        holder.tvPrecio.setText("Precio: S/. " + habitacion.getPrecio());
+        holder.tvCantidad.setText("Cantidad de habitaciones: " + habitacion.getCantidad());
 
-        // Habilitar/Deshabilitar botones según estado "enUso"
-        if (habitacion.isEnUso()) {
-            holder.btnEditar.setEnabled(false);
-            holder.btnEliminar.setEnabled(false);
-        } else {
+
+        // Habilitar/Deshabilitar botones según estado "Disponible"
+        if (Boolean.TRUE.equals(habitacion.getDisponible())) {
             holder.btnEditar.setEnabled(true);
             holder.btnEliminar.setEnabled(true);
+        } else {
+            holder.btnEditar.setEnabled(false);
+            holder.btnEliminar.setEnabled(false);
         }
 
         // Acciones de botones
@@ -72,7 +74,7 @@ public class HabitacionAdapter extends RecyclerView.Adapter<HabitacionAdapter.Ha
     }
 
     static class HabitacionViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTipo, tvCapacidad, tvTamano, tvPrecio;
+        TextView tvTipo, tvCapacidad, tvTamano, tvPrecio, tvCantidad;
         MaterialButton btnEditar, btnEliminar;
 
         HabitacionViewHolder(@NonNull View itemView) {
@@ -81,8 +83,12 @@ public class HabitacionAdapter extends RecyclerView.Adapter<HabitacionAdapter.Ha
             tvCapacidad = itemView.findViewById(R.id.tvCapacidad);
             tvTamano = itemView.findViewById(R.id.tvTamano);
             tvPrecio = itemView.findViewById(R.id.tvPrecio);
+            tvCantidad = itemView.findViewById(R.id.tvCantidad);
             btnEditar = itemView.findViewById(R.id.btnEditar);
             btnEliminar = itemView.findViewById(R.id.btnEliminar);
         }
+    }
+    public List<Habitacion> getHabitaciones() {
+        return habitacionList;
     }
 }
