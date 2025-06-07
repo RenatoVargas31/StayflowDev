@@ -247,16 +247,29 @@
         </ScrollView>
 
         <!-- Botón Guardar -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGuardar"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar"
-            android:padding="12dp"
-            android:layout_margin="16dp"
-            app:backgroundTint="@color/md_theme_inversePrimary_mediumContrast"
-            android:textColor="@android:color/black"
-            app:cornerRadius="8dp" />
+            android:layout_margin="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonGuardar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Guardar"
+                android:padding="12dp"
+                app:backgroundTint="@color/md_theme_inversePrimary_mediumContrast"
+                android:textColor="@android:color/black"
+                app:cornerRadius="8dp" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
 </LinearLayout>

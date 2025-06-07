@@ -62,12 +62,15 @@ public class LogsActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getBottomNavigationSelectedItem() {
-        return R.id.nav_inicio; // O el ítem que corresponda
+        // No hay un ítem específico para logs en la navegación inferior
+        // Normalmente podría devolverse el ítem desde donde se llegó, o un valor por defecto
+        return R.id.nav_inicio; // Podemos usar inicio como predeterminado
     }
 
+    // Añadimos también el método para establecer el título de la barra superior
     @Override
     protected String getToolbarTitle() {
-        return "Logs del Sistema";
+        return "Registros del Sistema";
     }
 
     private List<LogItem> createSampleLogData() {

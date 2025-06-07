@@ -3,6 +3,7 @@ package com.iot.stayflowdev.superAdmin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -111,24 +112,17 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.superadmin_up_menu, menu);
+        return true;
+    }
 
-        if (itemId == R.id.action_logs) {
-            // Ir a configuración
-            Intent intent = new Intent(this, LogsActivity.class);
-            startActivity(intent);
-            return true;
-        } else if (itemId == R.id.nav_perfil) {
-            // Ir a perfil
-            Intent intent = new Intent(this, PerfilActivity.class);
-            startActivity(intent);
-            return true;
-        } else if (itemId == R.id.action_logout) {
-            // Implementar logout
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_logs) {
+            startActivity(new Intent(this, LogsActivity.class));
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

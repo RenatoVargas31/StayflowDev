@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.superAdmin.model.User;
+import com.iot.stayflowdev.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,15 +45,20 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = userList.get(position);
 
+        // Usar el nombre completo o construirlo a partir de nombres y apellidos
         holder.textViewUserName.setText(user.getName());
+
+        // Mostrar el rol con descripción legible
         holder.textViewUserRole.setText(user.getRoleDescription());
+
+        // Mostrar el estado
         holder.textViewUserStatus.setText(user.isEnabled() ? "Habilitado" : "Deshabilitado");
 
-        // 🔴 Evita que el listener se dispare al hacer setChecked
+        // 🔴 Evitar que el listener se dispare al hacer setChecked
         holder.switchUserStatus.setOnCheckedChangeListener(null);
         holder.switchUserStatus.setChecked(user.isEnabled());
 
-        // 🟢 Vuelve a asignar el listener después de setChecked
+        // 🟢 Volver a asignar el listener después de setChecked
         holder.switchUserStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (listener != null) {
                 listener.onStatusChanged(user, isChecked, null);
@@ -82,6 +87,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         notifyItemInserted(0);
     }
 
+    // Actualizar la lista completa
+    public void updateUserList(List<User> newUserList) {
+        userList.clear();
+        userList.addAll(newUserList);
+        notifyDataSetChanged();
+    }
+
+    // Actualizar tanto la lista completa como la lista original (para filtros)
+    public void updateFullList(List<User> newUserList) {
+        userList.clear();
+        userList.addAll(newUserList);
+        userListFull.clear();
+        userListFull.addAll(newUserList);
+        notifyDataSetChanged();
+    }
+
     public void filterByType(String userType) {
         List<User> filteredList = new ArrayList<>();
         
@@ -89,7 +110,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             filteredList.addAll(userListFull);
         } else {
             for (User user : userListFull) {
-                if (user.getRole().equals(userType)) {
+                if (user.getRol() != null && user.getRol().equals(userType)) {
                     filteredList.add(user);
                 }
             }
@@ -108,7 +129,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         } else {
             String searchTextLower = searchText.toLowerCase();
             for (User user : userListFull) {
-                if (user.getName().toLowerCase().contains(searchTextLower)) {
+                if ((user.getNombres() != null && user.getNombres().toLowerCase().contains(searchTextLower)) ||
+                    (user.getApellidos() != null && user.getApellidos().toLowerCase().contains(searchTextLower)) ||
+                    (user.getEmail() != null && user.getEmail().toLowerCase().contains(searchTextLower))) {
                     filteredList.add(user);
                 }
             }
@@ -123,12 +146,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         List<User> filteredList = new ArrayList<>();
         
         for (User user : userListFull) {
-            if (user.getRole().equals("Taxista")) {
-                if (status.equals("Todos")) {
+            if ("taxista".equals(user.getRol())) {
+                if ("Todos".equals(status)) {
                     filteredList.add(user);
-                } else if (status.equals("Pendientes") && !user.isEnabled()) {
+                } else if ("pendiente".equals(status) && "pendiente".equals(user.getEstado())) {
                     filteredList.add(user);
-                } else if (status.equals("Habilitados") && user.isEnabled()) {
+                } else if ("activo".equals(status) && "activo".equals(user.getEstado())) {
                     filteredList.add(user);
                 }
             }

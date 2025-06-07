@@ -18,11 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.superAdmin.adapter.UserAdapter;
-import com.iot.stayflowdev.superAdmin.model.User;
+import com.iot.stayflowdev.model.User;
 import com.iot.stayflowdev.superAdmin.utils.LocalStorageManager;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +42,16 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
     private ActivityResultLauncher<Intent> addAdminLauncher;
     private LocalStorageManager localStorageManager;
 
+    // Referencia a Firestore
+    private FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // El layout ya se configura en BaseSuperAdminActivity
+
+        // Inicializar Firestore
+        db = FirebaseFirestore.getInstance();
 
         // Inicializar LocalStorageManager
         localStorageManager = new LocalStorageManager(this);
@@ -59,31 +67,23 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         // Configurar RecyclerView
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(this));
 
-        // Inicializar datos (datos hardcodeados)
-        initUserData();
-
-        // Configurar adaptador y mostrar datos inmediatamente
+        // Inicializar lista de usuarios
+        userList = new ArrayList<>();
         userAdapter = new UserAdapter(userList, this);
         recyclerViewUsers.setAdapter(userAdapter);
-        userAdapter.notifyDataSetChanged(); // Forzar actualización de la vista
+
+        // Cargar datos de Firestore
+        loadUsersFromFirestore();
 
         // Registrar el launcher para el resultado de la actividad
         addAdminLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        // Extraer los datos del Intent
-                        Intent data = result.getData();
-                        String name = data.getStringExtra(AddHotelAdminActivity.EXTRA_ADMIN_NAME);
-                        String role = data.getStringExtra(AddHotelAdminActivity.EXTRA_ADMIN_ROLE);
-                        String roleDesc = data.getStringExtra(AddHotelAdminActivity.EXTRA_ADMIN_ROLE_DESC);
-                        boolean enabled = data.getBooleanExtra(AddHotelAdminActivity.EXTRA_ADMIN_ENABLED, true);
-
-                        // Crear y añadir el nuevo usuario
-                        User newAdmin = new User(name, role, roleDesc, enabled);
-                        addNewUser(newAdmin);
-
-                        Snackbar.make(findViewById(android.R.id.content), "Administrador agregado con éxito", Snackbar.LENGTH_SHORT).show();
+                        // Cuando se crea un nuevo administrador, actualizamos la lista completa desde Firestore
+                        // para asegurar que se muestre el usuario recién creado con todos sus datos
+                        Toast.makeText(this, "Administrador creado exitosamente", Toast.LENGTH_SHORT).show();
+                        loadUsersFromFirestore(); // Recargar todos los usuarios desde Firestore
                     }
                 });
 
@@ -99,17 +99,17 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 fabAddHotelAdmin.show();
                 subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipAdmins) {
-                filterType = "Admin";
+                filterType = "admin_hotel";
                 fabAddHotelAdmin.show();
                 subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipTaxistas) {
-                filterType = "Taxista";
+                filterType = "taxista";
                 fabAddHotelAdmin.hide();
                 subFilterScrollView.setVisibility(View.VISIBLE);
                 // Seleccionar "Todos los Taxistas" por defecto
                 chipGroupTaxistaFiltro.check(R.id.chipTaxistasTodos);
             } else if (selectedId == R.id.chipClientes) {
-                filterType = "Cliente";
+                filterType = "cliente";
                 fabAddHotelAdmin.hide();
                 subFilterScrollView.setVisibility(View.GONE);
             }
@@ -119,7 +119,8 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
             filters.setSelectedUserType(filterType);
             localStorageManager.saveFilters(filters);
 
-            userAdapter.filterByType(filterType);
+            // Filtrar usuarios por tipo
+            filterUsersByType(filterType);
         });
 
         // Configurar listener para el subfiltro de taxistas
@@ -130,12 +131,15 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
             String subFilterType = "Todos";
 
             if (selectedId == R.id.chipTaxistasPendientes) {
-                subFilterType = "Pendientes";
+                subFilterType = "pendiente";
+                filterTaxistasByStatus(subFilterType);
             } else if (selectedId == R.id.chipTaxistasHabilitados) {
-                subFilterType = "Habilitados";
+                subFilterType = "activo";
+                filterTaxistasByStatus(subFilterType);
+            } else {
+                // Si es "Todos", cargar todos los taxistas
+                filterUsersByType("taxista");
             }
-
-            userAdapter.filterTaxistasByStatus(subFilterType);
         });
 
         // Configurar listener para la búsqueda
@@ -148,7 +152,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
 
             @Override
             public void afterTextChanged(Editable s) {
-                userAdapter.filterByText(s.toString());
+                filterUsersByText(s.toString());
             }
         });
 
@@ -162,6 +166,173 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         applySavedFilter();
     }
 
+    private void loadUsersFromFirestore() {
+        // Mostrar un indicador de carga
+        showLoading(true);
+
+        db.collection("usuarios")
+            .get()
+            .addOnCompleteListener(task -> {
+                showLoading(false);
+                if (task.isSuccessful()) {
+                    userList.clear();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        User user = document.toObject(User.class);
+                        // Asegurar que el usuario tenga el UID correcto (el del documento)
+                        user.setUid(document.getId());
+                        userList.add(user);
+                    }
+                    // Actualizamos tanto la lista original como la lista del adaptador
+                    userAdapter.updateFullList(userList);
+
+                    // Verificar si la lista está vacía y mostrar mensaje
+                    if (userList.isEmpty()) {
+                        showEmptyMessage(true);
+                    } else {
+                        showEmptyMessage(false);
+                    }
+                } else {
+                    showErrorMessage("Error al cargar usuarios: " + task.getException().getMessage());
+                }
+            });
+    }
+
+    private void showEmptyMessage(boolean show) {
+        // Opcionalmente implementa un mensaje de lista vacía
+        // ...
+    }
+
+    private void filterUsersByType(String rol) {
+        if ("Todos".equals(rol)) {
+            loadUsersFromFirestore();
+            return;
+        }
+
+        showLoading(true);
+        db.collection("usuarios")
+            .whereEqualTo("rol", rol)
+            .get()
+            .addOnCompleteListener(task -> {
+                showLoading(false);
+                if (task.isSuccessful()) {
+                    userList.clear();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        User user = document.toObject(User.class);
+                        // Asegurar que el usuario tenga el UID correcto
+                        user.setUid(document.getId());
+                        userList.add(user);
+                    }
+                    // Actualizamos tanto la lista original como la lista del adaptador
+                    userAdapter.updateFullList(userList);
+
+                    // Verificar si la lista está vacía y mostrar mensaje
+                    if (userList.isEmpty()) {
+                        showEmptyMessage(true);
+                    } else {
+                        showEmptyMessage(false);
+                    }
+                } else {
+                    showErrorMessage("Error al filtrar usuarios: " + task.getException().getMessage());
+                }
+            });
+    }
+
+    private void filterTaxistasByStatus(String estado) {
+        showLoading(true);
+        db.collection("usuarios")
+            .whereEqualTo("rol", "taxista")
+            .whereEqualTo("estado", estado)
+            .get()
+            .addOnCompleteListener(task -> {
+                showLoading(false);
+                if (task.isSuccessful()) {
+                    userList.clear();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        User user = document.toObject(User.class);
+                        userList.add(user);
+                    }
+                    userAdapter.notifyDataSetChanged();
+                } else {
+                    showErrorMessage("Error al filtrar taxistas: " + task.getException().getMessage());
+                }
+            });
+    }
+
+    private void filterUsersByText(String searchText) {
+        if (searchText.isEmpty()) {
+            // Si la búsqueda está vacía, volver a cargar datos según el filtro actual
+            String currentFilter = localStorageManager.getFilters().getSelectedUserType();
+            filterUsersByType(currentFilter);
+            return;
+        }
+
+        // Convertir a minúsculas para búsqueda sin distinción entre mayúsculas y minúsculas
+        String searchLowerCase = searchText.toLowerCase();
+
+        // Filtrar en memoria para búsqueda por texto
+        List<User> filteredList = new ArrayList<>();
+        for (User user : userList) {
+            if ((user.getNombres() != null && user.getNombres().toLowerCase().contains(searchLowerCase)) ||
+                (user.getApellidos() != null && user.getApellidos().toLowerCase().contains(searchLowerCase)) ||
+                (user.getEmail() != null && user.getEmail().toLowerCase().contains(searchLowerCase))) {
+                filteredList.add(user);
+            }
+        }
+
+        // Actualizar el adaptador con resultados filtrados
+        userAdapter.updateUserList(filteredList);
+    }
+
+    private void createNewAdminUser(String nombres, String apellidos, String email) {
+        // Este método ya no se utiliza para crear usuarios directamente
+        // La creación se realiza en AddHotelAdminActivity con Firebase Auth + Firestore
+        // Solo abrimos la actividad para que el usuario ingrese los datos
+        Intent intent = new Intent(this, AddHotelAdminActivity.class);
+        addAdminLauncher.launch(intent);
+    }
+
+    private void updateUserStatus(User user, String estado, String reason) {
+        if (user.getUid() == null || user.getUid().isEmpty()) {
+            showErrorMessage("ID de usuario no válido");
+            return;
+        }
+
+        showLoading(true);
+
+        // Actualizar en Firestore
+        db.collection("usuarios")
+            .document(user.getUid())
+            .update("estado", estado)
+            .addOnSuccessListener(aVoid -> {
+                showLoading(false);
+                // Actualizar el objeto local
+                user.setEstado(estado);
+                userAdapter.notifyDataSetChanged();
+
+                // Mostrar mensaje de confirmación
+                String message = user.getName() + " ha sido " + (estado.equals("activo") ? "habilitado" : "deshabilitado");
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
+
+                // TODO: Guardar la razón del cambio en un registro de logs
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                showErrorMessage("Error al actualizar estado: " + e.getMessage());
+            });
+    }
+
+    private void showLoading(boolean show) {
+        // Usar el overlay con indicador de carga en lugar de Toast
+        View loadingOverlay = findViewById(R.id.loadingOverlay);
+        if (loadingOverlay != null) {
+            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void showErrorMessage(String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
+    }
+
     private void applySavedFilter() {
         LocalStorageManager.FilterSettings filters = localStorageManager.getFilters();
         String savedFilter = filters.getSelectedUserType();
@@ -169,15 +340,15 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         // Seleccionar el chip correspondiente
         if (savedFilter != null && !savedFilter.equals("Todos")) {
             switch (savedFilter) {
-                case "Admin":
+                case "admin_hotel":
                     chipGroupFiltro.check(R.id.chipAdmins);
                     fabAddHotelAdmin.show();
                     break;
-                case "Taxista":
+                case "taxista":
                     chipGroupFiltro.check(R.id.chipTaxistas);
                     fabAddHotelAdmin.hide();
                     break;
-                case "Cliente":
+                case "cliente":
                     chipGroupFiltro.check(R.id.chipClientes);
                     fabAddHotelAdmin.hide();
                     break;
@@ -186,12 +357,12 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                     fabAddHotelAdmin.show();
                     break;
             }
-            userAdapter.filterByType(savedFilter);
+            filterUsersByType(savedFilter);
         } else {
             // Si no hay filtro guardado o es "Todos", seleccionar "Todos" por defecto
             chipGroupFiltro.check(R.id.chipTodos);
             fabAddHotelAdmin.show();
-            userAdapter.filterByType("Todos");
+            loadUsersFromFirestore();
         }
     }
 
@@ -210,39 +381,11 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         return "Gestión";
     }
 
-    private void initUserData() {
-        // Datos hardcodeados para pruebas
-        userList = new ArrayList<>();
-        userList.add(new User("Julian Casablancas", "Admin", "Admin Hotel El Cielo", false));
-        userList.add(new User("Juan Perez", "Taxista", "Taxista", true));
-        userList.add(new User("Luis Navejas", "Cliente", "Cliente", true));
-        userList.add(new User("María González", "Cliente", "Cliente", true));
-        userList.add(new User("Carlos López", "Admin", "Admin Hotel Las Estrellas", true));
-        userList.add(new User("Ana Torres", "Taxista", "Taxista", false));
-        userList.add(new User("Mario Vargas Llosa", "Admin", "Admin Hotel Libertad", true));
-        userList.add(new User("Alejandra Pizarnik", "Cliente", "Cliente", false));
-        userList.add(new User("Idea Vilariño", "Cliente", "Cliente", true));
-        userList.add(new User("Fiódor Dostoyevski", "Taxista", "Taxista", false));
-        userList.add(new User("Franz Kafka", "Admin", "Admin Hotel Metamorfosis", true));
-        userList.add(new User("Jesús Andrés Luján Carrión", "Cliente", "Cliente", true));
-        userList.add(new User("Joji", "Cliente", "Cliente", true));
-        userList.add(new User("Haruki Murakami", "Admin", "Admin Hotel Tokio", false));
-        userList.add(new User("Albert Camus", "Cliente", "Cliente", false));
-        userList.add(new User("Tralalero tralala", "Cliente", "Cliente", true));
-        userList.add(new User("María Zardoya", "Admin", "Admin Hotel Espectro", true));
-    }
-
-    private void addNewUser(User newUser) {
-        // Añadir al inicio de la lista para que sea visible inmediatamente
-        userAdapter.addUser(newUser);
-        // Hacer scroll hasta el primer elemento para mostrar el nuevo usuario
-        recyclerViewUsers.smoothScrollToPosition(0);
-    }
-
     @Override
     public void onDetailsClick(User user) {
-        // Crear intent para UserDetailActivity en lugar de fragment
+        // Crear intent para UserDetailActivity
         Intent intent = new Intent(GestionActivity.this, UserDetailActivity.class);
+        intent.putExtra("USER_ID", user.getUid());
         intent.putExtra("USER_NAME", user.getName());
         intent.putExtra("USER_ROLE", user.getRole());
         intent.putExtra("USER_ROLE_DESC", user.getRoleDescription());
@@ -287,33 +430,26 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
             String reasonText = reasonInput.getText().toString().trim();
             if (reasonText.isEmpty()) {
                 Toast.makeText(this, "Por favor ingrese una razón", Toast.LENGTH_SHORT).show();
-                // Revertir el switch y actualizar la vista
+                // Revertir el switch
                 user.setEnabled(!isEnabled);
                 userAdapter.notifyDataSetChanged();
                 return;
             }
             
-            // Actualizar el estado del usuario
-            user.setEnabled(isEnabled);
-            
-            // Mostrar mensaje de confirmación
-            String message = user.getName() + " ha sido " + (isEnabled ? "habilitado" : "deshabilitado");
-            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
-                    .setAction("Deshacer", v -> {
-                        user.setEnabled(!isEnabled);
-                        userAdapter.notifyDataSetChanged();
-                    })
-                    .show();
+            // Actualizar el estado del usuario en Firestore
+            String newEstado = isEnabled ? "activo" : "inactivo";
+            updateUserStatus(user, newEstado, reasonText);
         });
 
         builder.setNegativeButton("Cancelar", (dialog, which) -> {
-            // Revertir el switch a su estado anterior
+            // Revertir el switch
             user.setEnabled(!isEnabled);
             userAdapter.notifyDataSetChanged();
+            dialog.dismiss();
         });
 
-        // Mostrar el diálogo
-        androidx.appcompat.app.AlertDialog dialog = builder.create();
-        dialog.show();
+        builder.setCancelable(false);
+        builder.show();
     }
 }
+
