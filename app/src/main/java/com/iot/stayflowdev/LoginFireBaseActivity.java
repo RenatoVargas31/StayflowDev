@@ -22,6 +22,8 @@ import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,8 +31,9 @@ import java.util.List;
 public class LoginFireBaseActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginFireBase";
-    private Button btnEmailLogin, btnGoogleLogin;
+    private Button btnEmailLogin, btnGoogleLogin, btnAlreadyHaveAccount;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
@@ -42,6 +45,8 @@ public class LoginFireBaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        // Primero configura la vista
         setContentView(R.layout.activity_login_fire_base);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -49,19 +54,47 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Inicializar Firebase Auth
+        // Inicializar Firebase Auth, Firestore y vistas
         mAuth = FirebaseAuth.getInstance();
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            Log.e(TAG, "Error fatal: ", throwable);
-            // Puedes guardar el error en un archivo si es necesario
-        });
-        // Enlazar vistas
+        db = FirebaseFirestore.getInstance();
         btnEmailLogin = findViewById(R.id.btnEmailLogin);
         btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
+        btnAlreadyHaveAccount = findViewById(R.id.btnAlreadyHaveAccount);
+
+        // Temporalmente desactivar botones hasta verificar autenticación
+        btnEmailLogin.setEnabled(false);
+        btnGoogleLogin.setEnabled(false);
 
         // Configurar listeners
         btnEmailLogin.setOnClickListener(view -> iniciarSesionConEmail());
         btnGoogleLogin.setOnClickListener(view -> iniciarSesionConGoogle());
+        btnAlreadyHaveAccount.setOnClickListener(view -> {
+            Intent intent = new Intent(this, LoginCuentaFireBase.class);
+            startActivity(intent);
+        });
+
+        // Verificar autenticación con el servidor
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            currentUser.reload()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
+                            // El token sigue siendo válido, redirigir
+                            verificarRolYRedirigir();
+                        } else {
+                            // Token inválido o cuenta eliminada, habilitar botones
+                            btnEmailLogin.setEnabled(true);
+                            btnGoogleLogin.setEnabled(true);
+                            Toast.makeText(LoginFireBaseActivity.this,
+                                    "Sesión expirada, inicie sesión nuevamente",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            // No hay usuario, habilitar botones
+            btnEmailLogin.setEnabled(true);
+            btnGoogleLogin.setEnabled(true);
+        }
     }
 
     @Override
@@ -70,8 +103,8 @@ public class LoginFireBaseActivity extends AppCompatActivity {
         // Verificar si el usuario ya está autenticado
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // Si ya está autenticado, redirigir a la actividad principal
-            irAPantallaPrincipal();
+            // Si ya está autenticado, redirigir según el rol
+            verificarRolYRedirigir();
         }
     }
 
@@ -111,7 +144,7 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             Log.d(TAG, "signInWithCredential:success");
             Toast.makeText(this, "Autenticación exitosa", Toast.LENGTH_SHORT).show();
-            irAPantallaPrincipal();
+            verificarRolYRedirigir();
         } else {
             // Si el inicio de sesión falla, muestra un mensaje al usuario
             if (response == null) {
@@ -124,9 +157,80 @@ public class LoginFireBaseActivity extends AppCompatActivity {
         }
     }
 
-    private void irAPantallaPrincipal() {
-        Log.d(TAG, "Navegando a la pantalla principal");
-        // Implementa la navegación a tu Activity principal o muestra un mensaje temporal
-        Toast.makeText(this, "¡Usuario autenticado! Redireccionar a la actividad principal", Toast.LENGTH_SHORT).show();
+    private void verificarRolYRedirigir() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Log.e(TAG, "Usuario no autenticado");
+            return;
+        }
+
+        String userId = user.getUid();
+        String userEmail = user.getEmail();
+
+        // Mostrar un mensaje de espera
+        Toast.makeText(this, "Verificando información de usuario...", Toast.LENGTH_SHORT).show();
+
+        // Buscar el usuario en Firestore para verificar su rol
+        db.collection("usuarios")
+                .whereEqualTo("correo", userEmail)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Obtener los datos del usuario
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String rol = document.getString("rol");
+                        irAActividadSegunRol(rol);
+                    } else {
+                        Log.w(TAG, "No se encontró información del usuario en Firestore");
+                        // Si no se encuentra el rol en la base de datos, redirigir a una actividad por defecto
+                        irAActividadPorDefecto();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al obtener información del usuario", e);
+                    Toast.makeText(this, "Error al obtener información del usuario", Toast.LENGTH_SHORT).show();
+                    irAActividadPorDefecto();
+                });
+    }
+
+    private void irAActividadSegunRol(String rol) {
+        Intent intent;
+
+        if (rol == null) {
+            irAActividadPorDefecto();
+            return;
+        }
+
+        switch (rol.toLowerCase()) {
+            case "adminhotel":
+                Log.d(TAG, "Rol detectado: adminHotel - Navegando a AdminInicioActivity");
+                intent = new Intent(this, com.iot.stayflowdev.adminHotel.AdminInicioActivity.class);
+                break;
+            case "driver":
+                Log.d(TAG, "Rol detectado: driver - Navegando a DriverInicioActivity");
+                intent = new Intent(this, com.iot.stayflowdev.Driver.Activity.DriverInicioActivity.class);
+                break;
+            case "superadmin":
+                Log.d(TAG, "Rol detectado: superAdmin - Navegando a InicioActivity");
+                intent = new Intent(this, com.iot.stayflowdev.superAdmin.InicioActivity.class);
+                break;
+            default:
+                Log.w(TAG, "Rol desconocido: " + rol + " - Navegando a actividad por defecto");
+                irAActividadPorDefecto();
+                return;
+        }
+
+        startActivity(intent);
+        finish(); // Cierra esta actividad para que el usuario no pueda volver atrás con el botón de retroceso
+    }
+
+    private void irAActividadPorDefecto() {
+        // Por defecto, navegar a PerfilActivity (o cualquier otra actividad de tu elección)
+        Log.d(TAG, "Navegando a actividad por defecto (PerfilActivity)");
+        Intent intent = new Intent(this, com.iot.stayflowdev.superAdmin.PerfilActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
+
