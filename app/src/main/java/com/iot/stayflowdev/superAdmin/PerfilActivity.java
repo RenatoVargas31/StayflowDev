@@ -29,6 +29,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
     private static final String WORK_LOGS = "work_logs";
 
     // UI Components
+
     private SwitchMaterial switchReportes;
     private SwitchMaterial switchLogs;
     private TextInputLayout layoutPeriodicidadReportes;
@@ -62,6 +63,8 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         );
     }
 
+    private MaterialButton buttonLogout; // Agrega esto arriba
+
     private void setupViews() {
         // Inicializar vistas
         switchReportes = findViewById(R.id.switchReportes);
@@ -70,6 +73,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         layoutUmbralLogs = findViewById(R.id.layoutUmbralLogs);
         dropdownPeriodicidadReportes = findViewById(R.id.dropdownPeriodicidadReportes);
         buttonGuardar = findViewById(R.id.buttonGuardar);
+        buttonLogout = findViewById(R.id.buttonLogout); // Vincula el botón
 
         // Configurar estados iniciales
         layoutPeriodicidadReportes.setEnabled(false);
@@ -116,6 +120,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
             if (!isChecked) {
                 dropdownPeriodicidadReportes.setText("", false);
             }
+
         });
 
         switchLogs.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -131,6 +136,26 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         });
 
         buttonGuardar.setOnClickListener(v -> savePreferences());
+        buttonLogout.setOnClickListener(v -> cerrarSesion());
+
+    }
+
+    private void cerrarSesion() {
+        // 1. Cerrar sesión en Firebase
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+
+        // 2. Limpiar SharedPreferences
+        android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        sharedPreferences.edit().clear().apply();
+
+        // 3. Mostrar mensaje
+        android.widget.Toast.makeText(this, "Sesión cerrada correctamente", android.widget.Toast.LENGTH_SHORT).show();
+
+        // 4. Redirigir al login y limpiar la pila de actividades
+        android.content.Intent intent = new android.content.Intent(this, com.iot.stayflowdev.LoginFireBaseActivity.class);
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void loadSavedPreferences() {
