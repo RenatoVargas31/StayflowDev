@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Capacidad"
+            android:text="Capacidad: 2 adultos, 1 niño"
             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <TextView
@@ -41,7 +41,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Precio"
+            android:text="Precio: S/. 150"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <TextView
+            android:id="@+id/tvCantidad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Cantidad: 5"
             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <!-- Botones de acción -->

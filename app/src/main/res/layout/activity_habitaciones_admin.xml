@@ -67,12 +67,13 @@
                     android:text="No hay habitaciones registradas"
                     android:textAppearance="?attr/textAppearanceHeadlineMedium"
                     android:textColor="?attr/colorOnSurface"
+                    android:gravity="center"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Las habitaciones que agregues aparecerán aquí.\nPuedes crear hasta 10 habitaciones."
+                    android:text="Las habitaciones que agregues aparecerán aquí."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:gravity="center"
@@ -151,10 +152,11 @@
                             app:tint="?attr/colorPrimary" />
 
                         <TextView
+                            android:id="@+id/tvRoomInfo"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Recuerda que puedes crear hasta 10 habitaciones para tu hotel"
+                            android:text="Recuerda que puedes crear hasta 5 tipos de habitaciones para tu hotel"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:textColor="?attr/colorOnSurface"
                             android:lineSpacingExtra="2dp" />

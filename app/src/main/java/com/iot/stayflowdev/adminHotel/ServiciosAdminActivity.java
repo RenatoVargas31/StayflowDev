@@ -1,14 +1,12 @@
 package com.iot.stayflowdev.adminHotel;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,8 +15,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.adapter.ServicioAdapter;
-import com.iot.stayflowdev.adminHotel.database.AppDatabase;
-import com.iot.stayflowdev.adminHotel.database.ServicioEntity;
 import com.iot.stayflowdev.adminHotel.model.Servicio;
 import com.iot.stayflowdev.databinding.ActivityServiciosAdminBinding;
 import java.util.ArrayList;
@@ -28,7 +24,6 @@ public class ServiciosAdminActivity extends AppCompatActivity {
 
     private ActivityServiciosAdminBinding binding;
     private ServicioAdapter servicioAdapter;
-    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +31,6 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         binding = ActivityServiciosAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "hotel_db").build();
 
         // Configura Toolbar
         Toolbar toolbar = binding.toolbar;
@@ -56,6 +50,7 @@ public class ServiciosAdminActivity extends AppCompatActivity {
             return true;
         });
 
+        /*
         servicioAdapter = new ServicioAdapter(new ArrayList<>(), new ServicioAdapter.OnServicioActionListener() {
             @Override
             public void onEditar(Servicio servicio) {
@@ -66,16 +61,19 @@ public class ServiciosAdminActivity extends AppCompatActivity {
             public void onEliminar(Servicio servicio) {
                 confirmarEliminar(servicio);
             }
-        });
+        });*/
 
         binding.recyclerServicios.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerServicios.setAdapter(servicioAdapter);
 
-        binding.fabAddService.setOnClickListener(v -> mostrarDialogoAgregar());
+        /*binding.fabAddService.setOnClickListener(v -> mostrarDialogoAgregar());*/
 
-        cargarServicios();
+        /*
+        cargarServicios();*/
     }
 
+
+    /*
     private void cargarServicios() {
         new Thread(() -> {
             List<ServicioEntity> entidades = db.servicioDao().obtenerTodos();
@@ -85,7 +83,8 @@ public class ServiciosAdminActivity extends AppCompatActivity {
             }
             runOnUiThread(() -> servicioAdapter.updateData(servicios));
         }).start();
-    }
+    }*/
+    /*
 
     private void mostrarDialogoAgregar() {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
@@ -119,8 +118,9 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
-    }
+    }*/
 
+    /*
     private void mostrarDialogoEditar(Servicio servicio) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
         EditText etNombre = view.findViewById(R.id.inputServiceName);
@@ -200,5 +200,5 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                 .setMessage(mensaje)
                 .setPositiveButton("OK", null)
                 .show();
-    }
+    }*/
 }
