@@ -21,11 +21,4 @@ public class Hotel {
     private String ubicacion;
     @PropertyName("fotos")
     private String[] fotos; // Lista de URLs de fotos del hotel (4-6 fotos)
-    @PropertyName("servicios")
-    private String servicios; // ID de la subcolección de servicios en Firestore (4-6 servicios)
-    @PropertyName("lugaresCercanos")
-    private String lugaresCercanos; // ID de la subcolección de lugares cercanos en Firestore (4 lugares cercanos)
-    //Habitciones como subcollection
-    @PropertyName("habitaciones")
-    private String habitaciones; // ID de la subcolección de habitaciones en Firestore (10 hbitaciones)
 }
