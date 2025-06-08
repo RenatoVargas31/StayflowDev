@@ -28,6 +28,9 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".cliente.ClientePerfilActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginCuentaFireBase"
             android:exported="false" />
         <activity
@@ -39,7 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name=".superAdmin.AddHotelAdminActivity"
             android:exported="false" />
@@ -73,7 +75,6 @@
         <activity
             android:name=".Driver.Activity.DriverInicioActivity"
             android:exported="false" />
-
         <activity
             android:name=".superAdmin.SuperAdminActivity"
             android:exported="true">
@@ -82,9 +83,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Dentro de <application> -->
+        </activity> <!-- Dentro de <application> -->
         <receiver
             android:name=".Driver.Activity.DriverReservaActivity$ResumenDiarioReceiver"
             android:enabled="true"
