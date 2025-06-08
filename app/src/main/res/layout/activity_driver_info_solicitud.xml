@@ -76,7 +76,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginEnd="100dp" />
-
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/horaValor"
                 android:layout_width="wrap_content"
@@ -88,7 +87,6 @@
                 app:layout_constraintStart_toEndOf="@+id/horaLabel"
                 app:layout_constraintTop_toTopOf="@+id/horaLabel"
                 app:layout_constraintBottom_toBottomOf="@+id/horaLabel" />
-
             <!-- Tarjeta de Información del Pasajero -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pasajeroCard"
@@ -265,7 +263,6 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
             <!-- Tarjeta de Información del Recorrido -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/recorridoCard"
@@ -538,53 +535,6 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Tarjeta de Notas Adicionales
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/notasCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="?attr/colorOutline"
-                style="@style/Widget.Material3.CardView.Elevated"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recorridoCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/notasTitulo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Notas del Pasajero"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/notasContenido"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Llevo dos maletas grandes. Por favor ayuda con equipaje. Soy sordo, prefiero comunicación por mensajes."
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                        android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/notasTitulo" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView> -->
-
             <!-- Espacio adicional al final del scroll -->
             <View
                 android:layout_width="match_parent"

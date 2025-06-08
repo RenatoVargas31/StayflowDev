@@ -141,7 +141,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/user_icon"
+                android:src="@drawable/christopher_campbell_rdeovte7vos_unsplash"
                 android:background="?attr/colorSurfaceContainerHigh"
                 app:shapeAppearanceOverlay="@style/circleImageView"
                 app:strokeColor="@color/md_theme_tertiaryContainer_highContrast"
