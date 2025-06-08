@@ -145,20 +145,31 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             Log.d(TAG, "signInWithCredential:success");
             Toast.makeText(this, "Autenticación exitosa", Toast.LENGTH_SHORT).show();
 
-            // Registrar usuario en Firestore con rol "usuario"
+            // Registrar usuario en Firestore con rol "usuario" usando el mismo UID
             if (user != null) {
                 String email = user.getEmail();
+                String uid = user.getUid();
+
+                // Log para depuración
+                Log.d(TAG, "Creando usuario en Firestore con UID: " + uid);
+
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
+
                 // Crea el objeto de usuario
                 java.util.Map<String, Object> usuario = new java.util.HashMap<>();
                 usuario.put("correo", email);
                 usuario.put("rol", "usuario"); // o "cliente" si prefieres
-                // Guarda en la colección "usuarios"
+
+                // Guarda en la colección "usuarios" usando el UID como ID del documento
                 db.collection("usuarios")
-                  .document(user.getUid())
+                  .document(uid)  // Usar el UID como ID del documento
                   .set(usuario)
-                  .addOnSuccessListener(aVoid -> Log.d("Registro", "Usuario registrado en Firestore"))
-                  .addOnFailureListener(e -> Log.e("Registro", "Error al registrar usuario en Firestore", e));
+                  .addOnSuccessListener(aVoid -> {
+                      Log.d(TAG, "Usuario registrado en Firestore con ID: " + uid);
+                  })
+                  .addOnFailureListener(e -> {
+                      Log.e(TAG, "Error al registrar usuario en Firestore", e);
+                  });
             }
 
             verificarRolYRedirigir();
