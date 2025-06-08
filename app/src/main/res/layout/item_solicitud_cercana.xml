@@ -59,29 +59,57 @@
             android:background="@color/md_theme_inverseSurface"
             android:layout_marginVertical="8dp" />
 
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <!-- Icono de ubicación -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_location"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="top"
+                android:layout_marginTop="2dp"
                 app:tint="?attr/colorPrimary"
                 android:contentDescription="@string/pickup_location_icon" />
 
-            <TextView
-                android:id="@+id/tvPickupLocation"
-                android:layout_width="match_parent"
+            <!-- Contenedor vertical para los textos -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Av. Arequipa 3415, San Isidro"
-                android:textSize="14sp"
-                android:textColor="?attr/colorOnSurface"
+                android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:orientation="vertical">
+
+                <!-- Nombre del lugar -->
+                <TextView
+                    android:id="@+id/tvPickupLocationName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Hotel Hilton Lima"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Dirección completa -->
+                <TextView
+                    android:id="@+id/tvPickupLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Av. Arequipa 3415, San Isidro, Lima"
+                    android:textSize="13sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -90,24 +118,50 @@
             android:orientation="horizontal"
             android:layout_marginTop="6dp">
 
+            <!-- Icono de destino -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_location"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="top"
+                android:layout_marginTop="2dp"
                 app:tint="?attr/colorTertiary"
                 android:contentDescription="@string/destination_location_icon" />
 
-            <TextView
-                android:id="@+id/tvDestinationLocation"
-                android:layout_width="match_parent"
+            <!-- Contenedor vertical para los textos del destino -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Centro Comercial Larcomar, Miraflores"
-                android:textSize="14sp"
-                android:textColor="?attr/colorOnSurface"
+                android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:orientation="vertical">
+
+                <!-- Nombre del destino -->
+                <TextView
+                    android:id="@+id/tvDestinationLocationName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Centro Comercial Larcomar"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Dirección del destino -->
+                <TextView
+                    android:id="@+id/tvDestinationLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Malecón de la Reserva 610, Miraflores, Lima"
+                    android:textSize="13sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout

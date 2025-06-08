@@ -30,14 +30,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.Driver.Adapter.SolicitudesAdapter;
+import com.iot.stayflowdev.Driver.Dtos.SolicitudTaxi;
 import com.iot.stayflowdev.Driver.Model.SolicitudModel;
+import com.iot.stayflowdev.LoginActivity;
 import com.iot.stayflowdev.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 
 public class DriverInicioActivity extends AppCompatActivity {
 
@@ -46,13 +55,17 @@ public class DriverInicioActivity extends AppCompatActivity {
     private MaterialSwitch statusSwitch;
     private TextView statusText;
     private SolicitudesAdapter adapter;
-    private List<SolicitudModel> solicitudes;
+    private List<SolicitudTaxi> solicitudes;
     private BottomNavigationView bottomNavigation;
     private ImageView notificationIcon;
 
     // Variables para notificaciones
     private String channelId = "channelDefaultPri";
     private String gpsChannelId = "channelGPSAlert";
+
+    // Firebase
+    private FirebaseFirestore db; // Si necesitas Firestore, descomentar esta línea
+    private FirebaseAuth mAuth; // Si necesitas autenticación, descomentar esta línea
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +79,52 @@ public class DriverInicioActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
+        // Inicializar Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
+        TextView titleTextView = findViewById(R.id.title);
+
+        // Verificar si el usuario está autenticado
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid(); // ← ESTE ES EL ID ÚNICO DEL USUARIO
+            Log.d("DriverInicio", "UID del usuario autenticado: " + uid);
+
+            // Obtener información del usuario desde Firestore
+            db.collection("usuarios")
+                    .document(uid)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                            DocumentSnapshot document = task.getResult();
+
+                            String nombre = document.getString("nombre");
+                            String correo = document.getString("correo");
+                            String rol = document.getString("rol");
+
+                            Log.d("DriverInicio", "Nombre: " + nombre);
+                            Log.d("DriverInicio", "Correo: " + correo);
+                            Log.d("DriverInicio", "Rol: " + rol);
+
+                            // Mostrar el nombre en el título de la actividad
+                            titleTextView.setText(nombre);
+                        } else {
+                            Log.e("DriverInicio", "Error al obtener datos del usuario o documento no existe", task.getException());
+                        }
+                    });
+        } else {
+            Log.d("DriverInicio", "No hay usuario autenticado.");
+            // Puedes redirigir al login si lo deseas:
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
         // Crear canales de notificación primero
         crearCanalesNotificacion();
 
         //   INICIALIZAR TODAS LAS VISTAS PRIMERO
         inicializarVistas();
 
-        //   CONFIGURAR TODO EN ORDEN CORRECTO
         crearDatosDeSolicitudes();
         configurarRecyclerView();
         configurarSwitch();
@@ -86,11 +137,7 @@ public class DriverInicioActivity extends AppCompatActivity {
         // Verificar GPS al iniciar la app
         verificarEstadoGPS();
     }
-
-
-
-
-    //   MÉTODO SEPARADO PARA INICIALIZAR VISTAS
+    //   METODO SEPARADO PARA INICIALIZAR VISTAS
     private void inicializarVistas() {
         rvSolicitudesCercanas = findViewById(R.id.rvSolicitudesCercanas);
         tvNoSolicitudes = findViewById(R.id.tvNoSolicitudes);
@@ -107,8 +154,6 @@ public class DriverInicioActivity extends AppCompatActivity {
             Log.e("MainActivity", "Error: rvSolicitudesCercanas es null");
         }
     }
-
-
     private void crearCanalesNotificacion() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
 
@@ -135,7 +180,6 @@ public class DriverInicioActivity extends AppCompatActivity {
             askPermission();
         }
     }
-
     private void askPermission() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
@@ -145,8 +189,7 @@ public class DriverInicioActivity extends AppCompatActivity {
                     101);
         }
     }
-
-    // Método para verificar el estado del GPS
+    // Metodo para verificar el estado del GPS
     private void verificarEstadoGPS() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -155,8 +198,7 @@ public class DriverInicioActivity extends AppCompatActivity {
             mostrarNotificacionGPS();
         }
     }
-
-    // Método para mostrar notificación de GPS
+    // Metodo para mostrar notificación de GPS
     private void mostrarNotificacionGPS() {
         // Intent para abrir configuración de ubicación
         Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -196,7 +238,7 @@ public class DriverInicioActivity extends AppCompatActivity {
         }
     }
 
-    // Método para verificar GPS cuando el usuario cambia el estado del switch
+    // Metodo para verificar GPS cuando el usuario cambia el estado del switch
     private boolean verificarGPSParaServicio() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -209,7 +251,6 @@ public class DriverInicioActivity extends AppCompatActivity {
 
         return true; // GPS disponible
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -231,71 +272,65 @@ public class DriverInicioActivity extends AppCompatActivity {
 
     private void crearDatosDeSolicitudes() {
         solicitudes = new ArrayList<>();
+        db.collection("reservas")
+                .whereEqualTo("quieroTaxi", true)
+                .get()
+                .addOnSuccessListener(reservaSnapshots -> {
+                    if (reservaSnapshots.isEmpty()) {
+                        Log.d("Solicitudes", "No hay reservas con taxi = true");
+                        adapter.setListaSolicitudes(solicitudes); // vacío
+                        return;
+                    }
 
-        // Solicitud 1
-        solicitudes.add(new SolicitudModel(
-                "1.2 km",
-                "Hotel Marriot, Miraflores\nAv. Malecón de la Reserva 615, Miraflores 15074, Lima",
-                "Aeropuerto Jorge Chávez, Callao\nAv. Elmer Faucett s/n, Callao 07031",
-                "Hace 2 min",
-                "~45 min",
-                "Carlos Rodríguez",
-                "+51 945 123 456",
-                "2",
-                "Sedán ejecutivo",
-                "Llevo una maleta grande y necesito ayuda con el equipaje. Agradecería puntualidad.",
-                "Pendiente"
-        ));
+                    for (DocumentSnapshot reservaDoc : reservaSnapshots) {
+                        Map<String, Object> servicioTaxi = (Map<String, Object>) reservaDoc.get("servicioTaxi");
+                        Map<String, Object> cantHuespedes = (Map<String, Object>) reservaDoc.get("cantHuespedes");
+                        String idUsuario = reservaDoc.getString("idUsuario");
 
-        // Solicitud 2
-        solicitudes.add(new SolicitudModel(
-                "0.9 km",
-                "Aeropuerto Jorge Chávez, Callao\nAv. Elmer Faucett s/n, Callao 07031",
-                "Hotel Hilton, San Isidro\nAv. La Paz 1099, San Isidro 15073, Lima",
-                "Hace 3 min",
-                "~40 min",
-                "María Fernández",
-                "+51 987 654 321",
-                "1",
-                "Confort",
-                "Preferencia por un conductor que hable inglés. Viajo por negocios.",
-                "Pendiente"
-        ));
+                        if (servicioTaxi == null || cantHuespedes == null || idUsuario == null) continue;
 
-        // Solicitud 3
-        solicitudes.add(new SolicitudModel(
-                "1.5 km",
-                "Hotel Casa Andina, Miraflores\nAv. La Paz 463, Miraflores 15074, Lima",
-                "Aeropuerto Jorge Chávez, Callao\nAv. Elmer Faucett s/n, Callao 07031",
-                "Hace 1 min",
-                "~50 min",
-                "Juan Torres",
-                "+51 923 456 789",
-                "3",
-                "SUV",
-                "Somos 3 pasajeros con equipaje para 5 días. Necesitamos espacio en la maletera.",
-                "Pendiente"
-        ));
+                        String origen = (String) servicioTaxi.get("Origen");
+                        String origenDireccion = (String) servicioTaxi.get("OrigenDireccion");
+                        String destino = (String) servicioTaxi.get("Destino");
+                        String destinoDireccion = (String) servicioTaxi.get("DestinoDireccion");
 
-        // Solicitud 4
-        solicitudes.add(new SolicitudModel(
-                "2.1 km",
-                "Aeropuerto Jorge Chávez, Callao\nAv. Elmer Faucett s/n, Callao 07031",
-                "Hotel Los Delfines, San Isidro\nCalle Los Eucaliptos 555, San Isidro 15073, Lima",
-                "Hace 5 min",
-                "~38 min",
-                "Ana Sánchez",
-                "+51 912 345 678",
-                "4",
-                "Van",
-                "Viajamos con dos niños pequeños. Necesitamos asientos para niños.",
-                "Pendiente"
-        ));
+                        String adultosStr = (String) cantHuespedes.get("adultos");
+                        String ninosStr = (String) cantHuespedes.get("ninos");
 
-        Log.d("MainActivity", "Datos creados: " + solicitudes.size() + " solicitudes");
+                        int adultos = adultosStr != null ? Integer.parseInt(adultosStr) : 0;
+                        int ninos = ninosStr != null ? Integer.parseInt(ninosStr) : 0;
+                        int totalPasajeros = adultos + ninos;
+
+                        // Ahora obtener los datos del usuario
+                        db.collection("usuarios")
+                                .document(idUsuario)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String nombrePasajero = userDoc.getString("nombre");
+                                    String telefonoPasajero = userDoc.getString("telefono"); // si existe
+
+                                    // Crear DTO y llenar datos
+                                    SolicitudTaxi solicitud = new SolicitudTaxi(origen, origenDireccion, destino, destinoDireccion);
+                                    solicitud.setNombrePasajero(nombrePasajero != null ? nombrePasajero : "Usuario desconocido");
+                                    solicitud.setTelefonoPasajero(telefonoPasajero != null ? telefonoPasajero : "No disponible");
+                                    solicitud.setNumeroPasajeros(totalPasajeros);
+                                    solicitud.setTipoVehiculo("Estándar"); // o elige según reglas
+                                    solicitud.setNotas("Solicitud generada automáticamente"); // si no hay campo notas
+
+                                    solicitudes.add(solicitud);
+
+                                    // Actualizar RecyclerView
+                                    adapter.setListaSolicitudes(new ArrayList<>(solicitudes)); // copia para evitar duplicados
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Solicitudes", "Error al cargar reservas: " + e.getMessage());
+                });
     }
 
-    //   MÉTODO SEPARADO PARA CONFIGURAR NOTIFICACIONES
+
+    //   METODO SEPARADO PARA CONFIGURAR NOTIFICACIONES
     private void configurarNotificaciones() {
         if (notificationIcon != null) {
             notificationIcon.setOnClickListener(v -> {
@@ -347,18 +382,13 @@ public class DriverInicioActivity extends AppCompatActivity {
             return;
         }
 
-        // CONFIGURAR LAYOUT MANAGER
         rvSolicitudesCercanas.setLayoutManager(new LinearLayoutManager(this));
-
-        // CREAR Y CONFIGURAR ADAPTADOR
         adapter = new SolicitudesAdapter();
         adapter.setContext(this);
-        adapter.setListaSolicitudes(solicitudes);
-
+        adapter.setListaSolicitudes(new ArrayList<>()); // inicial vacío
         rvSolicitudesCercanas.setAdapter(adapter);
-
-        Log.d("MainActivity", "RecyclerView configurado con " + solicitudes.size() + " elementos");
     }
+
 
     private void configurarSwitch() {
         if (statusSwitch == null) {

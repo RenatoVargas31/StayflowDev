@@ -3,6 +3,7 @@ package com.iot.stayflowdev.Driver.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textview.MaterialTextView;
+import com.iot.stayflowdev.Driver.Dtos.SolicitudTaxi;
 import com.iot.stayflowdev.R;
 
 public class DriverInfoSolicitudActivity extends AppCompatActivity {
@@ -36,6 +38,9 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
     private MaterialTextView notasContenido;
     private MaterialButton btnAceptar;
     private MaterialButton btnRechazar;
+    private MaterialTextView origen;
+    private MaterialTextView destino;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,8 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
         numeroPasajeros = findViewById(R.id.numeroPasajeros);
         tipoVehiculo = findViewById(R.id.tipoVehiculo);
         direccionOrigen = findViewById(R.id.direccionOrigen);
+        origen = findViewById(R.id.direccionOrigenName);
+        destino = findViewById(R.id.direccionDestinoName);
         direccionDestino = findViewById(R.id.direccionDestino);
         distanciaValor = findViewById(R.id.distanciaValor);
         tiempoValor = findViewById(R.id.tiempoValor);
@@ -88,38 +95,31 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
     }
 
     private void recuperarDatosIntent() {
-        Intent intent = getIntent();
+        SolicitudTaxi solicitud = (SolicitudTaxi) getIntent().getSerializableExtra("solicitud");
 
-        // Obtener datos de la solicitud
-        String pickupLocation = intent.getStringExtra("EXTRA_PICKUP_LOCATION");
-        String destinationLocation = intent.getStringExtra("EXTRA_DESTINATION_LOCATION");
-        String distance = intent.getStringExtra("EXTRA_DISTANCE");
-        String time = intent.getStringExtra("EXTRA_TIME");
-        String estimatedTime = intent.getStringExtra("EXTRA_ESTIMATED_TIME");
+        if (solicitud == null) {
+            Toast.makeText(this, "No se recibió la solicitud", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Obtener datos adicionales
-        String passengerName = intent.getStringExtra("EXTRA_PASSENGER_NAME");
-        String passengerPhone = intent.getStringExtra("EXTRA_PASSENGER_PHONE");
-        String passengersCount = intent.getStringExtra("EXTRA_PASSENGERS_COUNT");
-        String vehicleType = intent.getStringExtra("EXTRA_VEHICLE_TYPE");
-        String notes = intent.getStringExtra("EXTRA_NOTES");
-        String status = intent.getStringExtra("EXTRA_STATUS");
+        // Mostrar los datos
+        nombrePasajero.setText(solicitud.getNombrePasajero());
+        telefonoPasajero.setText(solicitud.getTelefonoPasajero());
+        numeroPasajeros.setText(solicitud.getNumeroPasajeros() + " pasajeros");
+        tipoVehiculo.setText(solicitud.getTipoVehiculo());
+        direccionOrigen.setText(solicitud.getOrigenDireccion());
+        origen.setText(solicitud.getOrigen());
+        destino.setText(solicitud.getDestino());
+        direccionDestino.setText(solicitud.getDestinoDireccion());
+        distanciaValor.setText("~3 km");  // puedes calcularlo más adelante
+        tiempoValor.setText("~15 min");  // estimado ficticio
+        notasContenido.setText(solicitud.getNotas());
 
-        // Mostrar los datos en la UI
-        horaValor.setText(time);
-        nombrePasajero.setText(passengerName);
-        telefonoPasajero.setText(passengerPhone);
-        numeroPasajeros.setText(passengersCount + " pasajeros");
-        tipoVehiculo.setText(vehicleType);
-        direccionOrigen.setText(pickupLocation);
-        direccionDestino.setText(destinationLocation);
-        distanciaValor.setText(distance);
-        tiempoValor.setText(estimatedTime);
-        notasContenido.setText(notes);
-
-        // Configurar el chip de estado
-        configurarEstadoChip(status);
+        // Puedes usar estado fijo o dinámico
+        configurarEstadoChip("pendiente");
     }
+
 
     private void configurarEstadoChip(String status) {
         estadoChip.setText(status);

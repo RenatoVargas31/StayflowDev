@@ -286,6 +286,7 @@
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
+                    <!-- Título de la sección -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/recorridoTitulo"
                         android:layout_width="match_parent"
@@ -297,7 +298,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Origen -->
+                    <!-- ORIGEN -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/origenDot"
                         android:layout_width="16dp"
@@ -314,48 +315,67 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:text="Origen"
-                        android:textSize="13dp"
+                        android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                         android:textColor="#1976D2"
                         app:layout_constraintStart_toEndOf="@+id/origenDot"
                         app:layout_constraintTop_toTopOf="@+id/origenDot"
                         app:layout_constraintBottom_toBottomOf="@+id/origenDot" />
 
+                    <!-- Nombre del lugar de origen -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/direccionOrigenName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Hotel Hilton Lima"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                        android:textColor="?attr/colorOnSurface"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/origenLabel"
+                        app:layout_constraintTop_toBottomOf="@+id/origenLabel" />
+
+                    <!-- Dirección del origen -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionOrigen"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="2dp"
                         android:text="Av. Javier Prado Este 1234, San Isidro, Lima"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="13sp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="2"
+                        android:ellipsize="end"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/origenLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/origenLabel" />
+                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigenName" />
 
                     <!-- Línea vertical conectora -->
                     <View
                         android:id="@+id/lineaConectora"
                         android:layout_width="2dp"
-                        android:layout_height="0dp"
+                        android:layout_height="24dp"
                         android:background="?attr/colorOutlineVariant"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"
-                        app:layout_constraintBottom_toTopOf="@+id/destinoDot"
+                        android:layout_marginTop="8dp"
                         app:layout_constraintEnd_toEndOf="@+id/origenDot"
                         app:layout_constraintStart_toStartOf="@+id/origenDot"
-                        app:layout_constraintTop_toBottomOf="@+id/origenDot" />
+                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigen" />
 
-                    <!-- Destino -->
+                    <!-- DESTINO -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/destinoDot"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:layout_marginTop="48dp"
+                        android:layout_marginTop="8dp"
                         android:src="@drawable/ic_location"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigen"
-                        app:tint="#2c4e38" />
+                        app:layout_constraintTop_toBottomOf="@+id/lineaConectora"
+                        app:tint="#2E7D32" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/destinoLabel"
@@ -363,44 +383,66 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:text="Destino"
-                        android:textSize="13dp"
+                        android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                        android:textColor="#2c4e38"
+                        android:textColor="#2E7D32"
                         app:layout_constraintStart_toEndOf="@+id/destinoDot"
                         app:layout_constraintTop_toTopOf="@+id/destinoDot"
                         app:layout_constraintBottom_toBottomOf="@+id/destinoDot" />
 
+                    <!-- Nombre del lugar de destino -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/direccionDestinoName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Centro Comercial Larcomar"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                        android:textColor="?attr/colorOnSurface"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/destinoLabel"
+                        app:layout_constraintTop_toBottomOf="@+id/destinoLabel" />
+
+                    <!-- Dirección del destino -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionDestino"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Calle Las Palmeras 456, Miraflores, Lima"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginTop="2dp"
+                        android:text="Malecón de la Reserva 610, Miraflores, Lima"
+                        android:textSize="13sp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="2"
+                        android:ellipsize="end"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/destinoLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/destinoLabel" />
+                        app:layout_constraintTop_toBottomOf="@+id/direccionDestinoName" />
 
                     <!-- Detalles del recorrido -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/detallesRecorrido"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="20dp"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp"
                         app:strokeWidth="1dp"
                         app:strokeColor="?attr/colorOutlineVariant"
                         style="@style/Widget.Material3.CardView.Filled"
-                        app:layout_constraintTop_toBottomOf="@+id/direccionDestino">
+                        app:layout_constraintTop_toBottomOf="@+id/direccionDestino"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:padding="12dp"
-                            android:gravity="center">
+                            android:padding="16dp">
 
                             <!-- Distancia -->
                             <LinearLayout
@@ -421,18 +463,20 @@
                                     android:id="@+id/distanciaValor"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
                                     android:text="8.5 km"
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
                             </LinearLayout>
 
                             <!-- Separador vertical -->
-                            <com.google.android.material.divider.MaterialDivider
+                            <View
                                 android:layout_width="1dp"
                                 android:layout_height="match_parent"
-                                android:orientation="vertical" />
+                                android:layout_marginHorizontal="16dp"
+                                android:background="?attr/colorOutlineVariant" />
 
-                            <!-- Tiempo de llegada -->
+                            <!-- Tiempo estimado -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -451,6 +495,7 @@
                                     android:id="@+id/tiempoValor"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
                                     android:text="25 min"
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
@@ -465,7 +510,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
+                        app:cardElevation="2dp"
                         style="@style/Widget.Material3.CardView.Filled"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -473,7 +518,7 @@
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="180dp">
+                            android:layout_height="200dp">
 
                             <fragment
                                 android:id="@+id/rutaMapa"

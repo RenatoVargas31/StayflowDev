@@ -6,81 +6,82 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+import com.iot.stayflowdev.Driver.Dtos.SolicitudTaxi;
 import com.iot.stayflowdev.Driver.Model.SolicitudModel;
 import com.iot.stayflowdev.Driver.Activity.DriverInfoSolicitudActivity;
 import com.iot.stayflowdev.R;
 
+import java.util.ArrayList;
 import java.util.List;
-
 public class SolicitudesAdapter extends RecyclerView.Adapter<SolicitudesAdapter.SolicitudViewHolder> {
-    private List<SolicitudModel> listaSolicitudes;
+    private List<SolicitudTaxi> listaSolicitudes = new ArrayList<>();
     private Context context;
-
-    public void setListaSolicitudes(List<SolicitudModel> listaSolicitudes) {
+    public void setListaSolicitudes(List<SolicitudTaxi> listaSolicitudes) {
         this.listaSolicitudes = listaSolicitudes;
+        notifyDataSetChanged(); // Actualiza el RecyclerView cuando se recibe la nueva lista
     }
-
     public void setContext(Context context) {
         this.context = context;
     }
-
     public class SolicitudViewHolder extends RecyclerView.ViewHolder {
-        SolicitudModel solicitud;
-        TextView tvDistance, tvPickupLocation, tvDestinationLocation, tvTiempo, tvEstimatedTime;
+        TextView tvPickupLocationName, tvPickupLocation;
+        TextView tvDestinationLocationName, tvDestinationLocation;
+        TextView tvDistance, tvTiempo, tvEstimatedTime;
         MaterialCardView cardSolicitud;
-
         public SolicitudViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvDistance = itemView.findViewById(R.id.tvDistance);
+
+            // Pickup
+            tvPickupLocationName = itemView.findViewById(R.id.tvPickupLocationName);
             tvPickupLocation = itemView.findViewById(R.id.tvPickupLocation);
+
+            // Destination
+            tvDestinationLocationName = itemView.findViewById(R.id.tvDestinationLocationName);
             tvDestinationLocation = itemView.findViewById(R.id.tvDestinationLocation);
+
+            // Extras (puedes usarlos más adelante)
+            tvDistance = itemView.findViewById(R.id.tvDistance);
             tvTiempo = itemView.findViewById(R.id.tvTiempo);
             tvEstimatedTime = itemView.findViewById(R.id.tvEstimatedTime);
+
+            // Card
             cardSolicitud = itemView.findViewById(R.id.cardSolicitud);
-
-            cardSolicitud.setOnClickListener(view -> {
-                // Iniciar la actividad de detalles y pasar los datos
-                Intent intent = new Intent(context, DriverInfoSolicitudActivity.class);
-
-                // Pasar todos los datos de la solicitud a la actividad de detalles
-                intent.putExtra("EXTRA_PICKUP_LOCATION", solicitud.getPickupLocation());
-                intent.putExtra("EXTRA_DESTINATION_LOCATION", solicitud.getDestinationLocation());
-                intent.putExtra("EXTRA_DISTANCE", solicitud.getDistance());
-                intent.putExtra("EXTRA_TIME", solicitud.getTiempo());
-                intent.putExtra("EXTRA_ESTIMATED_TIME", solicitud.getEstimatedTime());
-                intent.putExtra("EXTRA_PASSENGER_NAME", solicitud.getPassengerName());
-                intent.putExtra("EXTRA_PASSENGER_PHONE", solicitud.getPassengerPhone());
-                intent.putExtra("EXTRA_PASSENGERS_COUNT", solicitud.getPassengersCount());
-                intent.putExtra("EXTRA_VEHICLE_TYPE", solicitud.getVehicleType());
-                intent.putExtra("EXTRA_NOTES", solicitud.getNotes());
-                intent.putExtra("EXTRA_STATUS", solicitud.getStatus());
-
-                context.startActivity(intent);
-            });
         }
     }
 
     @NonNull
     @Override
     public SolicitudViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_solicitud_cercana, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_solicitud_cercana, parent, false);
         return new SolicitudViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SolicitudViewHolder holder, int position) {
-        SolicitudModel s = listaSolicitudes.get(position);
-        holder.solicitud = s;
-        holder.tvDistance.setText(s.getDistance());
-        holder.tvPickupLocation.setText(s.getPickupLocation());
-        holder.tvDestinationLocation.setText(s.getDestinationLocation());
-        holder.tvTiempo.setText(s.getTiempo());
-        holder.tvEstimatedTime.setText(s.getEstimatedTime());
+        SolicitudTaxi solicitud = listaSolicitudes.get(position); // ← esta es la línea clave
+
+        // Asignar datos a las vistas
+        holder.tvPickupLocationName.setText(solicitud.getOrigen());
+        holder.tvPickupLocation.setText(solicitud.getOrigenDireccion());
+        holder.tvDestinationLocationName.setText(solicitud.getDestino());
+        holder.tvDestinationLocation.setText(solicitud.getDestinoDireccion());
+
+        holder.tvDistance.setText("Distancia: ~3 km");
+        holder.tvTiempo.setText("Hace 1 min");
+        holder.tvEstimatedTime.setText("~15 min");
+
+        // Click al card
+        holder.cardSolicitud.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DriverInfoSolicitudActivity.class);
+            intent.putExtra("solicitud", solicitud); // ✅ Ahora sí existe
+            context.startActivity(intent);
+        });
     }
 
     @Override
