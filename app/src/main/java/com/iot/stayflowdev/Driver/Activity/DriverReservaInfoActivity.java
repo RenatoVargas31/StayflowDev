@@ -49,6 +49,9 @@ public class DriverReservaInfoActivity extends AppCompatActivity {
     private MaterialTextView tv_distancia;
     private MaterialButton btn_ver_mapa;
 
+    // ID de la solicitud
+    private String solicitudId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,12 +111,13 @@ public class DriverReservaInfoActivity extends AppCompatActivity {
             // Puedes pasar datos adicionales aquí
             // intent.putExtra("HOTEL_LAT", hotelLatitud);
             // intent.putExtra("HOTEL_LNG", hotelLongitud);
+            intent.putExtra("SOLICITUD_ID", solicitudId);
             startActivity(intent);
         });
     }
     private void cargarDatosDesdeFirebase() {
         // Obtener el ID del documento desde el Intent
-        String solicitudId = getIntent().getStringExtra("SOLICITUD_ID");
+        solicitudId = getIntent().getStringExtra("SOLICITUD_ID");
         if (solicitudId == null || solicitudId.isEmpty()) {
             Log.e("DriverReservaInfo", "No se recibió SOLICITUD_ID");
             Toast.makeText(this, "Error: No se pudo cargar la información", Toast.LENGTH_SHORT).show();
