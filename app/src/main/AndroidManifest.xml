@@ -66,6 +66,9 @@
             android:name=".superAdmin.FilterReportActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.AddHotelActivity"
+            android:exported="false" />
+        <activity
             android:name=".superAdmin.LogsActivity"
             android:exported="false" />
         <activity

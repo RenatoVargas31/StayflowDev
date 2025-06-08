@@ -1,125 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <LinearLayout
+        <!-- Chip Group para filtrado -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
 
-            <!-- Chip Group para filtrado -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupFiltro"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:orientation="horizontal"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupFiltro"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTodos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true">
+                    android:checked="true"
+                    android:text="Todos"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_directions_walk"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipTodos"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="Todos"
-                        app:checkedIconVisible="false"
-                        app:chipIcon="@drawable/ic_directions_walk"
-                        app:chipIconTint="@color/md_theme_primary"
-                        app:chipIconVisible="true" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAdmins"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Perú"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_group_fill"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipAdmins"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Perú"
-                        app:checkedIconVisible="false"
-                        app:chipIcon="@drawable/ic_group_fill"
-                        app:chipIconTint="@color/md_theme_primary"
-                        app:chipIconVisible="true" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTaxistas"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Argentina"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_local_taxi"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipTaxistas"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Argentina"
-                        app:checkedIconVisible="false"
-                        app:chipIcon="@drawable/ic_local_taxi"
-                        app:chipIconTint="@color/md_theme_primary"
-                        app:chipIconVisible="true" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipClientes"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chile"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_person"
+                    app:chipIconTint="@color/md_theme_primary"
+                    app:chipIconVisible="true" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipClientes"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chile"
-                        app:checkedIconVisible="false"
-                        app:chipIcon="@drawable/ic_person"
-                        app:chipIconTint="@color/md_theme_primary"
-                        app:chipIconVisible="true" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
 
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
+        <!-- Barra de búsqueda -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#F5F5F5">
 
-            <!-- Barra de búsqueda -->
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:cardBackgroundColor="#F5F5F5">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
 
-                <LinearLayout
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="Ícono de búsqueda" />
+
+                <EditText
+                    android:id="@+id/searchEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="8dp">
+                    android:background="@null"
+                    android:hint="Buscar hotel"
+                    android:padding="8dp"
+                    android:textSize="16sp"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:imeOptions="actionSearch" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <ImageView
-                        android:id="@+id/searchIcon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="8dp"
-                        android:src="@drawable/ic_search"
-                        android:contentDescription="Ícono de búsqueda" />
+        <!-- RecyclerView para mostrar los hoteles -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewHotels"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp" />
 
-                    <EditText
-                        android:id="@+id/searchEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:hint="Buscar hotel"
-                        android:padding="8dp"
-                        android:textSize="16sp"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:imeOptions="actionSearch" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
-            <!-- RecyclerView para mostrar los hoteles -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewHotels"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="16dp"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp" />
+    <!-- Progress Indicator -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
-        </LinearLayout>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- Botón flotante para agregar hoteles -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabAddHotel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:text="Agregar Hotel"
+        app:icon="@drawable/ic_add_circle"
+        app:chipIconTint="@color/md_theme_inversePrimary_mediumContrast"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
