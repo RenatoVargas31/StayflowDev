@@ -162,17 +162,21 @@ public class LoginCuentaFireBase extends AppCompatActivity {
             return;
         }
 
-        switch (rol.toLowerCase()) {
+        // Convertir el rol a minúsculas y eliminar espacios
+        String rolNormalizado = rol.toLowerCase().trim();
+        Log.d(TAG, "Rol normalizado para comparación: '" + rolNormalizado + "'");
+
+        switch (rolNormalizado) {
             case "adminhotel":
-                Log.d(TAG, "Rol detectado: adminHotel - Navegando a AdminInicioActivity");
-                intent = new Intent(this, AdminInicioActivity.class);
+                Log.d(TAG, "Rol detectado: adminhotel - Navegando a AdminInicioActivity");
+                intent = new Intent(this, com.iot.stayflowdev.adminHotel.AdminInicioActivity.class);
                 break;
             case "driver":
                 Log.d(TAG, "Rol detectado: driver - Navegando a DriverInicioActivity");
-                intent = new Intent(this, DriverInicioActivity.class);
+                intent = new Intent(this, com.iot.stayflowdev.Driver.Activity.DriverInicioActivity.class);
                 break;
             case "superadmin":
-                Log.d(TAG, "Rol detectado: superAdmin - Navegando a InicioActivity");
+                Log.d(TAG, "Rol detectado: superadmin - Navegando a InicioActivity");
                 intent = new Intent(this, com.iot.stayflowdev.superAdmin.InicioActivity.class);
                 break;
             case "usuario":
@@ -180,7 +184,7 @@ public class LoginCuentaFireBase extends AppCompatActivity {
                 intent = new Intent(this, com.iot.stayflowdev.cliente.ClientePerfilActivity.class);
                 break;
             default:
-                Log.w(TAG, "Rol desconocido: " + rol + " - Navegando a actividad por defecto");
+                Log.w(TAG, "Rol desconocido: '" + rol + "' - Navegando a actividad por defecto");
                 irAActividadPorDefecto();
                 return;
         }
@@ -198,3 +202,4 @@ public class LoginCuentaFireBase extends AppCompatActivity {
         finish();
     }
 }
+
