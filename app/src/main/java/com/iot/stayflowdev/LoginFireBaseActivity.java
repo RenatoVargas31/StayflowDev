@@ -215,6 +215,10 @@ public class LoginFireBaseActivity extends AppCompatActivity {
                 Log.d(TAG, "Rol detectado: superAdmin - Navegando a InicioActivity");
                 intent = new Intent(this, com.iot.stayflowdev.superAdmin.InicioActivity.class);
                 break;
+            case "usuario":
+                Log.d(TAG, "Rol detectado: usuario - Navegando a ClientePerfilActivity");
+                intent = new Intent(this, com.iot.stayflowdev.cliente.ClientePerfilActivity.class);
+                break;
             default:
                 Log.w(TAG, "Rol desconocido: " + rol + " - Navegando a actividad por defecto");
                 irAActividadPorDefecto();
@@ -228,7 +232,7 @@ public class LoginFireBaseActivity extends AppCompatActivity {
     private void irAActividadPorDefecto() {
         // Por defecto, navegar a PerfilActivity (o cualquier otra actividad de tu elección)
         Log.d(TAG, "Navegando a actividad por defecto (PerfilActivity)");
-        Intent intent = new Intent(this, com.iot.stayflowdev.superAdmin.PerfilActivity.class);
+        Intent intent = new Intent(this, com.iot.stayflowdev.cliente.ClientePerfilActivity.class);
         startActivity(intent);
         finish();
     }

@@ -175,6 +175,10 @@ public class LoginCuentaFireBase extends AppCompatActivity {
                 Log.d(TAG, "Rol detectado: superAdmin - Navegando a InicioActivity");
                 intent = new Intent(this, com.iot.stayflowdev.superAdmin.InicioActivity.class);
                 break;
+            case "usuario":
+                Log.d(TAG, "Rol detectado: usuario - Navegando a ClientePerfilActivity");
+                intent = new Intent(this, com.iot.stayflowdev.cliente.ClientePerfilActivity.class);
+                break;
             default:
                 Log.w(TAG, "Rol desconocido: " + rol + " - Navegando a actividad por defecto");
                 irAActividadPorDefecto();
