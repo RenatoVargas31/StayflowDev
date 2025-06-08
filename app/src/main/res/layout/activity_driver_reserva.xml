@@ -94,12 +94,14 @@
         app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
         <ImageView
+            android:id="@+id/empty_image"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:contentDescription="No hay reservas activas"
             android:src="@drawable/freepik__background__21715" />
 
         <TextView
+            android:id="@+id/empty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

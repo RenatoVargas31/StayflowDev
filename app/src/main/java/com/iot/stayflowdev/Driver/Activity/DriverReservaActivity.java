@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -28,12 +29,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.Driver.Adapter.ReservasAdapter;
 import com.iot.stayflowdev.Driver.Model.ReservaModel;
 import com.iot.stayflowdev.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DriverReservaActivity extends AppCompatActivity implements ReservasAdapter.OnReservaClickListener {
 
@@ -48,6 +56,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
     private List<ReservaModel> reservasPasadas = new ArrayList<>();
     private List<ReservaModel> reservasCanceladas = new ArrayList<>();
     private String channelId = "channelReservas";
+    //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +85,14 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         // Añadir algo de espacio entre elementos
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        // Cargar datos de ejemplo
-        cargarDatosDeEjemplo();
+       //Cargar datos desde Firestore
+        cargarSolicitudesDesdeFirestore();
 
         // Inicializar adaptador con las reservas en curso por defecto
         adapter = new ReservasAdapter(this, reservasEnCurso, this);
         recyclerView.setAdapter(adapter);
 
-        // Mostrar vista vacía si no hay reservas
-        actualizarVistaVacia(reservasEnCurso);
+        actualizarVistaVacia(reservasEnCurso, 0); // 0 → corresponde a la pestaña "En curso"
 
         // Configurar listener del TabLayout
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -131,7 +139,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         }
     }
 
-    // Este método ya está correcto según el PPT
+    // Este metodo ya está correcto según el PPT
     public void mostrarNotificacionReservasActivas() {
         int reservasActivas = reservasEnCurso.size();
 
@@ -155,7 +163,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
     }
 
 
-    //  MÉTODO PARA INICIALIZAR VISTAS
+    //  MeTODO PARA INICIALIZAR VISTAS
     private void inicializarVistas() {
         tabLayout = findViewById(R.id.tabLayout);
         recyclerView = findViewById(R.id.recyclerViewReservas);
@@ -197,59 +205,97 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
             return false;
         });
     }
-    // MÉTODO PARA NAVEGAR SIN ANIMACIÓN
+    // MeTODO PARA NAVEGAR SIN ANIMACIÓN
     private void navegarSinAnimacion(Class<?> activityClass) {
         Intent intent = new Intent(this, activityClass);
         startActivity(intent);
         overridePendingTransition(0, 0);
         finish();
     }
-    // Método para cambiar los datos en el RecyclerView según la pestaña seleccionada
+    // Metodo para cambiar los datos en el RecyclerView según la pestaña seleccionada
     private void cambiarDatosPorTab(int position) {
         switch (position) {
             case 0: // En curso
                 adapter.actualizarDatos(reservasEnCurso);
-                actualizarVistaVacia(reservasEnCurso);
+                actualizarVistaVacia(reservasEnCurso, 0);
                 break;
             case 1: // Pasado
                 adapter.actualizarDatos(reservasPasadas);
-                actualizarVistaVacia(reservasPasadas);
+                actualizarVistaVacia(reservasPasadas, 1);
                 break;
             case 2: // Cancelado
                 adapter.actualizarDatos(reservasCanceladas);
-                actualizarVistaVacia(reservasCanceladas);
+                actualizarVistaVacia(reservasCanceladas, 2);
                 break;
         }
     }
 
+
     // Método para mostrar/ocultar la vista vacía
-    private void actualizarVistaVacia(List<ReservaModel> listaActual) {
+    private void actualizarVistaVacia(List<ReservaModel> listaActual, int tabIndex) {
         if (listaActual.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
             emptyView.setVisibility(View.VISIBLE);
+
+            TextView emptyText = findViewById(R.id.empty_text);
+            switch (tabIndex) {
+                case 0:
+                    emptyText.setText("No tienes reservas activas");
+                    break;
+                case 1:
+                    emptyText.setText("Aún no tienes reservas pasadas");
+                    break;
+                case 2:
+                    emptyText.setText("Aún no tienes reservas canceladas");
+                    break;
+            }
         } else {
             recyclerView.setVisibility(View.VISIBLE);
             emptyView.setVisibility(View.GONE);
         }
     }
+    private void cargarSolicitudesDesdeFirestore() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-    // Método para cargar datos de ejemplo
-    private void cargarDatosDeEjemplo() {
-        // Reservas En Curso - Cambiar de Reserva a ReservaModel
-        reservasEnCurso.add(new ReservaModel(1, "Luis Quispe Rojas", "Altura Real Hotel", "Aeropuerto",
-                "1.2 Km", "23 de Abril", "10:30", R.drawable.ic_hotel, "en_curso"));
-        reservasEnCurso.add(new ReservaModel(2, "Ana Ramirez Campos", "Aeropuerto", "Oasis Urbano",
-                "1.0 Km", "23 de Abril", "12:00", R.drawable.ic_aeropuerto, "en_curso"));
+        if (user == null) {
+            Log.e("Firestore", "Usuario no autenticado");
+            return;
+        }
 
-        // Reservas Pasadas - Cambiar de Reserva a ReservaModel
-        reservasPasadas.add(new ReservaModel(3, "Laura González", "La Casona del Lago", "Aeropuerto",
-                "1.5 Km", "23 de Abril", "14:30", R.drawable.ic_hotel, "pasado"));
-        reservasPasadas.add(new ReservaModel(4, "Jorge Enrique Vidal", "Aeropuerto", "La Perla",
-                "1.2 Km", "23 de Abril", "15:30", R.drawable.ic_aeropuerto, "pasado"));
+        db.collection("solicitudesTaxi")
+                .whereEqualTo("esAceptada", true)
+                .whereEqualTo("idTaxista", user.getUid())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    reservasEnCurso.clear();
 
-        // Reservas Canceladas - Cambiar de Reserva a ReservaModel
-        reservasCanceladas.add(new ReservaModel(5, "Miguel Castro", "Hotel Mirador", "Centro Comercial",
-                "2.0 Km", "22 de Abril", "09:15", R.drawable.ic_hotel, "cancelado"));
+                    for (DocumentSnapshot doc : snapshot) {
+                        String id = doc.getId();
+                        String nombre = doc.getString("nombrePasajero");
+                        String origen = doc.getString("origen");
+                        String destino = doc.getString("destino");
+                        Timestamp timestamp = doc.getTimestamp("fechaCreacion");
+                        String fecha = timestamp != null
+                                ? new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(timestamp.toDate())
+                                : "Sin fecha";
+                        String hora = doc.getString("horaAceptacion");
+                        String estado = doc.getString("estado");
+
+                        ReservaModel reserva = new ReservaModel(
+                                0, nombre, origen, destino, "1.2 Km",
+                                fecha != null ? fecha : "N/A",
+                                hora != null ? hora : "N/A",
+                                R.drawable.ic_carro, estado != null ? estado : "en_curso"
+                        );
+
+                        reservasEnCurso.add(reserva);
+                    }
+
+                    adapter.actualizarDatos(reservasEnCurso);
+                    actualizarVistaVacia(reservasEnCurso, 0); // En curso
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error cargando solicitudesTaxi", e));
     }
 
 
