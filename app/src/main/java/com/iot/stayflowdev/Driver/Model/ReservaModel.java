@@ -12,6 +12,16 @@ public class ReservaModel {
     private int tipoIcono;
     private String estado;
 
+    public String getSolicitudId() {
+        return solicitudId;
+    }
+
+    public void setSolicitudId(String solicitudId) {
+        this.solicitudId = solicitudId;
+    }
+
+    private String solicitudId;
+
     // Constructor
     public ReservaModel(int id, String nombrePasajero, String origen, String destino,
                    String distancia, String fecha, String hora, int tipoIcono, String estado) {

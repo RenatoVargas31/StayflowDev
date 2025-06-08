@@ -24,7 +24,7 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Solicitudes de recojo"
+                android:text="Detalles de recojo"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"

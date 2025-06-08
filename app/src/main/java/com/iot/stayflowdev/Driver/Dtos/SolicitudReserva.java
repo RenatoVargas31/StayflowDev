@@ -1,7 +1,7 @@
 package com.iot.stayflowdev.Driver.Dtos;
 
 public class SolicitudReserva {
-    private String id;
+    private String documentId ;
     private String nombrePasajero;
     private String origen;
     private String destino;
@@ -10,12 +10,13 @@ public class SolicitudReserva {
     private String hora;
     private String estado;
 
-    public String getId() {
-        return id;
+
+    public String getDocumentId() {
+        return documentId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public String getNombrePasajero() {

@@ -18,7 +18,44 @@ public class SolicitudTaxi implements Serializable {
     private int numeroPasajeros;
     private String tipoVehiculo;
     private String notas;
-    // Campos de Solicitud
+    // AGREGAR ESTOS CAMPOS NUEVOS:
+    private String idCliente;
+    private String idHotel;
+    private String reservaId;
+
+    public String getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(String idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public String getIdHotel() {
+        return idHotel;
+    }
+
+    public void setIdHotel(String idHotel) {
+        this.idHotel = idHotel;
+    }
+
+    public String getReservaId() {
+        return reservaId;
+    }
+
+    public void setReservaId(String reservaId) {
+        this.reservaId = reservaId;
+    }
+
+    public Timestamp getFechaSalida() {
+        return fechaSalida;
+    }
+
+    public void setFechaSalida(Timestamp fechaSalida) {
+        this.fechaSalida = fechaSalida;
+    }
+
+    private Timestamp fechaSalida;
 
     private Timestamp fechaCreacion;
     private String estado; // Estado de la solicitud (pendiente, aceptada, rechazada, etc.)

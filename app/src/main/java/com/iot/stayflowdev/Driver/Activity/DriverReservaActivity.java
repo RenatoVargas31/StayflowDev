@@ -271,7 +271,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
                     reservasEnCurso.clear();
 
                     for (DocumentSnapshot doc : snapshot) {
-                        String id = doc.getId();
+                        String documentId = doc.getId();
                         String nombre = doc.getString("nombrePasajero");
                         String origen = doc.getString("origen");
                         String destino = doc.getString("destino");
@@ -288,6 +288,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
                                 hora != null ? hora : "N/A",
                                 R.drawable.ic_carro, estado != null ? estado : "en_curso"
                         );
+                        reserva.setSolicitudId(documentId);
 
                         reservasEnCurso.add(reserva);
                     }
@@ -313,7 +314,7 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         // Aquí puedes manejar el clic en una reserva, como abrir detalles
         Toast.makeText(this, "Reserva seleccionada: " + reserva.getNombrePasajero(), Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, DriverReservaInfoActivity.class);
-        intent.putExtra("RESERVA_ID", reserva.getId());
+        intent.putExtra("SOLICITUD_ID", reserva.getSolicitudId());
         startActivity(intent);
 
     }
