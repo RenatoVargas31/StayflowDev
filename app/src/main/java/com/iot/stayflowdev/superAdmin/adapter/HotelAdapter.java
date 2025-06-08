@@ -1,5 +1,6 @@
 package com.iot.stayflowdev.superAdmin.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.superAdmin.model.Hotel;
+import com.iot.stayflowdev.model.Hotel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class HotelAdapter
         extends RecyclerView.Adapter<HotelAdapter.HotelViewHolder>
         implements Filterable {
+
+    private static final String TAG = "HotelAdapter";
 
     public interface OnHotelClickListener {
         void onHotelClick(Hotel hotel);
@@ -28,15 +32,40 @@ public class HotelAdapter
     private List<Hotel> hotelList;          // lista que se muestra
     private List<Hotel> hotelListFull;      // copia completa para filtrar
     private OnHotelClickListener listener;
+    private Map<String, String> adminNamesMap; // Mapa para almacenar nombres de administradores por ID
 
     public HotelAdapter(List<Hotel> hotelList, OnHotelClickListener listener) {
-        this.hotelList = new ArrayList<>(hotelList);
-        this.hotelListFull = new ArrayList<>(hotelList);
+        this.hotelList = new ArrayList<>();
+        this.hotelListFull = new ArrayList<>();
+        if (hotelList != null) {
+            this.hotelList.addAll(hotelList);
+            this.hotelListFull.addAll(hotelList);
+        }
         this.listener = listener;
+        Log.d(TAG, "HotelAdapter creado con " + this.hotelList.size() + " hoteles");
+    }
+
+    public void updateHotels(List<Hotel> newHotels) {
+        this.hotelList.clear();
+        this.hotelListFull.clear();
+        if (newHotels != null) {
+            this.hotelList.addAll(newHotels);
+            this.hotelListFull.addAll(newHotels);
+        }
+        Log.d(TAG, "Lista de hoteles actualizada: " + hotelList.size() + " elementos");
+        notifyDataSetChanged();
+    }
+
+    public void setAdminNamesMap(Map<String, String> adminNamesMap) {
+        this.adminNamesMap = adminNamesMap;
+        Log.d(TAG, "Mapa de nombres de administradores actualizado, tamaño: " +
+              (adminNamesMap != null ? adminNamesMap.size() : 0));
+        notifyDataSetChanged();
     }
 
     @NonNull @Override
     public HotelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d(TAG, "Creando ViewHolder");
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.superadmin_item_hotel_card, parent, false);
         return new HotelViewHolder(view);
@@ -44,9 +73,41 @@ public class HotelAdapter
 
     @Override
     public void onBindViewHolder(@NonNull HotelViewHolder holder, int position) {
+        if (position >= hotelList.size()) {
+            Log.e(TAG, "Posición fuera de límites: " + position + " para lista de tamaño " + hotelList.size());
+            return;
+        }
+
         Hotel hotel = hotelList.get(position);
-        holder.textViewHotelName.setText(hotel.getName());
-        holder.textViewHotelDescription.setText(hotel.getDescription());
+        Log.d(TAG, "Mostrando hotel en posición " + position + ": " +
+              (hotel != null ? (hotel.getNombre() + ", admin: " + hotel.getAdministradorAsignado()) : "null"));
+
+        if (hotel == null) {
+            Log.e(TAG, "Hotel null en posición " + position);
+            return;
+        }
+
+        // Mostrar el nombre del hotel
+        if (hotel.getNombre() != null) {
+            holder.textViewHotelName.setText(hotel.getNombre());
+        } else {
+            holder.textViewHotelName.setText("Hotel sin nombre");
+        }
+
+        // Mostrar el nombre del administrador si está disponible
+        if (hotel.getAdministradorAsignado() != null && !hotel.getAdministradorAsignado().isEmpty() && adminNamesMap != null) {
+            String adminName = adminNamesMap.get(hotel.getAdministradorAsignado());
+            if (adminName != null) {
+                holder.textViewAdminName.setText("Administrador: " + adminName);
+                Log.d(TAG, "Administrador encontrado: " + adminName);
+            } else {
+                holder.textViewAdminName.setText("Administrador: Asignado pero sin nombre");
+                Log.d(TAG, "Administrador no encontrado en el mapa para ID: " + hotel.getAdministradorAsignado());
+            }
+        } else {
+            holder.textViewAdminName.setText("Administrador: No asignado");
+            Log.d(TAG, "Hotel sin administrador asignado");
+        }
 
         // Hacer que toda la tarjeta sea clickeable
         holder.cardHotel.setOnClickListener(v -> {
@@ -58,7 +119,9 @@ public class HotelAdapter
 
     @Override
     public int getItemCount() {
-        return hotelList.size();
+        int size = hotelList != null ? hotelList.size() : 0;
+        Log.d(TAG, "getItemCount devuelve: " + size);
+        return size;
     }
 
     @Override
@@ -76,7 +139,7 @@ public class HotelAdapter
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 for (Hotel hotel : hotelListFull) {
-                    if (hotel.getName().toLowerCase().contains(filterPattern)) {
+                    if (hotel.getNombre() != null && hotel.getNombre().toLowerCase().contains(filterPattern)) {
                         filteredList.add(hotel);
                     }
                 }
@@ -91,20 +154,23 @@ public class HotelAdapter
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             hotelList.clear();
-            hotelList.addAll((List<Hotel>) results.values);
+            if (results.values != null) {
+                hotelList.addAll((List<Hotel>) results.values);
+            }
+            Log.d(TAG, "Filtro aplicado, ahora mostrando " + hotelList.size() + " hoteles");
             notifyDataSetChanged();
         }
     };
 
     static class HotelViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardHotel;
-        TextView textViewHotelName, textViewHotelDescription;
+        TextView textViewHotelName, textViewAdminName;
 
         public HotelViewHolder(@NonNull View itemView) {
             super(itemView);
             cardHotel = itemView.findViewById(R.id.cardHotel);
             textViewHotelName = itemView.findViewById(R.id.textViewHotelName);
-            textViewHotelDescription = itemView.findViewById(R.id.textViewHotelDescription);
+            textViewAdminName = itemView.findViewById(R.id.textViewAdminName);
         }
     }
 }
