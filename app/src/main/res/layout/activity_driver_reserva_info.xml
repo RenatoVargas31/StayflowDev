@@ -726,20 +726,6 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent" />
 
-                        <!-- Categoría/Tipo de hotel -->
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_categoria"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="5 Estrellas"
-                            android:textSize="12sp"
-                            style="@style/Widget.Material3.Chip.Assist"
-                            app:chipBackgroundColor="?attr/colorSecondaryContainer"
-                            app:chipIcon="@drawable/ic_star"
-                            app:chipIconSize="16dp"
-                            app:layout_constraintTop_toBottomOf="@id/tv_hotel_nombre"
-                            app:layout_constraintStart_toStartOf="parent" />
 
                         <!-- Dirección con icono -->
                         <com.google.android.material.imageview.ShapeableImageView
@@ -750,7 +736,7 @@
                             android:src="@drawable/ic_location"
                             app:tint="?attr/colorPrimary"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/chip_categoria" />
+                            app:layout_constraintTop_toBottomOf="@id/tv_hotel_nombre" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/tv_hotel_direccion"
