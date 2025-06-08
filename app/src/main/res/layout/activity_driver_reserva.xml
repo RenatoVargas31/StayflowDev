@@ -83,7 +83,7 @@
     <!-- Vista de estado vacío (inicialmente oculta) -->
     <LinearLayout
         android:id="@+id/empty_view"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center"
         android:orientation="vertical"
@@ -107,7 +107,9 @@
             android:layout_marginTop="16dp"
             android:text="No tienes reservas activas"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:gravity="center" />
 
     </LinearLayout>
 
