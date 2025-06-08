@@ -79,7 +79,8 @@ public class SolicitudesAdapter extends RecyclerView.Adapter<SolicitudesAdapter.
         // Click al card
         holder.cardSolicitud.setOnClickListener(v -> {
             Intent intent = new Intent(context, DriverInfoSolicitudActivity.class);
-            intent.putExtra("solicitud", solicitud); // ✅ Ahora sí existe
+            intent.putExtra("solicitud", solicitud); // Serializable
+            intent.putExtra("solicitudId", solicitud.getSolicitudId());
             context.startActivity(intent);
         });
     }

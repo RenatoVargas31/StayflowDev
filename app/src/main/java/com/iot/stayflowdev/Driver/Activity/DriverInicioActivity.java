@@ -33,6 +33,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.Driver.Adapter.SolicitudesAdapter;
@@ -42,6 +43,7 @@ import com.iot.stayflowdev.LoginActivity;
 import com.iot.stayflowdev.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +64,7 @@ public class DriverInicioActivity extends AppCompatActivity {
     // Variables para notificaciones
     private String channelId = "channelDefaultPri";
     private String gpsChannelId = "channelGPSAlert";
+    private TextView tvSinSolicitudes;
 
     // Firebase
     private FirebaseFirestore db; // Si necesitas Firestore, descomentar esta línea
@@ -125,6 +128,9 @@ public class DriverInicioActivity extends AppCompatActivity {
         //   INICIALIZAR TODAS LAS VISTAS PRIMERO
         inicializarVistas();
 
+        // Crear colección de solicitudes de taxi
+        coleccionSolicitudesTaxi();
+
         crearDatosDeSolicitudes();
         configurarRecyclerView();
         configurarSwitch();
@@ -141,6 +147,7 @@ public class DriverInicioActivity extends AppCompatActivity {
     private void inicializarVistas() {
         rvSolicitudesCercanas = findViewById(R.id.rvSolicitudesCercanas);
         tvNoSolicitudes = findViewById(R.id.tvNoSolicitudes);
+        tvSinSolicitudes = findViewById(R.id.tvSinSolicitudes);
         statusSwitch = findViewById(R.id.statusSwitch);
         statusText = findViewById(R.id.statusText);
         notificationIcon = findViewById(R.id.notification_icon);
@@ -269,64 +276,175 @@ public class DriverInicioActivity extends AppCompatActivity {
         }
     }
 
-
-    private void crearDatosDeSolicitudes() {
-        solicitudes = new ArrayList<>();
+    private void coleccionSolicitudesTaxi() {
         db.collection("reservas")
                 .whereEqualTo("quieroTaxi", true)
                 .get()
-                .addOnSuccessListener(reservaSnapshots -> {
-                    if (reservaSnapshots.isEmpty()) {
-                        Log.d("Solicitudes", "No hay reservas con taxi = true");
-                        adapter.setListaSolicitudes(solicitudes); // vacío
+                .addOnSuccessListener(reservasSnapshot -> {
+                    Log.d("SolicitudTaxi", "Total de reservas con quieroTaxi=true: " + reservasSnapshot.size());
+
+                    for (DocumentSnapshot reservaDoc : reservasSnapshot) {
+                        String reservaId = reservaDoc.getId(); // ← ID único de la reserva
+                        String idUsuario = reservaDoc.getString("idUsuario");
+                        String idHotel = reservaDoc.getString("idHotel");
+                        Map<String, Object> servicioTaxi = (Map<String, Object>) reservaDoc.get("servicioTaxi");
+                        Map<String, Object> cantHuespedes = (Map<String, Object>) reservaDoc.get("cantHuespedes");
+
+                        Log.d("SolicitudTaxi", "Reserva ID: " + reservaId);
+
+                        if (idUsuario == null || idHotel == null || servicioTaxi == null || cantHuespedes == null) {
+                            Log.w("SolicitudTaxi", "Faltan datos en reserva: " + reservaId);
+                            continue;
+                        }
+
+                        // Verificar si ya hay una solicitud creada para esta reserva
+                        db.collection("solicitudesTaxi")
+                                .whereEqualTo("reservaId", reservaId)
+                                .get()
+                                .addOnSuccessListener(existingSolicitudes -> {
+                                    if (!existingSolicitudes.isEmpty()) {
+                                        Log.d("SolicitudTaxi", "Ya existe solicitud para reserva: " + reservaId);
+                                        return;
+                                    }
+
+                                    // Si no existe, continúa con la lógica original
+                                    String origen = (String) servicioTaxi.get("Origen");
+                                    String origenDireccion = (String) servicioTaxi.get("OrigenDireccion");
+                                    String destino = (String) servicioTaxi.get("Destino");
+                                    String destinoDireccion = (String) servicioTaxi.get("DestinoDireccion");
+
+                                    int adultos = Integer.parseInt((String) cantHuespedes.get("adultos"));
+                                    int ninos = Integer.parseInt((String) cantHuespedes.get("ninos"));
+                                    int totalPasajeros = adultos + ninos;
+
+                                    db.collection("usuarios").document(idUsuario).get()
+                                            .addOnSuccessListener(usuarioDoc -> {
+                                                if (!usuarioDoc.exists()) {
+                                                    Log.w("SolicitudTaxi", "Usuario no encontrado: " + idUsuario);
+                                                    return;
+                                                }
+
+                                                String nombre = usuarioDoc.getString("nombre");
+                                                String telefono = usuarioDoc.getString("telefono");
+                                                String rol = usuarioDoc.getString("rol");
+
+                                                Log.d("SolicitudTaxi", "Usuario: " + nombre + " | Rol: " + rol);
+
+                                                if (!"usuario".equalsIgnoreCase(rol)) {
+                                                    Log.d("SolicitudTaxi", "Rol no es usuario, se omite: " + rol);
+                                                    return;
+                                                }
+
+                                                Map<String, Object> datosSolicitud = new HashMap<>();
+                                                datosSolicitud.put("reservaId", reservaId); // ← para no duplicar
+                                                datosSolicitud.put("idCliente", "usuarios/" + idUsuario);
+                                                datosSolicitud.put("idHotel", "hoteles/" + idHotel);
+                                                datosSolicitud.put("origen", origen);
+                                                datosSolicitud.put("origenDireccion", origenDireccion);
+                                                datosSolicitud.put("destino", destino);
+                                                datosSolicitud.put("destinoDireccion", destinoDireccion);
+                                                datosSolicitud.put("nombrePasajero", nombre);
+                                                datosSolicitud.put("telefonoPasajero", telefono != null ? telefono : "No disponible");
+                                                datosSolicitud.put("numeroPasajeros", totalPasajeros);
+                                                datosSolicitud.put("tipoVehiculo", determinarTipoVehiculo(totalPasajeros));
+                                                datosSolicitud.put("notas", "Solicitud generada automáticamente");
+                                                datosSolicitud.put("estado", "pendiente");
+                                                datosSolicitud.put("esAceptada", false);
+                                                datosSolicitud.put("idTaxista", null);
+                                                datosSolicitud.put("horaAceptacion", null);
+                                                datosSolicitud.put("fechaCreacion", FieldValue.serverTimestamp());
+
+                                                db.collection("solicitudesTaxi")
+                                                        .add(datosSolicitud)
+                                                        .addOnSuccessListener(docRef -> Log.d("SolicitudTaxi", "Solicitud guardada con ID: " + docRef.getId()))
+                                                        .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al guardar solicitud", e));
+                                            })
+                                            .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al obtener usuario: " + e.getMessage()));
+                                })
+                                .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al verificar solicitud existente: " + e.getMessage()));
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al consultar reservas: " + e.getMessage()));
+    }
+
+    private String determinarTipoVehiculo(int numeroPasajeros) {
+        if (numeroPasajeros <= 4) {
+            return "Estándar";
+        } else if (numeroPasajeros <= 6) {
+            return "Van";
+        } else {
+            return "Minibus";
+        }
+    }
+    private void crearDatosDeSolicitudes() {
+        solicitudes = new ArrayList<>();
+
+        db.collection("solicitudesTaxi")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.isEmpty()) {
+                        Log.d("Solicitudes", "No hay solicitudes en solicitudesTaxi");
+                        adapter.setListaSolicitudes(solicitudes);
+                        mostrarMensajeSiCorresponde();
                         return;
                     }
 
-                    for (DocumentSnapshot reservaDoc : reservaSnapshots) {
-                        Map<String, Object> servicioTaxi = (Map<String, Object>) reservaDoc.get("servicioTaxi");
-                        Map<String, Object> cantHuespedes = (Map<String, Object>) reservaDoc.get("cantHuespedes");
-                        String idUsuario = reservaDoc.getString("idUsuario");
+                    for (DocumentSnapshot doc : snapshot) {
+                        Boolean esAceptada = doc.getBoolean("esAceptada");
 
-                        if (servicioTaxi == null || cantHuespedes == null || idUsuario == null) continue;
+                        // Si la solicitud ya fue aceptada, la ignoramos
+                        if (esAceptada != null && esAceptada) continue;
 
-                        String origen = (String) servicioTaxi.get("Origen");
-                        String origenDireccion = (String) servicioTaxi.get("OrigenDireccion");
-                        String destino = (String) servicioTaxi.get("Destino");
-                        String destinoDireccion = (String) servicioTaxi.get("DestinoDireccion");
+                        String origen = doc.getString("origen");
+                        String origenDireccion = doc.getString("origenDireccion");
+                        String destino = doc.getString("destino");
+                        String destinoDireccion = doc.getString("destinoDireccion");
+                        String nombrePasajero = doc.getString("nombrePasajero");
+                        String telefonoPasajero = doc.getString("telefonoPasajero");
+                        String tipoVehiculo = doc.getString("tipoVehiculo");
+                        String notas = doc.getString("notas");
+                        String estado = doc.getString("estado");
 
-                        String adultosStr = (String) cantHuespedes.get("adultos");
-                        String ninosStr = (String) cantHuespedes.get("ninos");
+                        Long pasajeros = doc.getLong("numeroPasajeros");
+                        int numeroPasajeros = pasajeros != null ? pasajeros.intValue() : 0;
 
-                        int adultos = adultosStr != null ? Integer.parseInt(adultosStr) : 0;
-                        int ninos = ninosStr != null ? Integer.parseInt(ninosStr) : 0;
-                        int totalPasajeros = adultos + ninos;
+                        // Crear objeto DTO
+                        SolicitudTaxi solicitud = new SolicitudTaxi(origen, origenDireccion, destino, destinoDireccion);
+                        solicitud.setSolicitudId(doc.getId());
+                        solicitud.setNombrePasajero(nombrePasajero);
+                        solicitud.setTelefonoPasajero(telefonoPasajero);
+                        solicitud.setNumeroPasajeros(numeroPasajeros);
+                        solicitud.setTipoVehiculo(tipoVehiculo);
+                        solicitud.setNotas(notas);
+                        solicitud.setEstado(estado);
+                        solicitud.setEsAceptada(false); // ya sabemos que no es aceptada porque la filtramos
 
-                        // Ahora obtener los datos del usuario
-                        db.collection("usuarios")
-                                .document(idUsuario)
-                                .get()
-                                .addOnSuccessListener(userDoc -> {
-                                    String nombrePasajero = userDoc.getString("nombre");
-                                    String telefonoPasajero = userDoc.getString("telefono"); // si existe
-
-                                    // Crear DTO y llenar datos
-                                    SolicitudTaxi solicitud = new SolicitudTaxi(origen, origenDireccion, destino, destinoDireccion);
-                                    solicitud.setNombrePasajero(nombrePasajero != null ? nombrePasajero : "Usuario desconocido");
-                                    solicitud.setTelefonoPasajero(telefonoPasajero != null ? telefonoPasajero : "No disponible");
-                                    solicitud.setNumeroPasajeros(totalPasajeros);
-                                    solicitud.setTipoVehiculo("Estándar"); // o elige según reglas
-                                    solicitud.setNotas("Solicitud generada automáticamente"); // si no hay campo notas
-
-                                    solicitudes.add(solicitud);
-
-                                    // Actualizar RecyclerView
-                                    adapter.setListaSolicitudes(new ArrayList<>(solicitudes)); // copia para evitar duplicados
-                                });
+                        solicitudes.add(solicitud);
                     }
+
+                    adapter.setListaSolicitudes(new ArrayList<>(solicitudes));
+                    mostrarMensajeSiCorresponde();
+                    Log.d("Solicitudes", "Solicitudes NO aceptadas cargadas: " + solicitudes.size());
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Solicitudes", "Error al cargar reservas: " + e.getMessage());
+                    Log.e("Solicitudes", "Error al obtener solicitudesTaxi", e);
+
+                    if (statusSwitch.isChecked()) {
+                        tvSinSolicitudes.setVisibility(View.VISIBLE);
+                        tvSinSolicitudes.setText("Error al cargar solicitudes");
+                    } else {
+                        tvSinSolicitudes.setVisibility(View.GONE);
+                    }
                 });
+
+    }
+
+    private void mostrarMensajeSiCorresponde() {
+        if (statusSwitch != null && statusSwitch.isChecked() && solicitudes.isEmpty()) {
+            tvSinSolicitudes.setVisibility(View.VISIBLE);
+        } else {
+            tvSinSolicitudes.setVisibility(View.GONE);
+        }
     }
 
 

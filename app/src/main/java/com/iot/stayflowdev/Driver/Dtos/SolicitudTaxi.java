@@ -7,21 +7,46 @@ import java.security.Timestamp;
 
 public class SolicitudTaxi implements Serializable {
 
+    // Campos de Viaje
     private String origen;
     private String origenDireccion;
     private String destino;
     private String destinoDireccion;
-
+    // Campos de Pasajero
     private String nombrePasajero;
     private String telefonoPasajero;
     private int numeroPasajeros;
     private String tipoVehiculo;
     private String notas;
+    // Campos de Solicitud
 
     private Timestamp fechaCreacion;
-    private String estado;
+    private String estado; // Estado de la solicitud (pendiente, aceptada, rechazada, etc.)
+    // Campos de Información Adicional
     private double distanciaKm;
     private int tiempoEstimadoMin;
+    private String horaSolicitud; // Hora en que se realizó la solicitud
+    private String horaAceptacion; // Hora en que se aceptó la solicitud
+    private boolean esAceptada; // Indica si la solicitud ha sido aceptada por un conductor y cambia el estado a "aceptada"
+    private String solicitudId;
+
+    public String getSolicitudId() {
+        return solicitudId;
+    }
+
+    public void setSolicitudId(String solicitudId) {
+        this.solicitudId = solicitudId;
+    }
+    private String idTaxista;
+
+    public String getIdTaxista() {
+        return idTaxista;
+    }
+
+    public void setIdTaxista(String idTaxista) {
+        this.idTaxista = idTaxista;
+    }
+
 
 
 // ... lo mismo para los otros campos
@@ -71,8 +96,63 @@ public class SolicitudTaxi implements Serializable {
         this.tipoVehiculo = tipoVehiculo;
     }
 
+    public void setOrigen(String origen) {
+        this.origen = origen;
+    }
+
+    public void setOrigenDireccion(String origenDireccion) {
+        this.origenDireccion = origenDireccion;
+    }
+
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
+
+    public void setDestinoDireccion(String destinoDireccion) {
+        this.destinoDireccion = destinoDireccion;
+    }
+
+    public double getDistanciaKm() {
+        return distanciaKm;
+    }
+
+    public void setDistanciaKm(double distanciaKm) {
+        this.distanciaKm = distanciaKm;
+    }
+
+    public int getTiempoEstimadoMin() {
+        return tiempoEstimadoMin;
+    }
+
+    public void setTiempoEstimadoMin(int tiempoEstimadoMin) {
+        this.tiempoEstimadoMin = tiempoEstimadoMin;
+    }
+
+    public String getHoraSolicitud() {
+        return horaSolicitud;
+    }
+
+    public void setHoraSolicitud(String horaSolicitud) {
+        this.horaSolicitud = horaSolicitud;
+    }
+
+    public String getHoraAceptacion() {
+        return horaAceptacion;
+    }
+
+    public void setHoraAceptacion(String horaAceptacion) {
+        this.horaAceptacion = horaAceptacion;
+    }
+
+    public boolean isEsAceptada() {
+        return esAceptada;
+    }
+
     public void setNotas(String notas) {
         this.notas = notas;
+    }
+
+    public void setEsAceptada(boolean b) {
     }
 }
 

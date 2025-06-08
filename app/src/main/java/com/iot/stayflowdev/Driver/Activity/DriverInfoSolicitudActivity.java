@@ -2,6 +2,7 @@ package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -18,8 +19,17 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.Driver.Dtos.SolicitudTaxi;
 import com.iot.stayflowdev.R;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class DriverInfoSolicitudActivity extends AppCompatActivity {
 
@@ -40,6 +50,7 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
     private MaterialButton btnRechazar;
     private MaterialTextView origen;
     private MaterialTextView destino;
+    private String solicitudId; // Este lo recuperas desde el intent o el objeto SolicitudTaxi
 
 
     @Override
@@ -96,9 +107,10 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
 
     private void recuperarDatosIntent() {
         SolicitudTaxi solicitud = (SolicitudTaxi) getIntent().getSerializableExtra("solicitud");
+        solicitudId = getIntent().getStringExtra("solicitudId"); // ← este es el cambio necesario
 
-        if (solicitud == null) {
-            Toast.makeText(this, "No se recibió la solicitud", Toast.LENGTH_SHORT).show();
+        if (solicitud == null || solicitudId == null) {
+            Toast.makeText(this, "No se recibió la solicitud correctamente", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -112,13 +124,13 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
         origen.setText(solicitud.getOrigen());
         destino.setText(solicitud.getDestino());
         direccionDestino.setText(solicitud.getDestinoDireccion());
-        distanciaValor.setText("~3 km");  // puedes calcularlo más adelante
-        tiempoValor.setText("~15 min");  // estimado ficticio
+        distanciaValor.setText("~3 km");
+        tiempoValor.setText("~15 min");
         notasContenido.setText(solicitud.getNotas());
 
-        // Puedes usar estado fijo o dinámico
         configurarEstadoChip("pendiente");
     }
+
 
 
     private void configurarEstadoChip(String status) {
@@ -153,42 +165,62 @@ public class DriverInfoSolicitudActivity extends AppCompatActivity {
 
     private void configurarBotones() {
         btnAceptar.setOnClickListener(v -> {
-            // Cambiar el estado de la solicitud a "Aceptada"
-            configurarEstadoChip("Aceptada");
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null || solicitudId == null) {
+                Toast.makeText(this, "No se pudo aceptar la solicitud", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Mostrar mensaje de confirmación
-            Snackbar.make(findViewById(R.id.main), "Solicitud aceptada", Snackbar.LENGTH_LONG).show();
+            String idDriver = currentUser.getUid();
+            String horaActual = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
 
-            // Aquí iría el código para actualizar el estado en la base de datos
-            // También podrías iniciar la navegación al punto de recogida
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("estado", "aceptada");
+            updates.put("esAceptada", true);
+            updates.put("horaAceptacion", horaActual);
+            updates.put("idTaxista", idDriver);
 
-            // Deshabilitar los botones después de aceptar
-            btnAceptar.setEnabled(false);
-            btnRechazar.setEnabled(false);
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("solicitudesTaxi").document(solicitudId)
+                    .update(updates)
+                    .addOnSuccessListener(unused -> {
+                        configurarEstadoChip("aceptada");
+                        Snackbar.make(findViewById(R.id.main), "Solicitud aceptada", Snackbar.LENGTH_LONG).show();
+                        btnAceptar.setEnabled(false);
+                        btnRechazar.setEnabled(false);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("Solicitud", "Error al actualizar solicitud", e);
+                        Toast.makeText(this, "Error al aceptar solicitud", Toast.LENGTH_SHORT).show();
+                    });
         });
 
         btnRechazar.setOnClickListener(v -> {
-            // Mostrar diálogo de confirmación
             new MaterialAlertDialogBuilder(this)
                     .setTitle("Cancelar solicitud")
                     .setMessage("¿Estás seguro de que deseas cancelar esta solicitud?")
                     .setPositiveButton("Sí, cancelar", (dialog, which) -> {
-                        // Cambiar el estado de la solicitud a "Cancelada"
-                        configurarEstadoChip("Cancelada");
+                        if (solicitudId == null) return;
 
-                        // Mostrar mensaje de confirmación
-                        Snackbar.make(findViewById(R.id.main), "Solicitud cancelada", Snackbar.LENGTH_LONG).show();
-
-                        // Aquí iría el código para actualizar el estado en la base de datos
-
-                        // Deshabilitar los botones después de cancelar
-                        btnAceptar.setEnabled(false);
-                        btnRechazar.setEnabled(false);
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        db.collection("solicitudesTaxi").document(solicitudId)
+                                .update("estado", "cancelada")
+                                .addOnSuccessListener(unused -> {
+                                    configurarEstadoChip("cancelada");
+                                    Snackbar.make(findViewById(R.id.main), "Solicitud cancelada", Snackbar.LENGTH_LONG).show();
+                                    btnAceptar.setEnabled(false);
+                                    btnRechazar.setEnabled(false);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Solicitud", "Error al cancelar solicitud", e);
+                                    Toast.makeText(this, "Error al cancelar solicitud", Toast.LENGTH_SHORT).show();
+                                });
                     })
                     .setNegativeButton("No", null)
                     .show();
         });
     }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
