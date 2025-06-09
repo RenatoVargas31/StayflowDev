@@ -2,25 +2,24 @@ package com.iot.stayflowdev.adminHotel;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.LoginFireBaseActivity;
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.adminHotel.AdminInicioActivity;
-import com.iot.stayflowdev.adminHotel.HuespedAdminActivity;
-import com.iot.stayflowdev.adminHotel.MensajeriaAdminActivity;
-import com.iot.stayflowdev.adminHotel.PerfilAdminActivity;
-import com.iot.stayflowdev.adminHotel.ReportesAdminActivity;
 import com.iot.stayflowdev.databinding.ActivityPerfilAdminBinding;
+import com.iot.stayflowdev.model.User;
 
 public class PerfilAdminActivity extends AppCompatActivity {
 
     private ActivityPerfilAdminBinding binding;
     private FirebaseAuth mAuth;
+    private static final String TAG = "PerfilAdmin";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +29,44 @@ public class PerfilAdminActivity extends AppCompatActivity {
 
         // Inicializar FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        if (mAuth.getCurrentUser() != null) {
+            String uid = mAuth.getCurrentUser().getUid();
+
+            db.collection("usuarios")
+                    .document(uid)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        if (snapshot.exists()) {
+                            Log.d(TAG, "Snapshot data: " + snapshot.getData()); // Log para depuración
+
+                            User usuario = snapshot.toObject(User.class);
+                            if (usuario != null) {
+                                String nombreCompleto = usuario.getNombres() + " " + usuario.getApellidos();
+                                binding.tvNombreCompleto.setText(nombreCompleto);
+                                binding.tvNombreAdmin.setText(nombreCompleto);
+
+
+                                if (usuario.getEmail() != null) {
+                                    binding.tvCorreoElectronico.setText(usuario.getEmail());
+                                } else {
+                                    Log.w(TAG, "El campo 'correo' es null en Firestore");
+                                    binding.tvCorreoElectronico.setText("Correo no disponible");
+                                }
+                            } else {
+                                Log.e(TAG, "No se pudo convertir snapshot a User");
+                            }
+                        } else {
+                            Log.e(TAG, "Documento de usuario no encontrado");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error al obtener datos del usuario", e);
+                        binding.tvNombreCompleto.setText("Error al cargar datos");
+                        binding.tvCorreoElectronico.setText("Error");
+                    });
+        }
 
         // Configurar Toolbar
         setSupportActionBar(binding.toolbar);
@@ -42,40 +79,24 @@ public class PerfilAdminActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.menu_inicio) {
                 startActivity(new Intent(this, AdminInicioActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
             } else if (id == R.id.menu_reportes) {
                 startActivity(new Intent(this, ReportesAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
             } else if (id == R.id.menu_huesped) {
                 startActivity(new Intent(this, HuespedAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
             } else if (id == R.id.menu_mensajeria) {
                 startActivity(new Intent(this, MensajeriaAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_perfil) {
-                // Ya estamos en perfil, no hacemos nada
+            } else {
                 return true;
             }
-            return false;
+            overridePendingTransition(0, 0);
+            return true;
         });
 
-        binding.tvNombreCompleto.setText("Juan Perez");
-        binding.tvCorreoElectronico.setText("juan.admin@gmail.com");
-
-        // Configurar botón de cerrar sesión
+        // Cerrar sesión
         binding.btnCerrarSesion.setOnClickListener(v -> {
-            // Mostrar mensaje
-            Toast.makeText(PerfilAdminActivity.this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
-
-            // Cerrar sesión con Firebase Auth
+            Toast.makeText(this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
             mAuth.signOut();
-
-            // Redirigir a la pantalla de inicio de sesión
-            Intent intent = new Intent(PerfilAdminActivity.this, LoginFireBaseActivity.class);
+            Intent intent = new Intent(this, LoginFireBaseActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();

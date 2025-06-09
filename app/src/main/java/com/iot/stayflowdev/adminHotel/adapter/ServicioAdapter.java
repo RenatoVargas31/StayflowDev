@@ -7,8 +7,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
 import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.adminHotel.model.Servicio;
+import com.iot.stayflowdev.model.Servicio;
 import java.util.List;
 
 public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.ServicioViewHolder> {
@@ -25,16 +27,17 @@ public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.Servic
     @Override
     public ServicioViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_agregar_servicio, parent, false);
+                .inflate(R.layout.item_agregar_servicio_2, parent, false);
         return new ServicioViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ServicioViewHolder holder, int position) {
         Servicio servicio = listaServicios.get(position);
-        holder.tvNombre.setText(servicio.getNombre());
-        holder.tvDescripcion.setText(servicio.getDescripcion());
-        holder.tvPrecio.setText(servicio.isEsGratis() ? "Gratis" : "S/. " + servicio.getPrecio());
+        holder.tvNombre.setText("Servicio: " + servicio.getNombre());
+        holder.tvDescripcion.setText("Descripción: " +servicio.getDescripcion());
+        String precioTexto = servicio.getEsGratis() != null && servicio.getEsGratis() ? "Gratis" : "S/. " + servicio.getPrecio();
+        holder.tvPrecio.setText("Precio: " +precioTexto);
 
         holder.btnEditar.setOnClickListener(v -> actionListener.onEditar(servicio));
         holder.btnEliminar.setOnClickListener(v -> actionListener.onEliminar(servicio));
@@ -52,7 +55,7 @@ public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.Servic
 
     public static class ServicioViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre, tvDescripcion, tvPrecio;
-        ImageButton btnEditar, btnEliminar;
+        MaterialButton btnEditar, btnEliminar; // En lugar de ImageButton
 
         public ServicioViewHolder(@NonNull View itemView) {
             super(itemView);

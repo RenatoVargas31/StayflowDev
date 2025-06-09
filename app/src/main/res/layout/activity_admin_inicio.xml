@@ -51,7 +51,7 @@
 
             <!-- Texto superior -->
             <TextView
-                android:id="@+id/titulo_admin"
+                android:id="@+id/tvNombreAdmin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Hola, Administrador"
@@ -99,6 +99,7 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/tvNombreHotel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Belmond Palace Resort Hotel"

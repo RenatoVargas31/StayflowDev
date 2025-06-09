@@ -95,14 +95,24 @@
                         app:hintTextAppearance="@style/TextAppearance.Material3.BodyMedium"
                         style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense">
 
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/autoCompleteDireccion"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDireccionHotel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"
                             android:textColor="?attr/colorOnSurface"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnActualizarDireccion"
+                            style="@style/Widget.Material3.Button.ElevatedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Actualizar dirección"
+                            android:layout_gravity="end"
+                            android:layout_marginTop="8dp" />
+
                     </com.google.android.material.textfield.TextInputLayout>
+
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -321,7 +331,6 @@
         app:menu="@menu/menu_admin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
