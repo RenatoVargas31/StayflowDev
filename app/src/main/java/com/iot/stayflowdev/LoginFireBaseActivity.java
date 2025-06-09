@@ -117,6 +117,9 @@ public class LoginFireBaseActivity extends AppCompatActivity {
     }
 
     private void iniciarSesionConGoogle() {
+        // Primero cerramos la sesión existente para forzar la elección de cuenta
+        FirebaseAuth.getInstance().signOut();
+
         // Lista de proveedores para iniciar sesión con Google
         List<AuthUI.IdpConfig> proveedores = Arrays.asList(
                 new AuthUI.IdpConfig.GoogleBuilder().build()
@@ -129,6 +132,7 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             Intent signInIntent = AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(proveedores)
+                    .setIsSmartLockEnabled(false, false) // Deshabilitar SmartLock completamente (credenciales y cuentas sugeridas)
                     .build();
             signInLauncher.launch(signInIntent);
         } catch (Exception e) {
@@ -143,7 +147,6 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             // Inicio de sesión exitoso
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             Log.d(TAG, "signInWithCredential:success");
-            Toast.makeText(this, "Autenticación exitosa", Toast.LENGTH_SHORT).show();
 
             // Registrar usuario en Firestore con rol "usuario" usando el mismo UID
             if (user != null) {
@@ -158,7 +161,7 @@ public class LoginFireBaseActivity extends AppCompatActivity {
                 // Crea el objeto de usuario
                 java.util.Map<String, Object> usuario = new java.util.HashMap<>();
                 usuario.put("correo", email);
-                usuario.put("rol", "usuario"); // o "cliente" si prefieres
+                // Eliminamos la asignación de rol aquí, se asignará en LoginCargarFotoActivity
 
                 // Guarda en la colección "usuarios" usando el UID como ID del documento
                 db.collection("usuarios")
@@ -226,7 +229,11 @@ public class LoginFireBaseActivity extends AppCompatActivity {
         Intent intent;
 
         if (rol == null) {
-            irAActividadPorDefecto();
+            // Si el rol es nulo, redirigimos al usuario a la pantalla de registro
+            Log.d(TAG, "Rol es nulo - Navegando a LoginRegisterActivity");
+            intent = new Intent(this, LoginRegisterActivity.class);
+            startActivity(intent);
+            finish();
             return;
         }
 
@@ -252,8 +259,11 @@ public class LoginFireBaseActivity extends AppCompatActivity {
                 intent = new Intent(this, com.iot.stayflowdev.cliente.ClienteBuscarActivity.class);
                 break;
             default:
-                Log.w(TAG, "Rol desconocido: '" + rol + "' - Navegando a actividad por defecto");
-                irAActividadPorDefecto();
+                // Si el rol no coincide con ninguno de los esperados, también redirigimos a la pantalla de registro
+                Log.w(TAG, "Rol desconocido: '" + rol + "' - Navegando a LoginRegisterActivity");
+                intent = new Intent(this, LoginRegisterActivity.class);
+                startActivity(intent);
+                finish();
                 return;
         }
 

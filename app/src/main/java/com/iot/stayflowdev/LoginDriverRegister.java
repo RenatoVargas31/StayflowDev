@@ -139,15 +139,35 @@ public class LoginDriverRegister extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (validarFormulario()) {
-                    // Navegar a la pantalla de ingreso de correo
-                    Intent intent = new Intent(LoginDriverRegister.this, LoginIngCorreoActivity.class);
-                    intent.putExtra("esRegistroTaxista", true);
+                    // Navegar a la pantalla de creación de contraseña
+                    Intent intent = new Intent(LoginDriverRegister.this, LoginCrearPassActivity.class);
                     // Pasar los datos del vehículo
                     intent.putExtra("placa", etPlaca.getText().toString().trim());
                     intent.putExtra("modelo", etModelo.getText().toString().trim());
                     if (imageUri != null) {
                         intent.putExtra("imagenVehiculo", imageUri.toString());
                     }
+
+                    // Mantener los datos del usuario que vinieron del formulario anterior
+                    if (getIntent().hasExtra("nombre")) {
+                        intent.putExtra("nombre", getIntent().getStringExtra("nombre"));
+                    }
+                    if (getIntent().hasExtra("documento")) {
+                        intent.putExtra("documento", getIntent().getStringExtra("documento"));
+                    }
+                    if (getIntent().hasExtra("tipoDocumento")) {
+                        intent.putExtra("tipoDocumento", getIntent().getStringExtra("tipoDocumento"));
+                    }
+                    if (getIntent().hasExtra("fechaNacimiento")) {
+                        intent.putExtra("fechaNacimiento", getIntent().getStringExtra("fechaNacimiento"));
+                    }
+                    if (getIntent().hasExtra("celular")) {
+                        intent.putExtra("celular", getIntent().getStringExtra("celular"));
+                    }
+
+                    // Marcar que este es un registro de taxista
+                    intent.putExtra("esRegistroTaxista", true);
+
                     startActivity(intent);
                 }
             }

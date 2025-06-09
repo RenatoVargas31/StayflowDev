@@ -5,24 +5,44 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginCrearPassActivity extends AppCompatActivity {
+
+    private static final String TAG = "LoginCrearPass";
 
     private MaterialButton btnFinalizar;
     private TextInputEditText etPassword, etRepeatPassword;
     private TextInputLayout tilPassword, tilRepeatPassword;
+    private ImageView btnClose;
+
+    // Datos del usuario que se han recibido de actividades anteriores
+    private String nombre, documento, tipoDocumento, fechaNacimiento, celular;
+    private String placa, modelo, imagenVehiculo;
+    private boolean esRegistroTaxista = false;
+    private String email; // Email recibido desde Firebase Auth si estamos en un registro con Google
+
+    // Firebase Auth
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +55,12 @@ public class LoginCrearPassActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Inicializar Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+
+        // Recibir datos de las actividades anteriores
+        recibirDatos();
+
         // Inicializar vistas
         inicializarViews();
 
@@ -46,12 +72,31 @@ public class LoginCrearPassActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (validarContrasenas()) {
-                    // Navegar a la pantalla de cargar foto
-                    Intent intent = new Intent(LoginCrearPassActivity.this, LoginCargarFotoActivity.class);
-                    startActivity(intent);
+                    // Si el usuario está autenticado (registro con Google), actualizar contraseña
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    if (currentUser != null && !TextUtils.isEmpty(currentUser.getEmail())) {
+                        email = currentUser.getEmail();
+                        actualizarContrasenaUsuarioActual(etPassword.getText().toString());
+                    } else {
+                        // Si estamos en un registro normal, necesitamos el email
+                        // En este punto, deberíamos tenerlo del flujo anterior o solicitarlo
+                        if (!TextUtils.isEmpty(email)) {
+                            registrarUsuarioNuevo(email, etPassword.getText().toString());
+                        } else {
+                            // Error: falta el correo electrónico
+                            Toast.makeText(LoginCrearPassActivity.this,
+                                "Error: No se ha proporcionado un correo electrónico",
+                                Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    }
                 }
             }
         });
+
+        // Configurar el botón de cierre
+        btnClose = findViewById(R.id.btn_close);
+        btnClose.setOnClickListener(v -> finish());
     }
 
     private void inicializarViews() {
@@ -65,6 +110,51 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         // TextInputLayouts
         tilPassword = findViewById(R.id.til_password);
         tilRepeatPassword = findViewById(R.id.til_repeat_password);
+    }
+
+    private void recibirDatos() {
+        Intent intent = getIntent();
+
+        // Datos básicos del usuario
+        if (intent.hasExtra("nombre")) {
+            nombre = intent.getStringExtra("nombre");
+        }
+        if (intent.hasExtra("documento")) {
+            documento = intent.getStringExtra("documento");
+        }
+        if (intent.hasExtra("tipoDocumento")) {
+            tipoDocumento = intent.getStringExtra("tipoDocumento");
+        }
+        if (intent.hasExtra("fechaNacimiento")) {
+            fechaNacimiento = intent.getStringExtra("fechaNacimiento");
+        }
+        if (intent.hasExtra("celular")) {
+            celular = intent.getStringExtra("celular");
+        }
+
+        // Datos del vehículo (solo si es taxista)
+        if (intent.hasExtra("placa")) {
+            placa = intent.getStringExtra("placa");
+        }
+        if (intent.hasExtra("modelo")) {
+            modelo = intent.getStringExtra("modelo");
+        }
+        if (intent.hasExtra("imagenVehiculo")) {
+            imagenVehiculo = intent.getStringExtra("imagenVehiculo");
+        }
+
+        // Flag para indicar si es registro de taxista
+        if (intent.hasExtra("esRegistroTaxista")) {
+            esRegistroTaxista = intent.getBooleanExtra("esRegistroTaxista", false);
+        }
+
+        // Email (desde Firebase Auth si es registro con Google)
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+        } else if (intent.hasExtra("email")) {
+            email = intent.getStringExtra("email");
+        }
     }
 
     private void configurarValidaciones() {
@@ -159,5 +249,104 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         // Todo correcto
         tilRepeatPassword.setError(null);
         return true;
+    }
+
+    /**
+     * Registra un nuevo usuario con email y contraseña en Firebase Auth
+     */
+    private void registrarUsuarioNuevo(String email, String password) {
+        // Mostrar progreso
+        mostrarProgreso(true);
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        mostrarProgreso(false);
+
+                        if (task.isSuccessful()) {
+                            // Registro exitoso, proceder a la pantalla de carga de foto
+                            Log.d(TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            // Navegar a la siguiente pantalla
+                            irAPantallaSiguiente();
+                        } else {
+                            // Si falla el registro, mostrar un mensaje
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(LoginCrearPassActivity.this,
+                                "Error al registrar: " + task.getException().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Actualiza la contraseña del usuario actualmente autenticado
+     */
+    private void actualizarContrasenaUsuarioActual(String newPassword) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            // Mostrar progreso
+            mostrarProgreso(true);
+
+            user.updatePassword(newPassword)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            mostrarProgreso(false);
+
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "User password updated.");
+                                // Navegar a la siguiente pantalla
+                                irAPantallaSiguiente();
+                            } else {
+                                Log.w(TAG, "Error updating password", task.getException());
+                                Toast.makeText(LoginCrearPassActivity.this,
+                                    "Error al actualizar contraseña: " + task.getException().getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Muestra u oculta un indicador de progreso
+     */
+    private void mostrarProgreso(boolean mostrar) {
+        // Implementar lógica para mostrar/ocultar progreso (ProgressBar)
+        // Por ahora, solo deshabilitamos los botones durante el proceso
+        btnFinalizar.setEnabled(!mostrar);
+        if (mostrar) {
+            Toast.makeText(this, "Procesando...", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Navega a la pantalla de carga de foto de perfil
+     */
+    private void irAPantallaSiguiente() {
+        Intent intent = new Intent(this, LoginCargarFotoActivity.class);
+
+        // Pasar todos los datos necesarios
+        intent.putExtra("nombre", nombre);
+        intent.putExtra("documento", documento);
+        intent.putExtra("tipoDocumento", tipoDocumento);
+        intent.putExtra("fechaNacimiento", fechaNacimiento);
+        intent.putExtra("celular", celular);
+
+        // Si es taxista, incluir los datos del vehículo
+        if (esRegistroTaxista) {
+            intent.putExtra("esRegistroTaxista", true);
+            intent.putExtra("placa", placa);
+            intent.putExtra("modelo", modelo);
+            if (imagenVehiculo != null) {
+                intent.putExtra("imagenVehiculo", imagenVehiculo);
+            }
+        }
+
+        startActivity(intent);
     }
 }

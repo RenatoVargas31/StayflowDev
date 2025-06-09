@@ -74,8 +74,14 @@ public class LoginRegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (validarFormulario()) {
-                    // Navegar a la pantalla de ingreso de correo
-                    Intent intent = new Intent(LoginRegisterActivity.this, LoginIngCorreoActivity.class);
+                    // Navegar a la pantalla de creación de contraseña
+                    Intent intent = new Intent(LoginRegisterActivity.this, LoginCrearPassActivity.class);
+                    // Pasar los datos del usuario al siguiente formulario
+                    intent.putExtra("nombre", etNombre.getText().toString().trim());
+                    intent.putExtra("documento", etDni.getText().toString().trim());
+                    intent.putExtra("tipoDocumento", isDniSelected ? "DNI" : "Carné de extranjería");
+                    intent.putExtra("fechaNacimiento", etFechaNacimiento.getText().toString().trim());
+                    intent.putExtra("celular", etCelular.getText().toString().trim());
                     startActivity(intent);
                 }
             }
