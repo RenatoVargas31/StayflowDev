@@ -178,7 +178,7 @@ public class User {
     @Exclude
     public String getRoleDescription() {
         switch (rol) {
-            case "admin_hotel":
+            case "adminhotel":
                 return "Administrador de Hotel";
             case "taxista":
                 return "Taxista";
