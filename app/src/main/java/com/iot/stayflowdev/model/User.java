@@ -15,7 +15,7 @@ public class User {
     private String telefono;
     private String rol;
     private String fotoPerfilUrl;
-    private String estado;
+    private boolean estado; // Cambiado de String a boolean
     private String fechaNacimiento;
     private String tipoDocumento;
     private String numeroDocumento;
@@ -28,7 +28,7 @@ public class User {
     }
 
     public User(String uid, String nombres, String apellidos, String email, String telefono,
-                String rol, String fotoPerfilUrl, String estado, String fechaNacimiento,
+                String rol, String fotoPerfilUrl, boolean estado, String fechaNacimiento,
                 String tipoDocumento, String numeroDocumento, String domicilio,
                 Map<String, Object> datosEspecificos) {
         this.uid = uid;
@@ -47,7 +47,7 @@ public class User {
     }
 
     // Constructor simplificado para compatibilidad con código existente
-    public User(String nombres, String apellidos, String email, String rol, String estado) {
+    public User(String nombres, String apellidos, String email, String rol, boolean estado) {
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.email = email;
@@ -82,10 +82,12 @@ public class User {
         this.apellidos = apellidos;
     }
 
+    @PropertyName("correo")
     public String getEmail() {
         return email;
     }
 
+    @PropertyName("correo")
     public void setEmail(String email) {
         this.email = email;
     }
@@ -114,11 +116,11 @@ public class User {
         this.fotoPerfilUrl = fotoPerfilUrl;
     }
 
-    public String getEstado() {
+    public boolean isEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(boolean estado) {
         this.estado = estado;
     }
 
@@ -167,7 +169,18 @@ public class User {
     // Métodos auxiliares para compatibilidad con el código existente
     @Exclude
     public String getName() {
-        return nombres + " " + apellidos;
+        // Validar si los nombres o apellidos están disponibles
+        String nombre = (nombres != null && !nombres.isEmpty()) ? nombres : "Usuario";
+        String apellido = (apellidos != null && !apellidos.isEmpty()) ? apellidos : "sin nombre";
+
+        // Si ambos están disponibles, mostrar nombre y apellido
+        // Si solo uno está disponible, mostrar ese componente solo
+        // Si ninguno está disponible, mostrar mensaje predeterminado
+        if (nombres == null && apellidos == null) {
+            return "Usuario sin información";
+        }
+
+        return nombre + " " + apellido;
     }
 
     @Exclude
@@ -180,9 +193,9 @@ public class User {
         switch (rol) {
             case "adminhotel":
                 return "Administrador de Hotel";
-            case "taxista":
+            case "driver":
                 return "Taxista";
-            case "cliente":
+            case "usuario":
                 return "Cliente";
             case "superadmin":
                 return "Super Administrador";
@@ -193,11 +206,11 @@ public class User {
 
     @Exclude
     public boolean isEnabled() {
-        return "activo".equals(estado);
+        return estado;
     }
 
     @Exclude
     public void setEnabled(boolean enabled) {
-        this.estado = enabled ? "activo" : "inactivo";
+        this.estado = enabled;
     }
 }

@@ -113,14 +113,14 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
     private void showChangeStatusConfirmation(boolean newStatus) {
         // Implementar diálogo de confirmación similar al de GestionActivity
         // Para mantener el código simple, solo mostramos un Toast por ahora
-        Toast.makeText(this, "Función para cambiar estado a: " + (newStatus ? "activo" : "inactivo"), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Función para cambiar estado a: " + (newStatus ? "habilitado" : "deshabilitado"), Toast.LENGTH_SHORT).show();
 
         if (userId != null) {
-            updateUserStatus(userId, newStatus ? "activo" : "inactivo");
+            updateUserStatus(userId, newStatus);
         }
     }
 
-    private void updateUserStatus(String userId, String newStatus) {
+    private void updateUserStatus(String userId, boolean newStatus) {
         setLoading(true);
         db.collection("usuarios").document(userId)
             .update("estado", newStatus)
@@ -130,7 +130,7 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
 
                 // Actualizar la UI
                 TextView textViewAccountStatus = findViewById(R.id.textViewAccountStatus);
-                textViewAccountStatus.setText(newStatus.equals("activo") ? "Habilitado" : "Deshabilitado");
+                textViewAccountStatus.setText(newStatus ? "Habilitado" : "Deshabilitado");
 
                 // Actualizar el objeto usuario
                 if (currentUser != null) {
@@ -226,11 +226,11 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
                                   "No asignado";
                     // Aquí podrías mostrar estos datos en algún TextView adicional
                     break;
-                case "taxista":
+                case "driver":
                     // Mostrar datos específicos del taxista
                     // Como placa, modelo de vehículo, etc.
                     break;
-                case "cliente":
+                case "usuario":
                     // Mostrar datos específicos del cliente
                     // Como preferencias, historial, etc.
                     break;

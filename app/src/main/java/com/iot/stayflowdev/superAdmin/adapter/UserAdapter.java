@@ -145,13 +145,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void filterTaxistasByStatus(String status) {
         List<User> filteredList = new ArrayList<>();
         
+        // Convertir el tipo de estado (string) a un valor booleano
+        boolean estadoValue = "activo".equals(status);
+
         for (User user : userListFull) {
-            if ("taxista".equals(user.getRol())) {
+            if ("driver".equals(user.getRol())) { // Actualizado de "taxista" a "driver"
                 if ("Todos".equals(status)) {
                     filteredList.add(user);
-                } else if ("pendiente".equals(status) && "pendiente".equals(user.getEstado())) {
+                } else if ("pendiente".equals(status) && !user.isEstado()) {
+                    // Estado pendiente = false
                     filteredList.add(user);
-                } else if ("activo".equals(status) && "activo".equals(user.getEstado())) {
+                } else if ("activo".equals(status) && user.isEstado()) {
+                    // Estado activo = true
                     filteredList.add(user);
                 }
             }

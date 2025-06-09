@@ -72,8 +72,8 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         userAdapter = new UserAdapter(userList, this);
         recyclerViewUsers.setAdapter(userAdapter);
 
-        // Cargar datos de Firestore
-        loadUsersFromFirestore();
+        // Ya no cargamos todos los usuarios aquí
+        // loadUsersFromFirestore();
 
         // Registrar el launcher para el resultado de la actividad
         addAdminLauncher = registerForActivityResult(
@@ -83,7 +83,8 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                         // Cuando se crea un nuevo administrador, actualizamos la lista completa desde Firestore
                         // para asegurar que se muestre el usuario recién creado con todos sus datos
                         Toast.makeText(this, "Administrador creado exitosamente", Toast.LENGTH_SHORT).show();
-                        loadUsersFromFirestore(); // Recargar todos los usuarios desde Firestore
+                        // Aplicar el filtro guardado después de crear un nuevo administrador
+                        applySavedFilter();
                     }
                 });
 
@@ -103,13 +104,13 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 fabAddHotelAdmin.show();
                 subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipTaxistas) {
-                filterType = "taxista";
+                filterType = "driver";
                 fabAddHotelAdmin.hide();
                 subFilterScrollView.setVisibility(View.VISIBLE);
                 // Seleccionar "Todos los Taxistas" por defecto
                 chipGroupTaxistaFiltro.check(R.id.chipTaxistasTodos);
             } else if (selectedId == R.id.chipClientes) {
-                filterType = "cliente";
+                filterType = "usuario";
                 fabAddHotelAdmin.hide();
                 subFilterScrollView.setVisibility(View.GONE);
             }
@@ -138,7 +139,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 filterTaxistasByStatus(subFilterType);
             } else {
                 // Si es "Todos", cargar todos los taxistas
-                filterUsersByType("taxista");
+                filterUsersByType("driver");
             }
         });
 
@@ -237,11 +238,15 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
             });
     }
 
-    private void filterTaxistasByStatus(String estado) {
+    private void filterTaxistasByStatus(String statusType) {
         showLoading(true);
+
+        // Convertir el tipo de estado (string) a un valor booleano
+        boolean estadoValue = "activo".equals(statusType);
+
         db.collection("usuarios")
-            .whereEqualTo("rol", "taxista")
-            .whereEqualTo("estado", estado)
+            .whereEqualTo("rol", "driver")
+            .whereEqualTo("estado", estadoValue)
             .get()
             .addOnCompleteListener(task -> {
                 showLoading(false);
@@ -249,9 +254,19 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                     userList.clear();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         User user = document.toObject(User.class);
+                        // Asegurar que el usuario tenga el UID correcto
+                        user.setUid(document.getId());
                         userList.add(user);
                     }
-                    userAdapter.notifyDataSetChanged();
+                    // Actualizamos tanto la lista original como la lista del adaptador
+                    userAdapter.updateFullList(userList);
+
+                    // Verificar si la lista está vacía y mostrar mensaje
+                    if (userList.isEmpty()) {
+                        showEmptyMessage(true);
+                    } else {
+                        showEmptyMessage(false);
+                    }
                 } else {
                     showErrorMessage("Error al filtrar taxistas: " + task.getException().getMessage());
                 }
@@ -291,7 +306,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         addAdminLauncher.launch(intent);
     }
 
-    private void updateUserStatus(User user, String estado, String reason) {
+    private void updateUserStatus(User user, boolean estado, String reason) {
         if (user.getUid() == null || user.getUid().isEmpty()) {
             showErrorMessage("ID de usuario no válido");
             return;
@@ -309,8 +324,11 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 user.setEstado(estado);
                 userAdapter.notifyDataSetChanged();
 
+                // Obtener el nombre del usuario o usar un valor predeterminado si es null
+                String userName = user.getName() != null ? user.getName() : "Usuario sin nombre";
+
                 // Mostrar mensaje de confirmación
-                String message = user.getName() + " ha sido " + (estado.equals("activo") ? "habilitado" : "deshabilitado");
+                String message = userName + " ha sido " + (estado ? "habilitado" : "deshabilitado");
                 Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
 
                 // TODO: Guardar la razón del cambio en un registro de logs
@@ -322,10 +340,16 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
     }
 
     private void showLoading(boolean show) {
-        // Usar el overlay con indicador de carga en lugar de Toast
+        // Comentamos o modificamos el código que muestra el overlay para que no oscurezca la pantalla
         View loadingOverlay = findViewById(R.id.loadingOverlay);
         if (loadingOverlay != null) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+            // Establecer la visibilidad en INVISIBLE en lugar de GONE para mantener el espacio
+            // pero que no sea visible (o alternativamente, podemos eliminar completamente su visibilidad)
+            // loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+
+            // O simplemente no hacer nada para que nunca se muestre el overlay
+            // También podemos ocultar completamente este overlay si ya no lo necesitamos
+            loadingOverlay.setVisibility(View.GONE);
         }
     }
 
@@ -344,11 +368,11 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                     chipGroupFiltro.check(R.id.chipAdmins);
                     fabAddHotelAdmin.show();
                     break;
-                case "taxista":
+                case "driver":
                     chipGroupFiltro.check(R.id.chipTaxistas);
                     fabAddHotelAdmin.hide();
                     break;
-                case "cliente":
+                case "usuario":
                     chipGroupFiltro.check(R.id.chipClientes);
                     fabAddHotelAdmin.hide();
                     break;
@@ -435,9 +459,9 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 userAdapter.notifyDataSetChanged();
                 return;
             }
-            
+
             // Actualizar el estado del usuario en Firestore
-            String newEstado = isEnabled ? "activo" : "inactivo";
+            boolean newEstado = isEnabled;
             updateUserStatus(user, newEstado, reasonText);
         });
 
