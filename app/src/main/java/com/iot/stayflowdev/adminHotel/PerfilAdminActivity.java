@@ -45,6 +45,8 @@ public class PerfilAdminActivity extends AppCompatActivity {
                             if (usuario != null) {
                                 String nombreCompleto = usuario.getNombres() + " " + usuario.getApellidos();
                                 binding.tvNombreCompleto.setText(nombreCompleto);
+                                binding.tvNombreAdmin.setText(nombreCompleto);
+
 
                                 if (usuario.getEmail() != null) {
                                     binding.tvCorreoElectronico.setText(usuario.getEmail());

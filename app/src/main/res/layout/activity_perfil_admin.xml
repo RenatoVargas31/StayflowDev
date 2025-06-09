@@ -74,7 +74,7 @@
                         app:strokeColor="#EEEEEE" />
 
                     <TextView
-                        android:id="@+id/tv_nombre_taxista"
+                        android:id="@+id/tvNombreAdmin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Juan Perez"
