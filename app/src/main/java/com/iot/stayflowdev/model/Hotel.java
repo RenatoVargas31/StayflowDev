@@ -17,6 +17,9 @@ public class Hotel {
     @PropertyName("nombre")
     private String nombre;
 
+    @PropertyName("descripcion")
+    private String descripcion;
+
     @PropertyName("administradorAsignado")
     private String administradorAsignado;
 

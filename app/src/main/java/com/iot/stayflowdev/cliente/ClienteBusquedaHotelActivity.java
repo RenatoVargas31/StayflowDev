@@ -1,5 +1,6 @@
 package com.iot.stayflowdev.cliente;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -204,7 +205,10 @@ public class ClienteBusquedaHotelActivity extends AppCompatActivity implements H
 
     @Override
     public void onHotelClick(Hotel hotel) {
-        // Aquí implementaremos la navegación al detalle del hotel (próximamente)
-        Log.d(TAG, "Hotel seleccionado: " + hotel.getNombre());
+        // Navegar a la pantalla de detalles del hotel
+        Intent intent = new Intent(this, ClienteDetalleHotelActivity.class);
+        intent.putExtra(ClienteDetalleHotelActivity.EXTRA_HOTEL_ID, hotel.getId());
+        startActivity(intent);
+        Log.d(TAG, "Navegando al detalle del hotel: " + hotel.getNombre());
     }
 }
