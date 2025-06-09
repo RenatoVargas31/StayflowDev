@@ -99,7 +99,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
                 fabAddHotelAdmin.show();
                 subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipAdmins) {
-                filterType = "admin_hotel";
+                filterType = "adminhotel";
                 fabAddHotelAdmin.show();
                 subFilterScrollView.setVisibility(View.GONE);
             } else if (selectedId == R.id.chipTaxistas) {
@@ -340,7 +340,7 @@ public class GestionActivity extends BaseSuperAdminActivity implements UserAdapt
         // Seleccionar el chip correspondiente
         if (savedFilter != null && !savedFilter.equals("Todos")) {
             switch (savedFilter) {
-                case "admin_hotel":
+                case "adminhotel":
                     chipGroupFiltro.check(R.id.chipAdmins);
                     fabAddHotelAdmin.show();
                     break;

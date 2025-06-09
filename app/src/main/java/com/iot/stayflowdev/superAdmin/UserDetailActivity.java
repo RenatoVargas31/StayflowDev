@@ -219,7 +219,7 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
 
         if (user.getDatosEspecificos() != null) {
             switch (user.getRol()) {
-                case "admin_hotel":
+                case "adminhotel":
                     // Mostrar hotel asignado
                     String hotel = user.getDatosEspecificos().containsKey("hotel") ?
                                   user.getDatosEspecificos().get("hotel").toString() :

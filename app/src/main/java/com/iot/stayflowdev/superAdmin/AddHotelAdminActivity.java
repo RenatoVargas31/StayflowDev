@@ -251,9 +251,9 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         Map<String, Object> userData = new HashMap<>();
         userData.put("nombres", nombres);
         userData.put("apellidos", apellidos);
-        userData.put("email", email);
+        userData.put("correo", email);  // Cambiado de "email" a "correo"
         userData.put("telefono", telefono);
-        userData.put("rol", "admin_hotel");
+        userData.put("rol", "adminhotel");
         userData.put("estado", habilitado ? "activo" : "inactivo");
         userData.put("tipoDocumento", tipoDocumento);
         userData.put("numeroDocumento", numeroDocumento);
@@ -279,7 +279,7 @@ public class AddHotelAdminActivity extends AppCompatActivity {
                 resultIntent.putExtra(EXTRA_ADMIN_NAME, nombres);
                 resultIntent.putExtra(EXTRA_ADMIN_APELLIDOS, apellidos);
                 resultIntent.putExtra(EXTRA_ADMIN_EMAIL, email);
-                resultIntent.putExtra(EXTRA_ADMIN_ROLE, "admin_hotel");
+                resultIntent.putExtra(EXTRA_ADMIN_ROLE, "adminhotel");
                 resultIntent.putExtra(EXTRA_ADMIN_ROLE_DESC, "Administrador de Hotel");
                 resultIntent.putExtra(EXTRA_ADMIN_ENABLED, habilitado);
 
