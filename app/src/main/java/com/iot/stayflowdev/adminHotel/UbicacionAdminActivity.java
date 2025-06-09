@@ -4,27 +4,49 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.iot.stayflowdev.R;
-import com.iot.stayflowdev.databinding.ActivityUbicacionAdminBinding;
 import com.google.android.material.chip.Chip;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
+import com.iot.stayflowdev.databinding.ActivityUbicacionAdminBinding;
+import com.iot.stayflowdev.model.LugaresCercanos;
+import com.iot.stayflowdev.viewmodels.LugaresCercanosViewModel;
 
 public class UbicacionAdminActivity extends AppCompatActivity {
 
     private ActivityUbicacionAdminBinding binding;
+    private AdminHotelViewModel adminHotelViewModel;
+    private LugaresCercanosViewModel lugaresViewModel;
+    private String hotelIdGlobal = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ubicacion_admin);
+        binding = ActivityUbicacionAdminBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        binding = ActivityUbicacionAdminBinding.bind(findViewById(R.id.rootUbicacionAdmin));
+        lugaresViewModel = new ViewModelProvider(this).get(LugaresCercanosViewModel.class);
+        this.adminHotelViewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+
+        adminHotelViewModel.getHotelId().observe(this, idHotel -> {
+            if (idHotel != null && !idHotel.isEmpty()) {
+                hotelIdGlobal = idHotel;
+                lugaresViewModel.cargarLugares(idHotel);
+                observarLugares();
+                cargarDireccionHotel(idHotel);
+            } else {
+                Toast.makeText(this, "No hay hotel asignado", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Configura Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -35,147 +57,140 @@ public class UbicacionAdminActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.menu_inicio);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_inicio) {
-                return true;
-            } else if (id == R.id.menu_reportes) {
-                startActivity(new Intent(this, ReportesAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_huesped) {
-                startActivity(new Intent(this, HuespedAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_mensajeria) {
-                startActivity(new Intent(this, MensajeriaAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_perfil) {
-                startActivity(new Intent(this, PerfilAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            }
-            return false;
+            if (id == R.id.menu_inicio) return true;
+            if (id == R.id.menu_reportes) startActivity(new Intent(this, ReportesAdminActivity.class));
+            else if (id == R.id.menu_huesped) startActivity(new Intent(this, HuespedAdminActivity.class));
+            else if (id == R.id.menu_mensajeria) startActivity(new Intent(this, MensajeriaAdminActivity.class));
+            else if (id == R.id.menu_perfil) startActivity(new Intent(this, PerfilAdminActivity.class));
+            overridePendingTransition(0, 0);
+            return true;
         });
 
-        setupAutocomplete();
         setupListeners();
-        loadMockupData();
     }
 
-    private void setupAutocomplete() {
-        String[] suggestions = {"Av. El Sol 123", "Jr. Cusco 456", "Plaza Mayor 789"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, suggestions);
-        binding.autoCompleteDireccion.setAdapter(adapter);
-        binding.autoCompleteDireccion.setThreshold(1);
-
-        binding.autoCompleteDireccion.setOnItemClickListener((parent, view, position, id) -> {
-            String address = parent.getItemAtPosition(position).toString();
-            showSelectedAddress(address);
-        });
-
-        binding.autoCompleteDireccion.setOnDismissListener(() -> {
-            String text = binding.autoCompleteDireccion.getText().toString();
-            if (!text.isEmpty()) {
-                showSelectedAddress(text);
+    private void cargarDireccionHotel(String idHotel) {
+        adminHotelViewModel.getUbicacionHotel().observe(this, ubicacion -> {
+            if (ubicacion == null || ubicacion.trim().isEmpty()) {
+                binding.chipDireccion.setText("Dirección no registrada");
+                binding.chipDireccion.setVisibility(View.VISIBLE);
+            } else {
+                binding.chipDireccion.setText(ubicacion);
+                binding.chipDireccion.setVisibility(View.VISIBLE);
             }
         });
     }
 
-    private void showSelectedAddress(String address) {
-        binding.chipDireccion.setText(address);
-        binding.chipDireccion.setVisibility(View.VISIBLE);
+    private void observarLugares() {
+        lugaresViewModel.getLugares().observe(this, lista -> {
+            binding.layoutListaLugares.removeAllViews();
+            for (LugaresCercanos lugar : lista) {
+                addPlaceCard(lugar);
+            }
+        });
     }
 
     private void setupListeners() {
-        binding.btnAgregarLugar.setOnClickListener(v -> showBottomSheet());
-        binding.btnCancelar.setOnClickListener(v -> hideBottomSheet());
-        binding.scrim.setOnClickListener(v -> hideBottomSheet());
-        binding.btnGuardarLugar.setOnClickListener(v -> savePlace());
+        binding.btnAgregarLugar.setOnClickListener(v -> showFormDialog());
+        binding.btnActualizarDireccion.setOnClickListener(v -> {
+            String nuevaUbicacion = binding.etDireccionHotel.getText().toString().trim();
+            if (!nuevaUbicacion.isEmpty() && hotelIdGlobal != null) {
+                adminHotelViewModel.actualizarUbicacion(hotelIdGlobal, nuevaUbicacion,
+                        () -> {
+                            showMessage("Dirección actualizada");
+                            binding.chipDireccion.setText(nuevaUbicacion);
+                            binding.chipDireccion.setVisibility(View.VISIBLE);
+                        },
+                        () -> showMessage("Error al actualizar dirección")
+                );
+            } else {
+                showMessage("Completa la dirección");
+            }
+        });
+
     }
 
-    private void showBottomSheet() {
-        binding.cardFormularioLugar.setTranslationY(500);
-        binding.bottomSheetFormulario.setVisibility(View.VISIBLE);
-        binding.cardFormularioLugar.animate().translationY(0).setDuration(300).start();
-    }
+    private void showFormDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_form_lugar, null);
 
-    private void hideBottomSheet() {
-        binding.cardFormularioLugar.animate()
-                .translationY(500)
-                .setDuration(250)
-                .withEndAction(() -> {
-                    binding.bottomSheetFormulario.setVisibility(View.GONE);
-                    clearForm();
+        final EditText etNombre = view.findViewById(R.id.etDialogNombreLugar);
+        final EditText etDistancia = view.findViewById(R.id.etDialogDistanciaLugar);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Agregar lugar")
+                .setView(view)
+                .setPositiveButton("Guardar", (dialog, which) -> {
+                    String nombre = etNombre.getText().toString().trim();
+                    String distancia = etDistancia.getText().toString().trim();
+
+                    if (!nombre.isEmpty() && !distancia.isEmpty() && hotelIdGlobal != null) {
+                        LugaresCercanos nuevo = new LugaresCercanos(null, distancia, "", nombre);
+                        lugaresViewModel.agregarLugar(hotelIdGlobal, nuevo, () -> {
+                            showMessage("Lugar agregado");
+                            lugaresViewModel.cargarLugares(hotelIdGlobal);
+                        });
+                    } else {
+                        showMessage("Completa todos los campos.");
+                    }
                 })
-                .start();
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
-    private void clearForm() {
-        binding.etNombreLugar.setText("");
-        binding.etDistanciaLugar.setText("");
+    private void showEditDialog(LugaresCercanos lugar) {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_form_lugar, null);
+
+        EditText etNombre = view.findViewById(R.id.etDialogNombreLugar);
+        EditText etDistancia = view.findViewById(R.id.etDialogDistanciaLugar);
+
+        etNombre.setText(lugar.getNombre());
+        etDistancia.setText(lugar.getDistancia());
+
+        new AlertDialog.Builder(this)
+                .setTitle("Editar lugar")
+                .setView(view)
+                .setPositiveButton("Actualizar", (dialog, which) -> {
+                    String nuevoNombre = etNombre.getText().toString().trim();
+                    String nuevaDistancia = etDistancia.getText().toString().trim();
+
+                    if (!nuevoNombre.isEmpty() && !nuevaDistancia.isEmpty()) {
+                        LugaresCercanos actualizado = new LugaresCercanos(lugar.getId(), nuevaDistancia, "", nuevoNombre);
+                        lugaresViewModel.actualizarLugar(hotelIdGlobal, actualizado, () -> {
+                            showMessage("Lugar actualizado");
+                            lugaresViewModel.cargarLugares(hotelIdGlobal);
+                        });
+                    } else {
+                        showMessage("Completa todos los campos");
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
-    private void savePlace() {
-        String name = binding.etNombreLugar.getText().toString().trim();
-        String distance = binding.etDistanciaLugar.getText().toString().trim();
-
-        if (!name.isEmpty() && !distance.isEmpty()) {
-            addPlaceCard(name, distance + " m");
-            showMessage("Lugar agregado");
-            hideBottomSheet();
-        } else {
-            showMessage("Por favor completa ambos campos");
-        }
-    }
-
-    private void addPlaceCard(String name, String distance) {
+    private void addPlaceCard(LugaresCercanos lugar) {
         View card = LayoutInflater.from(this)
                 .inflate(R.layout.item_admin_lugar_historico, binding.layoutListaLugares, false);
 
-        ((android.widget.TextView) card.findViewById(R.id.tvNombreLugar)).setText(name);
-        ((Chip) card.findViewById(R.id.chipDistancia)).setText(distance);
+        ((android.widget.TextView) card.findViewById(R.id.tvNombreLugar)).setText(lugar.getNombre());
+        ((Chip) card.findViewById(R.id.chipDistancia)).setText(lugar.getDistancia() + " m");
 
-        card.findViewById(R.id.btnEditar).setOnClickListener(v -> editPlace(name, distance));
-        card.findViewById(R.id.btnEliminar).setOnClickListener(v -> removePlace(card));
+        // Botón editar
+        card.findViewById(R.id.btnEditar).setOnClickListener(v -> showEditDialog(lugar));
 
-        card.setAlpha(0f);
-        card.setTranslationY(50);
-        binding.layoutListaLugares.addView(card);
-
-        card.animate()
-                .alpha(1f)
-                .translationY(0)
-                .setDuration(300)
-                .start();
-    }
-
-    private void editPlace(String name, String distance) {
-        binding.etNombreLugar.setText(name);
-        binding.etDistanciaLugar.setText(distance.replace(" m", ""));
-        showBottomSheet();
-    }
-
-    private void removePlace(View card) {
-        card.animate()
-                .alpha(0f)
-                .translationX(card.getWidth())
-                .setDuration(300)
-                .withEndAction(() -> {
-                    binding.layoutListaLugares.removeView(card);
+        // Botón eliminar
+        card.findViewById(R.id.btnEliminar).setOnClickListener(v -> {
+            if (hotelIdGlobal != null) {
+                lugaresViewModel.eliminarLugar(hotelIdGlobal, lugar.getId(), () -> {
                     showMessage("Lugar eliminado");
-                })
-                .start();
+                    lugaresViewModel.cargarLugares(hotelIdGlobal);
+                });
+            }
+        });
+
+        binding.layoutListaLugares.addView(card);
     }
 
-    private void loadMockupData() {
-        addPlaceCard("Plaza de Armas", "300 m");
-        addPlaceCard("Museo Central", "500 m");
-        addPlaceCard("Catedral Histórica", "450 m");
 
-        binding.autoCompleteDireccion.setText("Av. El Sol 123");
-        binding.chipDireccion.setText("Av. El Sol 123");
-        binding.chipDireccion.setVisibility(View.VISIBLE);
-    }
 
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

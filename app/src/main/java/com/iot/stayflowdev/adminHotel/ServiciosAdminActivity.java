@@ -1,29 +1,37 @@
 package com.iot.stayflowdev.adminHotel;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.room.Room;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.adapter.ServicioAdapter;
-import com.iot.stayflowdev.adminHotel.model.Servicio;
+import com.iot.stayflowdev.model.Servicio;
+import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
 import com.iot.stayflowdev.databinding.ActivityServiciosAdminBinding;
+import com.iot.stayflowdev.viewmodels.ServicioViewModel;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class ServiciosAdminActivity extends AppCompatActivity {
 
     private ActivityServiciosAdminBinding binding;
     private ServicioAdapter servicioAdapter;
+    private ServicioViewModel servicioViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +39,8 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         binding = ActivityServiciosAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setSupportActionBar(binding.toolbar);
 
-        // Configura Toolbar
-        Toolbar toolbar = binding.toolbar;
-        setSupportActionBar(toolbar);
-
-        // Configura BottomNavigationView
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.setSelectedItemId(R.id.menu_inicio);
         bottomNav.setOnItemSelectedListener(item -> {
@@ -50,55 +54,62 @@ public class ServiciosAdminActivity extends AppCompatActivity {
             return true;
         });
 
-        /*
-        servicioAdapter = new ServicioAdapter(new ArrayList<>(), new ServicioAdapter.OnServicioActionListener() {
-            @Override
-            public void onEditar(Servicio servicio) {
-                mostrarDialogoEditar(servicio);
+        servicioViewModel = new ViewModelProvider(this).get(ServicioViewModel.class);
+        AdminHotelViewModel adminHotelViewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+
+        adminHotelViewModel.getHotelId().observe(this, hotelId -> {
+            if (hotelId == null || hotelId.isEmpty()) {
+                mostrarError("Error", "No se encontró hotel asignado.");
+                return;
             }
 
-            @Override
-            public void onEliminar(Servicio servicio) {
-                confirmarEliminar(servicio);
-            }
-        });*/
+            servicioAdapter = new ServicioAdapter(new ArrayList<>(), new ServicioAdapter.OnServicioActionListener() {
+                @Override
+                public void onEditar(Servicio servicio) {
+                    mostrarDialogoEditar(servicio, hotelId);
+                }
 
-        binding.recyclerServicios.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerServicios.setAdapter(servicioAdapter);
+                @Override
+                public void onEliminar(Servicio servicio) {
+                    confirmarEliminar(servicio, hotelId);
+                }
+            });
 
-        /*binding.fabAddService.setOnClickListener(v -> mostrarDialogoAgregar());*/
+            binding.recyclerServicios.setLayoutManager(new LinearLayoutManager(this));
+            binding.recyclerServicios.setAdapter(servicioAdapter);
 
-        /*
-        cargarServicios();*/
+            binding.fabAddService.setOnClickListener(v -> mostrarDialogoAgregar(hotelId));
+
+            servicioViewModel.getServicios(hotelId).observe(this, servicios -> servicioAdapter.updateData(servicios));
+        });
     }
 
-
-    /*
-    private void cargarServicios() {
-        new Thread(() -> {
-            List<ServicioEntity> entidades = db.servicioDao().obtenerTodos();
-            List<Servicio> servicios = new ArrayList<>();
-            for (ServicioEntity e : entidades) {
-                servicios.add(new Servicio(e.id, e.nombre, e.descripcion, e.precio, e.esGratis));
-            }
-            runOnUiThread(() -> servicioAdapter.updateData(servicios));
-        }).start();
-    }*/
-    /*
-
-    private void mostrarDialogoAgregar() {
+    private void mostrarDialogoAgregar(String hotelId) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
-        EditText etNombre = view.findViewById(R.id.inputServiceName);
-        EditText etDescripcion = view.findViewById(R.id.inputDescription);
-        EditText etPrecio = view.findViewById(R.id.inputPrice);
+        MaterialAutoCompleteTextView dropdown = view.findViewById(R.id.dropdownTipoServicio);
+        TextInputEditText etDescripcion = view.findViewById(R.id.inputDescription);
+        TextInputEditText etPrecio = view.findViewById(R.id.inputPrice);
         RadioButton radioFree = view.findViewById(R.id.radioFree);
         RadioButton radioWithPrice = view.findViewById(R.id.radioWithPrice);
+
+        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, servicios);
+        dropdown.setAdapter(adapter);
+        dropdown.setKeyListener(null); // evita que escriban
+        dropdown.setOnClickListener(v -> dropdown.showDropDown());
+
+        etPrecio.setEnabled(false);
+        radioFree.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            etPrecio.setEnabled(!isChecked);
+            if (isChecked) etPrecio.setText("");
+        });
+        radioWithPrice.setOnCheckedChangeListener((buttonView, isChecked) -> etPrecio.setEnabled(isChecked));
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Agregar Servicio")
                 .setView(view)
                 .setPositiveButton("Guardar", (dialog, which) -> {
-                    String nombre = etNombre.getText().toString().trim();
+                    String nombre = dropdown.getText().toString().trim();
                     String descripcion = etDescripcion.getText().toString().trim();
                     String precio = etPrecio.getText().toString().trim();
                     boolean esGratis = radioFree.isChecked();
@@ -108,79 +119,78 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                         return;
                     }
 
-                    new Thread(() -> {
-                        db.servicioDao().insertar(new ServicioEntity(nombre, descripcion, esGratis ? "Gratis" : precio, esGratis));
-                        runOnUiThread(() -> {
-                            cargarServicios();
-                            mostrarMensaje("Servicio agregado exitosamente.");
-                        });
-                    }).start();
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }*/
+                    Servicio s = new Servicio();
+                    s.setNombre(nombre);
+                    s.setDescripcion(descripcion);
+                    s.setPrecio(esGratis ? "Gratis" : precio);
+                    s.setEsGratis(esGratis);
 
-    /*
-    private void mostrarDialogoEditar(Servicio servicio) {
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
-        EditText etNombre = view.findViewById(R.id.inputServiceName);
-        EditText etDescripcion = view.findViewById(R.id.inputDescription);
-        EditText etPrecio = view.findViewById(R.id.inputPrice);
-        RadioButton radioFree = view.findViewById(R.id.radioFree);
-        RadioButton radioWithPrice = view.findViewById(R.id.radioWithPrice);
-
-        etNombre.setText(servicio.getNombre());
-        etDescripcion.setText(servicio.getDescripcion());
-        if (servicio.isEsGratis()) {
-            radioFree.setChecked(true);
-            etPrecio.setText("");
-        } else {
-            radioWithPrice.setChecked(true);
-            etPrecio.setText(servicio.getPrecio());
-        }
-
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Editar Servicio")
-                .setView(view)
-                .setPositiveButton("Actualizar", (dialog, which) -> {
-                    String nombre = etNombre.getText().toString().trim();
-                    String descripcion = etDescripcion.getText().toString().trim();
-                    String precio = etPrecio.getText().toString().trim();
-                    boolean esGratis = radioFree.isChecked();
-
-                    if (nombre.isEmpty() || descripcion.isEmpty() || (!esGratis && precio.isEmpty())) {
-                        mostrarError("Error", "Completa todos los campos antes de guardar.");
-                        return;
-                    }
-
-                    new Thread(() -> {
-                        ServicioEntity entity = new ServicioEntity(nombre, descripcion, esGratis ? "Gratis" : precio, esGratis);
-                        entity.id = servicio.getId();
-                        db.servicioDao().actualizar(entity);
-                        runOnUiThread(() -> {
-                            cargarServicios();
-                            mostrarMensaje("Servicio actualizado exitosamente.");
-                        });
-                    }).start();
+                    servicioViewModel.agregar(hotelId, s, () -> mostrarMensaje("Servicio agregado correctamente."));
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
-    private void confirmarEliminar(Servicio servicio) {
+    private void mostrarDialogoEditar(Servicio servicio, String hotelId) {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
+        MaterialAutoCompleteTextView dropdown = view.findViewById(R.id.dropdownTipoServicio);
+        TextInputEditText etDescripcion = view.findViewById(R.id.inputDescription);
+        TextInputEditText etPrecio = view.findViewById(R.id.inputPrice);
+        RadioButton radioFree = view.findViewById(R.id.radioFree);
+        RadioButton radioWithPrice = view.findViewById(R.id.radioWithPrice);
+
+        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, servicios);
+        dropdown.setAdapter(adapter);
+        dropdown.setKeyListener(null);
+        dropdown.setOnClickListener(v -> dropdown.showDropDown());
+
+        dropdown.setText(servicio.getNombre(), false);
+        etDescripcion.setText(servicio.getDescripcion());
+
+        boolean esGratis = servicio.getEsGratis() != null && servicio.getEsGratis();
+        radioFree.setChecked(esGratis);
+        radioWithPrice.setChecked(!esGratis);
+        etPrecio.setEnabled(!esGratis);
+        etPrecio.setText(esGratis ? "" : servicio.getPrecio());
+
+        radioFree.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            etPrecio.setEnabled(!isChecked);
+            if (isChecked) etPrecio.setText("");
+        });
+        radioWithPrice.setOnCheckedChangeListener((buttonView, isChecked) -> etPrecio.setEnabled(isChecked));
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Editar Servicio")
+                .setView(view)
+                .setPositiveButton("Actualizar", (dialog, which) -> {
+                    String nombre = dropdown.getText().toString().trim();
+                    String descripcion = etDescripcion.getText().toString().trim();
+                    String precio = etPrecio.getText().toString().trim();
+                    boolean esGratis2 = radioFree.isChecked();
+
+                    if (nombre.isEmpty() || descripcion.isEmpty() || (!esGratis2 && precio.isEmpty())) {
+                        mostrarError("Error", "Completa todos los campos antes de guardar.");
+                        return;
+                    }
+
+                    servicio.setNombre(nombre);
+                    servicio.setDescripcion(descripcion);
+                    servicio.setPrecio(esGratis2 ? "Gratis" : precio);
+                    servicio.setEsGratis(esGratis2);
+
+                    servicioViewModel.actualizar(hotelId, servicio, () -> mostrarMensaje("Servicio actualizado."));
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void confirmarEliminar(Servicio servicio, String hotelId) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Confirmar eliminación")
                 .setMessage("¿Deseas eliminar el servicio '" + servicio.getNombre() + "'?")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
-                    new Thread(() -> {
-                        ServicioEntity entity = new ServicioEntity(servicio.getNombre(), servicio.getDescripcion(), servicio.getPrecio(), servicio.isEsGratis());
-                        entity.id = servicio.getId();
-                        db.servicioDao().eliminar(entity);
-                        runOnUiThread(() -> {
-                            cargarServicios();
-                            mostrarMensaje("Servicio eliminado exitosamente.");
-                        });
-                    }).start();
+                    servicioViewModel.eliminar(hotelId, servicio.getId(), () -> mostrarMensaje("Servicio eliminado."));
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
@@ -195,10 +205,6 @@ public class ServiciosAdminActivity extends AppCompatActivity {
     }
 
     private void mostrarMensaje(String mensaje) {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Información")
-                .setMessage(mensaje)
-                .setPositiveButton("OK", null)
-                .show();
-    }*/
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+    }
 }

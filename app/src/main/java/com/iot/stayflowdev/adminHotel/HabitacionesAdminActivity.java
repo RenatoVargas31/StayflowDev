@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.ComponentActivity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,8 +22,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.adapter.HabitacionAdapter;
-import com.iot.stayflowdev.model.Habitacion;
+import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
 import com.iot.stayflowdev.databinding.ActivityHabitacionesAdminBinding;
+import com.iot.stayflowdev.model.Habitacion;
 import com.iot.stayflowdev.viewmodels.HabitacionViewModel;
 
 import java.util.ArrayList;
@@ -41,9 +42,7 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
     private TextView tvRoomInfo;
 
     private FloatingActionButton fabAddRoom;
-
     private static final int MAX_HABITACIONES = 5;
-    private final String hotelId = "OkKIOJKRI3krgDOXr1PL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,18 +50,25 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
         binding = ActivityHabitacionesAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        viewModel = new ViewModelProvider(this).get(HabitacionViewModel.class);
-        viewModel.cargarHabitaciones(hotelId);
-
         initViews();
         setupToolbar();
         setupBottomNavigation();
-        setupRecyclerView();
-        setupFab();
 
-        viewModel.getHabitaciones().observe(this, habitaciones -> {
-            habitacionAdapter.updateData(habitaciones);
-            actualizarUI();
+        viewModel = new ViewModelProvider(this).get(HabitacionViewModel.class);
+        AdminHotelViewModel adminHotelViewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+
+        adminHotelViewModel.getHotelId().observe(this, hotelId -> {
+            if (hotelId != null && !hotelId.isEmpty()) {
+                viewModel.cargarHabitaciones(hotelId);
+                viewModel.getHabitaciones().observe(this, habitaciones -> {
+                    habitacionAdapter.updateData(habitaciones);
+                    actualizarUI();
+                });
+                setupRecyclerViewConHotelId(hotelId);
+                setupFabConHotelId(hotelId);
+            } else {
+                mostrarError("Error", "No se encontró hotel asignado.");
+            }
         });
     }
 
@@ -94,12 +100,13 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
         });
     }
 
-    private void setupRecyclerView() {
+    private void setupRecyclerViewConHotelId(String hotelId) {
         binding.recyclerHabitaciones.setLayoutManager(new LinearLayoutManager(this));
         habitacionAdapter = new HabitacionAdapter(new ArrayList<>(), new HabitacionAdapter.OnHabitacionActionListener() {
             @Override
             public void onEditar(Habitacion habitacion, int position) {
-                if (Boolean.TRUE.equals(habitacion.getDisponible())) mostrarFormularioEditarHabitacion(habitacion);
+                if (Boolean.TRUE.equals(habitacion.getDisponible()))
+                    mostrarFormularioEditarHabitacion(habitacion, hotelId);
                 else mostrarError("Acción no permitida", "No se puede editar una habitación en uso.");
             }
 
@@ -110,9 +117,7 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                             .setTitle("Eliminar habitación")
                             .setMessage("¿Seguro que deseas eliminar esta habitación?")
                             .setPositiveButton("Eliminar", (dialog, which) -> viewModel.eliminar(hotelId, habitacion.getId(), () -> {
-                                runOnUiThread(() -> {
-                                    Snackbar.make(binding.getRoot(), "Habitación eliminada correctamente", Snackbar.LENGTH_LONG).show();
-                                });
+                                runOnUiThread(() -> Toast.makeText(HabitacionesAdminActivity.this, "Habitación eliminada correctamente", Toast.LENGTH_SHORT).show());
                             }))
                             .setNegativeButton("Cancelar", null)
                             .show();
@@ -124,22 +129,17 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
         binding.recyclerHabitaciones.setAdapter(habitacionAdapter);
     }
 
-    private void setupFab() {
+    private void setupFabConHotelId(String hotelId) {
         fabAddRoom.setOnClickListener(v -> {
-            if (habitacionAdapter.getItemCount() < MAX_HABITACIONES) mostrarFormularioAgregarHabitacion();
-            else mostrarMensajeLimiteAlcanzado();
+            if (habitacionAdapter.getItemCount() < MAX_HABITACIONES) {
+                mostrarFormularioAgregarHabitacion(hotelId);
+            } else {
+                mostrarMensajeLimiteAlcanzado();
+            }
         });
     }
 
-    private void actualizarUI() {
-        int count = habitacionAdapter.getItemCount();
-        emptyState.setVisibility(count == 0 ? View.VISIBLE : View.GONE);
-        contentWithRooms.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
-        tvRoomCount.setText(count + " de " + MAX_HABITACIONES + " habitaciones creadas");
-        fabAddRoom.setAlpha(count >= MAX_HABITACIONES ? 0.6f : 1f);
-    }
-
-    private void mostrarFormularioAgregarHabitacion() {
+    private void mostrarFormularioAgregarHabitacion(String hotelId) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_habitacion, null);
         TextInputEditText etAdultos = view.findViewById(R.id.etAdultos);
         TextInputEditText etNinos = view.findViewById(R.id.etNinos);
@@ -168,7 +168,6 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                         String cantidadStr = etCantidad.getText().toString().trim();
                         String tipo = etTipo.getText().toString().trim();
 
-                        // Validación de campos vacíos
                         if (tipo.isEmpty() || tamanoStr.isEmpty() || precioStr.isEmpty() || cantidadStr.isEmpty()) {
                             mostrarError("Campos incompletos", "Completa todos los campos obligatorios.");
                             return;
@@ -180,10 +179,8 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                         double precio = Double.parseDouble(precioStr);
                         int cantidad = Integer.parseInt(cantidadStr);
 
-                        // Validaciones lógicas
                         if (!validarCampos(tipo, adultos, ninos, tamano, precio, cantidadStr)) return;
 
-                        // Validar que el tipo no esté repetido
                         boolean tipoYaExiste = false;
                         for (Habitacion hExistente : habitacionAdapter.getHabitaciones()) {
                             if (hExistente.getTipo().equalsIgnoreCase(tipo)) {
@@ -196,7 +193,6 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                             return;
                         }
 
-                        // Crear objeto habitación y guardar
                         Habitacion h = new Habitacion();
                         h.setTipo(tipo);
                         h.setCapacidad(new Habitacion.Capacidad(String.valueOf(adultos), String.valueOf(ninos)));
@@ -206,7 +202,7 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                         h.setDisponible(true);
 
                         viewModel.agregar(hotelId, h);
-                        Snackbar.make(binding.getRoot(), "Habitación creada exitosamente", Snackbar.LENGTH_LONG).show();
+                        Toast.makeText(this, "Habitación creada exitosamente", Toast.LENGTH_SHORT).show();
 
                     } catch (NumberFormatException e) {
                         mostrarError("Error numérico", "Verifica que los valores numéricos estén correctamente escritos (usa punto para decimales).");
@@ -216,8 +212,7 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                 .show();
     }
 
-
-    private void mostrarFormularioEditarHabitacion(Habitacion habitacion) {
+    private void mostrarFormularioEditarHabitacion(Habitacion habitacion, String hotelId) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_habitacion, null);
         TextInputEditText etAdultos = view.findViewById(R.id.etAdultos);
         TextInputEditText etNinos = view.findViewById(R.id.etNinos);
@@ -228,29 +223,15 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
 
         String[] tipos = {"Individual", "Doble", "Triple", "Suite", "Familiar"};
         etTipo.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos));
-
-        // Establecer valores actuales
-
-
-        // tipo de habitacion no se puede cambiar, pero lo mostramos para referencia
-        // Mostrar el tipo, pero alertar si intenta cambiarlo
         etTipo.setText(habitacion.getTipo(), false);
-
-        // Deshabilitar edición directa con teclado
         etTipo.setInputType(0);
-
-        // Mostrar advertencia si intenta cambiar el tipo
-        etTipo.setOnClickListener(v -> {
-            mostrarError("Acción no permitida", "No puedes cambiar el tipo de habitación. Solo puedes editar otros campos.");
-        });
+        etTipo.setOnClickListener(v -> mostrarError("Acción no permitida", "No puedes cambiar el tipo de habitación."));
         etTipo.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 etTipo.clearFocus();
                 mostrarError("Acción no permitida", "No puedes cambiar el tipo de habitación.");
             }
         });
-
-
 
         etAdultos.setText(habitacion.getCapacidad().getAdultos());
         etNinos.setText(habitacion.getCapacidad().getNinos());
@@ -263,31 +244,23 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
                 .setView(view)
                 .setPositiveButton("Guardar", (dialog, which) -> {
                     try {
-                        String adultosStr = etAdultos.getText().toString().trim();
-                        String ninosStr = etNinos.getText().toString().trim();
-                        String tamanoStr = etTamano.getText().toString().trim();
-                        String precioStr = etPrecio.getText().toString().trim();
-                        String cantidadStr = etCantidad.getText().toString().trim();
-                        String tipo = etTipo.getText().toString().trim(); // aunque no se puede cambiar, lo usamos igual
+                        int adultos = Integer.parseInt(etAdultos.getText().toString().trim());
+                        int ninos = Integer.parseInt(etNinos.getText().toString().trim());
+                        int tamano = Integer.parseInt(etTamano.getText().toString().trim());
+                        double precio = Double.parseDouble(etPrecio.getText().toString().trim());
+                        int cantidad = Integer.parseInt(etCantidad.getText().toString().trim());
+                        String tipo = etTipo.getText().toString().trim();
 
-                        int adultos = adultosStr.isEmpty() ? 0 : Integer.parseInt(adultosStr);
-                        int ninos = ninosStr.isEmpty() ? 0 : Integer.parseInt(ninosStr);
-                        int tamano = Integer.parseInt(tamanoStr);
-                        double precio = Double.parseDouble(precioStr);
-                        int cantidad = Integer.parseInt(cantidadStr);
-
-                        if (!validarCampos(tipo, adultos, ninos, tamano, precio, cantidadStr)) return;
+                        if (!validarCampos(tipo, adultos, ninos, tamano, precio, String.valueOf(cantidad))) return;
 
                         habitacion.setCapacidad(new Habitacion.Capacidad(String.valueOf(adultos), String.valueOf(ninos)));
                         habitacion.setTamano(String.valueOf(tamano));
                         habitacion.setPrecio(String.valueOf(precio));
                         habitacion.setCantidad(String.valueOf(cantidad));
 
-                        viewModel.actualizar(hotelId, habitacion, () -> {
-                            runOnUiThread(() -> {
-                                Snackbar.make(binding.getRoot(), "Habitación editada correctamente", Snackbar.LENGTH_LONG).show();
-                            });
-                        });
+                        viewModel.actualizar(hotelId, habitacion, () ->
+                                runOnUiThread(() -> Snackbar.make(binding.getRoot(), "Habitación editada correctamente", Snackbar.LENGTH_LONG).show())
+                        );
 
                     } catch (Exception e) {
                         mostrarError("Error", "Verifica que los números estén correctamente escritos.");
@@ -336,6 +309,14 @@ public class HabitacionesAdminActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void actualizarUI() {
+        int count = habitacionAdapter.getItemCount();
+        emptyState.setVisibility(count == 0 ? View.VISIBLE : View.GONE);
+        contentWithRooms.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        tvRoomCount.setText(count + " de " + MAX_HABITACIONES + " habitaciones creadas");
+        fabAddRoom.setAlpha(count >= MAX_HABITACIONES ? 0.6f : 1f);
     }
 
 }

@@ -45,15 +45,16 @@
             android:exported="false" />
         <activity
             android:name=".LoginCuentaFireBase"
-            android:exported="false" />
-        <activity
-            android:name=".LoginFireBaseActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginFireBaseActivity"
+            android:exported="false">
+
         </activity>
         <activity
             android:name=".superAdmin.AddHotelAdminActivity"
@@ -63,7 +64,9 @@
             android:exported="false" />
         <activity
             android:name=".superAdmin.InicioActivity"
-            android:exported="false" />
+            android:exported="false">
+        </activity>
+
         <activity
             android:name=".superAdmin.PerfilActivity"
             android:exported="false" />
@@ -93,12 +96,7 @@
             android:exported="false" />
         <activity
             android:name=".superAdmin.SuperAdminActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:exported="false">
         </activity> <!-- Dentro de <application> -->
         <receiver
             android:name=".Driver.Activity.DriverReservaActivity$ResumenDiarioReceiver"

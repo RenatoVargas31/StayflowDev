@@ -5,13 +5,13 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    android:padding="16dp">
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tvNombreServicio"
@@ -24,36 +24,44 @@
             android:id="@+id/tvDescripcionServicio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Descripción"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:text="Descripción del servicio"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <TextView
             android:id="@+id/tvPrecioServicio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Precio"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:text="Precio: S/. 0"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:gravity="end">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEditarServicio"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Editar" />
+                android:text="Editar"
+                app:icon="@drawable/ic_edit"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEliminarServicio"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Eliminar"
+                app:icon="@drawable/ic_delete"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
     </LinearLayout>
