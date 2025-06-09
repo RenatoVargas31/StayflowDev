@@ -11,91 +11,64 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.iot.stayflowdev.LoginFireBaseActivity;
 import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.databinding.ActivityClientePerfilBinding;
 
 public class ClientePerfilActivity extends AppCompatActivity {
 
-    private BottomNavigationView bottomNavigation;
+    private ActivityClientePerfilBinding binding;
     private static final String TAG = "ClientePerfilActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_cliente_perfil);
-        setSupportActionBar(findViewById(R.id.toolbar)); // Configurar toolbar
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Inicializar ViewBinding
+        binding = ActivityClientePerfilBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        // Configurar toolbar
+        setSupportActionBar(binding.toolbar);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0); // No padding en el bottom
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0); // Sin padding inferior
             return insets;
         });
 
-        // Inicializar todas las vistas
-        inicializarVistas();
-
         // Configurar navegación inferior
-        configurarBottomNavigationFluido();
+        setupBottomNavigation();
     }
 
-    // Inicializar vistas
-    private void inicializarVistas() {
-        bottomNavigation = findViewById(R.id.bottomNavigation);
+    private void setupBottomNavigation() {
+        // Establecer Perfil como seleccionado
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_perfil);
 
-        // Verificar que se encontró
-        if (bottomNavigation == null) {
-            Log.e(TAG, "❌ ERROR: bottomNavigation es null!");
-        } else {
-            Log.d(TAG, "✅ bottomNavigation encontrado correctamente");
-        }
-    }
-
-    // Configuración de la navegación inferior
-    private void configurarBottomNavigationFluido() {
-        if (bottomNavigation == null) {
-            Log.e(TAG, "❌ bottomNavigation es null, no se puede configurar");
-            return;
-        }
-
-        // Verificar que el menú se cargó
-        if (bottomNavigation.getMenu() == null || bottomNavigation.getMenu().size() == 0) {
-            Log.e(TAG, "❌ ERROR: El menú no se cargó correctamente");
-            return;
-        }
-
-        // Establecer perfil como seleccionado
-        bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-        Log.d(TAG, "✅ Intentando seleccionar nav_perfil");
-
-        // Forzar selección con post para asegurar que se aplique
-        bottomNavigation.post(() -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-            Log.d(TAG, "✅ Selección aplicada con post()");
-        });
-
-        // Configurar listener con navegación sin animación
-        bottomNavigation.setOnItemSelectedListener(item -> {
+        // Configurar listener de navegación
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            Log.d(TAG, "🔄 Ítem seleccionado: " + itemId);
 
-            // Evitar acción si ya estamos en la actividad actual
+            // Si ya estamos en esta actividad, no hacer nada
             if (itemId == R.id.nav_perfil) {
-                Log.d(TAG, "✅ Ya en Perfil");
                 return true;
             }
 
             // Navegación según el ítem seleccionado
             if (itemId == R.id.nav_buscar) {
-                Log.d(TAG, "🏠 Navegando a Inicio");
-                navegarSinAnimacion(ClienteBuscarActivity.class);
+                navigateToActivity(ClienteBuscarActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_favoritos) {
+                navigateToActivity(ClienteFavoritosActivity.class);
+                return true;
+            } else if (itemId == R.id.nav_reservas) {
+                navigateToActivity(ClienteReservasActivity.class);
                 return true;
             }
 
@@ -104,38 +77,11 @@ public class ClientePerfilActivity extends AppCompatActivity {
     }
 
     // Método para navegar sin animación
-    private void navegarSinAnimacion(Class<?> activityClass) {
+    private void navigateToActivity(Class<?> activityClass) {
         Intent intent = new Intent(this, activityClass);
         startActivity(intent);
-        overridePendingTransition(0, 0);
+        overridePendingTransition(0, 0); // Sin animación
         finish();
-    }
-
-    // Manejar botón de retroceso correctamente
-    @Override
-    public void onBackPressed() {
-        // Redirigir a MainActivity cuando se presiona el botón atrás
-        super.onBackPressed();
-        navegarSinAnimacion(ClienteBuscarActivity.class);
-    }
-
-    // Verificar selección en onResume
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
-        if (bottomNavigation != null) {
-            bottomNavigation.post(() -> {
-                bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-                Log.d(TAG, "✅ Selección verificada en onResume()");
-            });
-        }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        navegarSinAnimacion(ClienteBuscarActivity.class);
-        return true;
     }
 
     // Inflar el menú
@@ -174,5 +120,17 @@ public class ClientePerfilActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Al presionar atrás, regresar a la pantalla principal
+        navigateToActivity(ClienteBuscarActivity.class);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        navigateToActivity(ClienteBuscarActivity.class);
+        return true;
     }
 }

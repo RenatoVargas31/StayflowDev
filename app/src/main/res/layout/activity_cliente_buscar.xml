@@ -12,26 +12,23 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:liftOnScroll="true">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:titleTextColor="@color/white"
+            android:layout_height="?attr/actionBarSize"
             app:titleCentered="true"
-            android:background="?attr/colorPrimary"
-            android:minHeight="?attr/actionBarSize"
-            app:title="STAYFLOW"
+            app:titleTextColor="@color/md_theme_primary"
+            app:menu="@menu/buscar_menu"
+            app:title="StayFlow"
             app:layout_scrollFlags="scroll|enterAlways|snap"/>
     </com.google.android.material.appbar.AppBarLayout>
     <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
-
-    <!-- ==================== NAVEGACIÓN INFERIOR ==================== -->
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -63,7 +60,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Campo de destino -->
+            <!--
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -77,6 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
+            -->
             <!-- Botón de búsqueda -->
             <Button
                 android:id="@+id/button"
@@ -86,16 +86,52 @@
                 android:layout_marginBottom="16dp"
                 app:cornerRadius="0dp"
                 android:text="Buscar" />
-            <!-- Sección de Hoteles mejor valorados -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/black"
-                android:text="Hoteles mejor valorados"
-                android:textAppearance="?attr/textAppearanceTitleMedium" />
 
             <!-- Sección de Hoteles mejor valorados -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/black"
+                    android:text="Hoteles mejor valorados"
+                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                <!-- RecyclerView horizontal para mostrar hoteles en carrusel -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerHotelesTop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:orientation="horizontal" />
+
+                <!-- Estado de carga -->
+                <ProgressBar
+                    android:id="@+id/progressBarHotelesTop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+                <!-- Estado de error -->
+                <TextView
+                    android:id="@+id/textErrorHotelesTop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No se pudieron cargar los hoteles"
+                    android:textAlignment="center"
+                    android:textColor="?attr/colorError"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Sección de Lugares históricos -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,7 +142,7 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
+    <!-- ==================== NAVEGACIÓN INFERIOR ==================== -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"

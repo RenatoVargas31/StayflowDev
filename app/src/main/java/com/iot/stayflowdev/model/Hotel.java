@@ -27,7 +27,7 @@ public class Hotel {
     private String ubicacion;
 
     @PropertyName("fotos")
-    private List<String> fotos;
+    private List<String> fotos; // Lista de URLs de fotos del hotel
 
     // Constructor para los campos obligatorios
     public Hotel(String nombre, String administradorAsignado) {
