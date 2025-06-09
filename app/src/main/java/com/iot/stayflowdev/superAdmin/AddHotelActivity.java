@@ -101,8 +101,8 @@ public class AddHotelActivity extends AppCompatActivity {
 
         // Cargar los administradores de hotel desde Firestore
         db.collection("usuarios")
-                .whereEqualTo("rol", "admin_hotel")
-                .whereEqualTo("estado", "activo")  // Solo administradores activos
+                .whereEqualTo("rol", "adminhotel")
+                .whereEqualTo("estado", true)  // Solo administradores activos (ahora con booleano)
                 .get()
                 .addOnCompleteListener(task -> {
                     progressIndicator.setVisibility(View.GONE);

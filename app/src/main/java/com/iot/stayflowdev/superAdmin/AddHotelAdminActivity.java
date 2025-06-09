@@ -251,10 +251,10 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         Map<String, Object> userData = new HashMap<>();
         userData.put("nombres", nombres);
         userData.put("apellidos", apellidos);
-        userData.put("email", email);
+        userData.put("correo", email);  // Cambiado de "email" a "correo"
         userData.put("telefono", telefono);
         userData.put("rol", "adminhotel");
-        userData.put("estado", habilitado ? "activo" : "inactivo");
+        userData.put("estado", habilitado); // Ahora guardamos el valor booleano directamente
         userData.put("tipoDocumento", tipoDocumento);
         userData.put("numeroDocumento", numeroDocumento);
         userData.put("fotoPerfilUrl", "");
