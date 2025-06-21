@@ -40,7 +40,7 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    private String nombre, documento, tipoDocumento, fechaNacimiento, celular;
+    private String nombres, apellidos, numeroDocumento, tipoDocumento, fechaNacimiento, telefono, domicilio;
     private String placa, modelo, imagenVehiculo;
     private boolean esRegistroTaxista = false;
 
@@ -93,11 +93,14 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
     private void recibirDatos() {
         Intent intent = getIntent();
 
-        if (intent.hasExtra("nombre")) {
-            nombre = intent.getStringExtra("nombre");
+        if (intent.hasExtra("nombres")) {
+            nombres = intent.getStringExtra("nombres");
         }
-        if (intent.hasExtra("documento")) {
-            documento = intent.getStringExtra("documento");
+        if (intent.hasExtra("apellidos")) {
+            apellidos = intent.getStringExtra("apellidos");
+        }
+        if (intent.hasExtra("numeroDocumento")) {
+            numeroDocumento = intent.getStringExtra("numeroDocumento");
         }
         if (intent.hasExtra("tipoDocumento")) {
             tipoDocumento = intent.getStringExtra("tipoDocumento");
@@ -105,8 +108,11 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
         if (intent.hasExtra("fechaNacimiento")) {
             fechaNacimiento = intent.getStringExtra("fechaNacimiento");
         }
-        if (intent.hasExtra("celular")) {
-            celular = intent.getStringExtra("celular");
+        if (intent.hasExtra("telefono")) {
+            telefono = intent.getStringExtra("telefono");
+        }
+        if (intent.hasExtra("domicilio")) {
+            domicilio = intent.getStringExtra("domicilio");
         }
 
         if (intent.hasExtra("placa")) {
@@ -157,12 +163,15 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
         }
 
         Map<String, Object> userData = new HashMap<>();
-        userData.put("nombre", nombre);
-        userData.put("documento", documento);
+        userData.put("nombres", nombres);
+        userData.put("apellidos", apellidos);
+        userData.put("numeroDocumento", numeroDocumento);
         userData.put("tipoDocumento", tipoDocumento);
         userData.put("fechaNacimiento", fechaNacimiento);
-        userData.put("celular", celular);
+        userData.put("telefono", telefono);
+        userData.put("domicilio", domicilio);
         userData.put("correo", user.getEmail());
+        userData.put("estado", "activo"); // Campo de estado con valor por defecto activo
 
         // Si seleccionó una imagen, solo guardamos la referencia local (URI como string)
         if (selectedImageUri != null) {

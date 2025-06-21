@@ -36,7 +36,7 @@ public class LoginCrearPassActivity extends AppCompatActivity {
     private ImageView btnClose;
 
     // Datos del usuario que se han recibido de actividades anteriores
-    private String nombre, documento, tipoDocumento, fechaNacimiento, celular;
+    private String nombres, apellidos, numeroDocumento, tipoDocumento, fechaNacimiento, telefono, domicilio;
     private String placa, modelo, imagenVehiculo;
     private boolean esRegistroTaxista = false;
     private String email; // Email recibido desde Firebase Auth si estamos en un registro con Google
@@ -116,11 +116,14 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         // Datos básicos del usuario
-        if (intent.hasExtra("nombre")) {
-            nombre = intent.getStringExtra("nombre");
+        if (intent.hasExtra("nombres")) {
+            nombres = intent.getStringExtra("nombres");
         }
-        if (intent.hasExtra("documento")) {
-            documento = intent.getStringExtra("documento");
+        if (intent.hasExtra("apellidos")) {
+            apellidos = intent.getStringExtra("apellidos");
+        }
+        if (intent.hasExtra("numeroDocumento")) {
+            numeroDocumento = intent.getStringExtra("numeroDocumento");
         }
         if (intent.hasExtra("tipoDocumento")) {
             tipoDocumento = intent.getStringExtra("tipoDocumento");
@@ -128,8 +131,11 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         if (intent.hasExtra("fechaNacimiento")) {
             fechaNacimiento = intent.getStringExtra("fechaNacimiento");
         }
-        if (intent.hasExtra("celular")) {
-            celular = intent.getStringExtra("celular");
+        if (intent.hasExtra("telefono")) {
+            telefono = intent.getStringExtra("telefono");
+        }
+        if (intent.hasExtra("domicilio")) {
+            domicilio = intent.getStringExtra("domicilio");
         }
 
         // Datos del vehículo (solo si es taxista)
@@ -331,11 +337,13 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginCargarFotoActivity.class);
 
         // Pasar todos los datos necesarios
-        intent.putExtra("nombre", nombre);
-        intent.putExtra("documento", documento);
+        intent.putExtra("nombres", nombres);
+        intent.putExtra("apellidos", apellidos);
+        intent.putExtra("numeroDocumento", numeroDocumento);
         intent.putExtra("tipoDocumento", tipoDocumento);
         intent.putExtra("fechaNacimiento", fechaNacimiento);
-        intent.putExtra("celular", celular);
+        intent.putExtra("telefono", telefono);
+        intent.putExtra("domicilio", domicilio);
 
         // Si es taxista, incluir los datos del vehículo
         if (esRegistroTaxista) {

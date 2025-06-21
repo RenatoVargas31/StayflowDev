@@ -35,8 +35,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
     private MaterialButton btnRegistroTaxista;
 
     // Campos del formulario
-    private TextInputEditText etNombre, etDni, etFechaNacimiento, etCelular;
-    private TextInputLayout tilNombre, tilDni, tilFechaNacimiento, tilCelular;
+    private TextInputEditText etNombres, etApellidos, etNumeroDocumento, etFechaNacimiento, etTelefono, etDomicilio;
+    private TextInputLayout tilNombres, tilApellidos, tilNumeroDocumento, tilFechaNacimiento, tilTelefono, tilDomicilio;
     private RadioGroup rgTipoDocumento;
     private RadioButton rbDni, rbCarnet;
     private boolean isDniSelected = true;
@@ -77,11 +77,13 @@ public class LoginRegisterActivity extends AppCompatActivity {
                     // Navegar a la pantalla de creación de contraseña
                     Intent intent = new Intent(LoginRegisterActivity.this, LoginCrearPassActivity.class);
                     // Pasar los datos del usuario al siguiente formulario
-                    intent.putExtra("nombre", etNombre.getText().toString().trim());
-                    intent.putExtra("documento", etDni.getText().toString().trim());
+                    intent.putExtra("nombres", etNombres.getText().toString().trim());
+                    intent.putExtra("apellidos", etApellidos.getText().toString().trim());
+                    intent.putExtra("numeroDocumento", etNumeroDocumento.getText().toString().trim());
                     intent.putExtra("tipoDocumento", isDniSelected ? "DNI" : "Carné de extranjería");
                     intent.putExtra("fechaNacimiento", etFechaNacimiento.getText().toString().trim());
-                    intent.putExtra("celular", etCelular.getText().toString().trim());
+                    intent.putExtra("telefono", etTelefono.getText().toString().trim());
+                    intent.putExtra("domicilio", etDomicilio.getText().toString().trim());
                     startActivity(intent);
                 }
             }
@@ -96,11 +98,13 @@ public class LoginRegisterActivity extends AppCompatActivity {
                     // Navegar a la pantalla de registro de taxista
                     Intent intent = new Intent(LoginRegisterActivity.this, LoginDriverRegister.class);
                     // Pasar los datos del usuario al siguiente formulario
-                    intent.putExtra("nombre", etNombre.getText().toString().trim());
-                    intent.putExtra("documento", etDni.getText().toString().trim());
+                    intent.putExtra("nombres", etNombres.getText().toString().trim());
+                    intent.putExtra("apellidos", etApellidos.getText().toString().trim());
+                    intent.putExtra("numeroDocumento", etNumeroDocumento.getText().toString().trim());
                     intent.putExtra("tipoDocumento", isDniSelected ? "DNI" : "Carné de extranjería");
                     intent.putExtra("fechaNacimiento", etFechaNacimiento.getText().toString().trim());
-                    intent.putExtra("celular", etCelular.getText().toString().trim());
+                    intent.putExtra("telefono", etTelefono.getText().toString().trim());
+                    intent.putExtra("domicilio", etDomicilio.getText().toString().trim());
                     startActivity(intent);
                 } else {
                     Toast.makeText(LoginRegisterActivity.this,
@@ -122,235 +126,147 @@ public class LoginRegisterActivity extends AppCompatActivity {
         rbCarnet = findViewById(R.id.rb_carnet);
 
         // TextInputEditText
-        etNombre = findViewById(R.id.et_nombre);
-        etDni = findViewById(R.id.et_dni);
+        etNombres = findViewById(R.id.et_nombres);
+        etApellidos = findViewById(R.id.et_apellidos);
+        etNumeroDocumento = findViewById(R.id.et_dni); // Mantenemos el ID pero cambiamos la referencia
         etFechaNacimiento = findViewById(R.id.et_fecha_nacimiento);
-        etCelular = findViewById(R.id.et_celular);
+        etTelefono = findViewById(R.id.et_telefono);
+        etDomicilio = findViewById(R.id.et_domicilio);
 
         // TextInputLayout
-        tilNombre = findViewById(R.id.til_nombre);
-        tilDni = findViewById(R.id.til_dni);
+        tilNombres = findViewById(R.id.til_nombres);
+        tilApellidos = findViewById(R.id.til_apellidos);
+        tilNumeroDocumento = findViewById(R.id.til_dni); // Mantenemos el ID pero cambiamos la referencia
         tilFechaNacimiento = findViewById(R.id.til_fecha_nacimiento);
-        tilCelular = findViewById(R.id.til_celular);
+        tilTelefono = findViewById(R.id.til_telefono);
+        tilDomicilio = findViewById(R.id.til_domicilio);
     }
 
     private void configurarListeners() {
-        // Configurar listener para el RadioGroup
-        rgTipoDocumento.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rb_dni) {
-                // DNI seleccionado - 8 dígitos
-                isDniSelected = true;
-                tilDni.setHint("Ingresar DNI (8 dígitos)");
-                tilDni.setCounterMaxLength(8);
-                etDni.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
-                etDni.setText(""); // Limpiar campo para evitar problemas
-            } else {
-                // Carné de extranjería seleccionado - hasta 20 dígitos
-                isDniSelected = false;
-                tilDni.setHint("Ingresar carné de extranjería");
-                tilDni.setCounterMaxLength(20);
-                etDni.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
-                etDni.setText(""); // Limpiar campo para evitar problemas
+        // Listener para el RadioGroup de tipo de documento
+        rgTipoDocumento.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.rb_dni) {
+                    isDniSelected = true;
+                    etNumeroDocumento.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
+                    etNumeroDocumento.setHint("Número de DNI");
+                    tilNumeroDocumento.setHint("Número de DNI");
+                } else if (checkedId == R.id.rb_carnet) {
+                    isDniSelected = false;
+                    etNumeroDocumento.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+                    etNumeroDocumento.setHint("Número de carné de extranjería");
+                    tilNumeroDocumento.setHint("Número de carné de extranjería");
+                }
             }
         });
 
-        // Validación en tiempo real para el nombre
-        etNombre.addTextChangedListener(new TextWatcher() {
+        // Listener para el campo de fecha de nacimiento
+        etFechaNacimiento.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                validarNombre();
-            }
-        });
-
-        // Validación en tiempo real para el DNI/carné
-        etDni.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                validarDni();
-            }
-        });
-
-        // Validación en tiempo real para el celular
-        etCelular.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                validarCelular();
-            }
-        });
-
-        // Configurar el selector de fecha
-        etFechaNacimiento.setOnClickListener(v -> mostrarSelectorFecha());
-    }
-
-    private boolean validarFormulario() {
-        boolean isNombreValido = validarNombre();
-        boolean isDniValido = validarDni();
-        boolean isFechaValida = validarFecha();
-        boolean isCelularValido = validarCelular();
-
-        return isNombreValido && isDniValido && isFechaValida && isCelularValido;
-    }
-
-    private boolean validarNombre() {
-        String nombre = etNombre.getText().toString().trim();
-
-        if (TextUtils.isEmpty(nombre)) {
-            tilNombre.setError("El nombre es obligatorio");
-            return false;
-        }
-
-        if (!NOMBRE_PATTERN.matcher(nombre).matches()) {
-            tilNombre.setError("Ingrese un nombre válido (solo letras)");
-            return false;
-        }
-
-        tilNombre.setError(null);
-        return true;
-    }
-
-    private boolean validarDni() {
-        String documento = etDni.getText().toString().trim();
-
-        if (TextUtils.isEmpty(documento)) {
-            tilDni.setError("El documento de identidad es obligatorio");
-            return false;
-        }
-
-        if (isDniSelected) {
-            // Validación para DNI (8 dígitos)
-            if (documento.length() != 8) {
-                tilDni.setError("El DNI debe tener 8 dígitos");
-                return false;
-            }
-        } else {
-            // Validación para carné de extranjería (hasta 20 dígitos)
-            if (documento.length() < 4 || documento.length() > 20) {
-                tilDni.setError("El carné debe tener entre 4 y 20 caracteres");
-                return false;
-            }
-        }
-
-        try {
-            long numeroDoc = Long.parseLong(documento);
-        } catch (NumberFormatException e) {
-            tilDni.setError("El documento debe contener solo números");
-            return false;
-        }
-
-        tilDni.setError(null);
-        return true;
-    }
-
-    private boolean validarFecha() {
-        String fecha = etFechaNacimiento.getText().toString().trim();
-
-        if (TextUtils.isEmpty(fecha)) {
-            tilFechaNacimiento.setError("La fecha de nacimiento es obligatoria");
-            return false;
-        }
-
-        try {
-            Date fechaNac = dateFormat.parse(fecha);
-            Calendar calendarActual = Calendar.getInstance();
-            Calendar calendarNac = Calendar.getInstance();
-            calendarNac.setTime(fechaNac);
-
-            int edad = calendarActual.get(Calendar.YEAR) - calendarNac.get(Calendar.YEAR);
-
-            if (calendarActual.get(Calendar.DAY_OF_YEAR) < calendarNac.get(Calendar.DAY_OF_YEAR)) {
-                edad--;
-            }
-
-            if (edad < 18) {
-                tilFechaNacimiento.setError("Debes ser mayor de 18 años");
-                return false;
-            }
-
-            if (edad > 100) {
-                tilFechaNacimiento.setError("Ingresa una fecha válida");
-                return false;
-            }
-        } catch (Exception e) {
-            tilFechaNacimiento.setError("Formato de fecha inválido");
-            return false;
-        }
-
-        tilFechaNacimiento.setError(null);
-        return true;
-    }
-
-    private boolean validarCelular() {
-        String celular = etCelular.getText().toString().trim();
-
-        if (TextUtils.isEmpty(celular)) {
-            tilCelular.setError("El número de celular es obligatorio");
-            return false;
-        }
-
-        if (celular.length() != 9) {
-            tilCelular.setError("El número debe tener 9 dígitos");
-            return false;
-        }
-
-        if (!celular.startsWith("9")) {
-            tilCelular.setError("El número debe empezar con 9");
-            return false;
-        }
-
-        tilCelular.setError(null);
-        return true;
-    }
-
-    private void mostrarSelectorFecha() {
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                new DatePickerDialog.OnDateSetListener() {
+            public void onClick(View v) {
+                new DatePickerDialog(LoginRegisterActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         calendar.set(Calendar.YEAR, year);
                         calendar.set(Calendar.MONTH, month);
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
                         etFechaNacimiento.setText(dateFormat.format(calendar.getTime()));
-                        validarFecha();
                     }
-                },
-                year - 18,  // Por defecto, ajustamos a que muestre 18 años atrás
-                month,
-                day
-        );
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
 
-        // Establecer fecha máxima (hoy)
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        // Listeners para validaciones en tiempo real
+        etNombres.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        // Establecer fecha mínima (100 años atrás)
-        Calendar minDate = Calendar.getInstance();
-        minDate.add(Calendar.YEAR, -100);
-        datePickerDialog.getDatePicker().setMinDate(minDate.getTimeInMillis());
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validarCampoNombre(s.toString(), tilNombres);
+            }
 
-        datePickerDialog.show();
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        etApellidos.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validarCampoNombre(s.toString(), tilApellidos);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
+    private boolean validarFormulario() {
+        boolean esValido = true;
+
+        // Validar nombres
+        if (!validarCampoNombre(etNombres.getText().toString().trim(), tilNombres)) {
+            esValido = false;
+        }
+
+        // Validar apellidos
+        if (!validarCampoNombre(etApellidos.getText().toString().trim(), tilApellidos)) {
+            esValido = false;
+        }
+
+        // Validar número de documento
+        if (TextUtils.isEmpty(etNumeroDocumento.getText().toString().trim())) {
+            tilNumeroDocumento.setError("El número de documento es obligatorio");
+            esValido = false;
+        } else {
+            tilNumeroDocumento.setError(null);
+        }
+
+        // Validar fecha de nacimiento
+        if (TextUtils.isEmpty(etFechaNacimiento.getText().toString().trim())) {
+            tilFechaNacimiento.setError("La fecha de nacimiento es obligatoria");
+            esValido = false;
+        } else {
+            tilFechaNacimiento.setError(null);
+        }
+
+        // Validar teléfono
+        if (TextUtils.isEmpty(etTelefono.getText().toString().trim())) {
+            tilTelefono.setError("El teléfono es obligatorio");
+            esValido = false;
+        } else {
+            tilTelefono.setError(null);
+        }
+
+        // Validar domicilio
+        if (TextUtils.isEmpty(etDomicilio.getText().toString().trim())) {
+            tilDomicilio.setError("El domicilio es obligatorio");
+            esValido = false;
+        } else {
+            tilDomicilio.setError(null);
+        }
+
+        return esValido;
+    }
+
+    private boolean validarCampoNombre(String nombre, TextInputLayout tilCampo) {
+        if (TextUtils.isEmpty(nombre)) {
+            tilCampo.setError("Este campo es obligatorio");
+            return false;
+        } else if (!NOMBRE_PATTERN.matcher(nombre).matches()) {
+            tilCampo.setError("El nombre no es válido");
+            return false;
+        } else {
+            tilCampo.setError(null);
+            return true;
+        }
     }
 }
-

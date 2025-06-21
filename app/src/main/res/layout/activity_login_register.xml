@@ -94,14 +94,14 @@
                     android:textColor="#666666"
                     android:textSize="14sp" />
 
-                <!-- Nombre y Apellido -->
+                <!-- Nombres -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_nombre"
+                    android:id="@+id/til_nombres"
                     style="@style/Widget.Material3.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Nombre y Apellido"
+                    android:hint="Nombres"
                     android:padding="5dp"
                     app:boxBackgroundMode="filled"
                     app:boxBackgroundColor="#FFFFFF"
@@ -111,7 +111,32 @@
                     app:boxCornerRadiusTopStart="20dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_nombre"
+                        android:id="@+id/et_nombres"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Apellidos -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_apellidos"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Apellidos"
+                    android:padding="5dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="#FFFFFF"
+                    app:boxCornerRadiusBottomEnd="20dp"
+                    app:boxCornerRadiusBottomStart="20dp"
+                    app:boxCornerRadiusTopEnd="20dp"
+                    app:boxCornerRadiusTopStart="20dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_apellidos"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingStart="16dp"
@@ -214,14 +239,14 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Celular -->
+                <!-- Teléfono -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_celular"
+                    android:id="@+id/til_telefono"
                     style="@style/Widget.Material3.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    android:hint="N° Celular (9 dígitos)"
+                    android:layout_marginBottom="16dp"
+                    android:hint="N° Teléfono (9 dígitos)"
                     android:padding="5dp"
                     app:boxBackgroundMode="filled"
                     app:boxBackgroundColor="#FFFFFF"
@@ -234,13 +259,38 @@
                     app:prefixText="+51 ">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_celular"
+                        android:id="@+id/et_telefono"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:maxLength="9"
                         android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Domicilio -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_domicilio"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:hint="Domicilio"
+                    android:padding="5dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="#FFFFFF"
+                    app:boxCornerRadiusBottomEnd="20dp"
+                    app:boxCornerRadiusBottomStart="20dp"
+                    app:boxCornerRadiusTopEnd="20dp"
+                    app:boxCornerRadiusTopStart="20dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_domicilio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:inputType="textPostalAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Botón Continuar -->

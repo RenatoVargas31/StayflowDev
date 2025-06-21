@@ -53,15 +53,18 @@
         </activity>
         <activity
             android:name=".LoginFireBaseActivity"
-            android:exported="false">
-        </activity>
-        <activity
-            android:name=".superAdmin.AddHotelAdminActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+
+        </activity>
+        <activity
+            android:name=".superAdmin.AddHotelAdminActivity"
+            android:exported="false" >
+
         </activity>
         <activity
             android:name=".superAdmin.GestionActivity"
