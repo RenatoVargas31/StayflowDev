@@ -171,16 +171,24 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
         userData.put("telefono", telefono);
         userData.put("domicilio", domicilio);
         userData.put("correo", user.getEmail());
-        userData.put("estado", "activo"); // Campo de estado con valor por defecto activo
+
+        // Asignar el rol según el tipo de registro
+        String rol = esRegistroTaxista ? "driver" : "usuario";
+        userData.put("rol", rol);
+
+        // Campo estado con diferente valor según tipo de usuario
+        if (esRegistroTaxista) {
+            userData.put("estado", "activo"); // Campo de estado con valor por defecto activo
+            userData.put("verificado", false); // Campo de verificación para drivers
+            userData.put("activo", false); // Campo de activación para drivers
+        } else {
+            userData.put("estado", "activo"); // Para usuarios regulares
+        }
 
         // Si seleccionó una imagen, solo guardamos la referencia local (URI como string)
         if (selectedImageUri != null) {
             userData.put("imagenPerfilURI", selectedImageUri.toString());
         }
-
-        // Asignar el rol según el tipo de registro
-        String rol = esRegistroTaxista ? "driver" : "usuario";
-        userData.put("rol", rol);
 
         // Si es taxista, añadir datos del vehículo
         if (esRegistroTaxista) {

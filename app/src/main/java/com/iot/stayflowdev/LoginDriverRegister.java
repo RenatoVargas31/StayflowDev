@@ -149,11 +149,14 @@ public class LoginDriverRegister extends AppCompatActivity {
                     }
 
                     // Mantener los datos del usuario que vinieron del formulario anterior
-                    if (getIntent().hasExtra("nombre")) {
-                        intent.putExtra("nombre", getIntent().getStringExtra("nombre"));
+                    if (getIntent().hasExtra("nombres")) {
+                        intent.putExtra("nombres", getIntent().getStringExtra("nombres"));
                     }
-                    if (getIntent().hasExtra("documento")) {
-                        intent.putExtra("documento", getIntent().getStringExtra("documento"));
+                    if (getIntent().hasExtra("apellidos")) {
+                        intent.putExtra("apellidos", getIntent().getStringExtra("apellidos"));
+                    }
+                    if (getIntent().hasExtra("numeroDocumento")) {
+                        intent.putExtra("numeroDocumento", getIntent().getStringExtra("numeroDocumento"));
                     }
                     if (getIntent().hasExtra("tipoDocumento")) {
                         intent.putExtra("tipoDocumento", getIntent().getStringExtra("tipoDocumento"));
@@ -161,8 +164,11 @@ public class LoginDriverRegister extends AppCompatActivity {
                     if (getIntent().hasExtra("fechaNacimiento")) {
                         intent.putExtra("fechaNacimiento", getIntent().getStringExtra("fechaNacimiento"));
                     }
-                    if (getIntent().hasExtra("celular")) {
-                        intent.putExtra("celular", getIntent().getStringExtra("celular"));
+                    if (getIntent().hasExtra("telefono")) {
+                        intent.putExtra("telefono", getIntent().getStringExtra("telefono"));
+                    }
+                    if (getIntent().hasExtra("domicilio")) {
+                        intent.putExtra("domicilio", getIntent().getStringExtra("domicilio"));
                     }
 
                     // Marcar que este es un registro de taxista
@@ -176,7 +182,7 @@ public class LoginDriverRegister extends AppCompatActivity {
 
     private void recibirDatosUsuario() {
         // Recibir los datos del usuario del formulario anterior
-        if (getIntent().hasExtra("nombre")) {
+        if (getIntent().hasExtra("nombres") && getIntent().hasExtra("apellidos")) {
             // Si hay datos en el intent, son datos del usuario que ya se validaron
             // Aquí podemos guardarlos para enviarlos junto con los datos del vehículo
             // al siguiente paso del registro
