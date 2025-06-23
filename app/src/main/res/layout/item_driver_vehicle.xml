@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
+    android:layout_marginBottom="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/iv_vehicle_photo_item"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/pexels_alexgtacar_745150_1592384"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@drawable/circle_background"
+            android:clipToOutline="true"
+            tools:src="@drawable/pexels_alexgtacar_745150_1592384"/>
+
+        <TextView
+            android:id="@+id/tv_vehicle_brand_model"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Honda Civic 2018"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/iv_vehicle_photo_item"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_select_vehicle"
+            tools:text="Honda Civic 2018"/>
+
+        <TextView
+            android:id="@+id/tv_vehicle_plate_item"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Placa: XYZ-789"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="@id/tv_vehicle_brand_model"
+            app:layout_constraintTop_toBottomOf="@id/tv_vehicle_brand_model"
+            app:layout_constraintEnd_toStartOf="@id/btn_select_vehicle"
+            tools:text="Placa: XYZ-789"/>
+
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_select_vehicle"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Seleccionar"
+            android:textSize="12sp"
+            app:cornerRadius="18dp"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- Chip para indicar si es vehículo principal -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_primary_vehicle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Principal"
+            android:textSize="10sp"
+            app:chipBackgroundColor="@color/md_theme_primary"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/tv_vehicle_plate_item"
+            app:layout_constraintTop_toBottomOf="@id/tv_vehicle_plate_item"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
