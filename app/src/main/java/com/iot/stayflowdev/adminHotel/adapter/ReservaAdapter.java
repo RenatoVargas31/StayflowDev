@@ -13,14 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.huesped.DetalleReservaActivity;
-import com.iot.stayflowdev.adminHotel.model.Reserva;
+import com.iot.stayflowdev.model.Reserva;
+import com.iot.stayflowdev.model.Reserva.CantHuespedes;
+import com.iot.stayflowdev.model.Reserva.Habitacion;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class ReservaAdapter extends RecyclerView.Adapter<ReservaAdapter.ReservaViewHolder> {
 
-    private List<Reserva> reservas;
-    private Context context;
+    private final List<Reserva> reservas;
+    private final Context context;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
 
     public ReservaAdapter(List<Reserva> reservas, Context context) {
         this.reservas = reservas;
@@ -30,27 +35,75 @@ public class ReservaAdapter extends RecyclerView.Adapter<ReservaAdapter.ReservaV
     @NonNull
     @Override
     public ReservaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_reserva, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_reserva, parent, false);
         return new ReservaViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReservaViewHolder holder, int position) {
         Reserva reserva = reservas.get(position);
-        holder.nombre.setText(reserva.getNombre());
-        holder.habitacion.setText(reserva.getHabitacion());
-        holder.detallePersonas.setText(reserva.getDetallePersonas());
-        holder.imagen.setImageResource(reserva.getImagenResId());
 
+        // Imagen fija por ahora
+        holder.imagen.setImageResource(R.drawable.img_guest_placeholder);
+
+        // Código de la reserva - Mostrar el ID completo de la reserva como código
+        if (reserva.getId() != null && !reserva.getId().isEmpty()) {
+            holder.nombre.setText("Reserva " + reserva.getId());
+        } else {
+            holder.nombre.setText("Reserva sin código");
+        }
+
+        // Tipo de habitación
+        List<Habitacion> habitaciones = reserva.getHabitaciones();
+        if (habitaciones != null && !habitaciones.isEmpty()) {
+            Habitacion primeraHabitacion = habitaciones.get(0);
+            String tipoHabitacion = primeraHabitacion.getTipo();
+
+            // Si hay múltiples habitaciones, indicarlo
+            if (habitaciones.size() > 1) {
+                holder.habitacion.setText(tipoHabitacion + " (+" + (habitaciones.size() - 1) + " más)");
+            } else {
+                holder.habitacion.setText("Habitación " + tipoHabitacion);
+            }
+        } else {
+            holder.habitacion.setText("Habitación -");
+        }
+
+        // Detalle de personas
+        CantHuespedes ch = reserva.getCantHuespedes();
+        if (ch != null) {
+            // Convertir String a int con manejo de errores
+            int adultos = 0;
+            int ninos = 0;
+
+            try {
+                adultos = Integer.parseInt(ch.getAdultos());
+            } catch (NumberFormatException e) {
+                adultos = 0; // valor por defecto si no se puede convertir
+            }
+
+            try {
+                ninos = Integer.parseInt(ch.getNinos());
+            } catch (NumberFormatException e) {
+                ninos = 0; // valor por defecto si no se puede convertir
+            }
+
+            String detalle = adultos + " adulto" + (adultos > 1 ? "s" : "");
+            if (ninos > 0) detalle += " + " + ninos + " niño" + (ninos > 1 ? "s" : "");
+            holder.detallePersonas.setText(detalle);
+        } else {
+            holder.detallePersonas.setText("-");
+        }
+
+        // Fechas
+        String fechaInicio = reserva.getFechaInicio() != null ? dateFormat.format(reserva.getFechaInicio().toDate()) : "-";
+        String fechaFin = reserva.getFechaFin() != null ? dateFormat.format(reserva.getFechaFin().toDate()) : "-";
+        holder.fechas.setText(" • " + fechaInicio + " - " + fechaFin);
+
+        // Botón de más información - ACTUALIZADO PARA PASAR SOLO EL ID
         holder.masInfo.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetalleReservaActivity.class);
-            intent.putExtra("nombre", reserva.getNombre());
-            intent.putExtra("habitacion", reserva.getHabitacion());
-            intent.putExtra("codigo", reserva.getCodigoReserva());
-            intent.putExtra("llegada", reserva.getFechaLlegada());
-            intent.putExtra("salida", reserva.getFechaSalida());
-            intent.putExtra("huespedes", reserva.getDetallePersonas());
+            intent.putExtra("idReserva", reserva.getId()); // Solo pasamos el ID
             context.startActivity(intent);
         });
     }
@@ -62,7 +115,7 @@ public class ReservaAdapter extends RecyclerView.Adapter<ReservaAdapter.ReservaV
 
     static class ReservaViewHolder extends RecyclerView.ViewHolder {
         ImageView imagen;
-        TextView nombre, habitacion, detallePersonas, masInfo;
+        TextView nombre, habitacion, detallePersonas, masInfo, fechas;
 
         ReservaViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,6 +124,7 @@ public class ReservaAdapter extends RecyclerView.Adapter<ReservaAdapter.ReservaV
             habitacion = itemView.findViewById(R.id.tvHabitacion);
             detallePersonas = itemView.findViewById(R.id.tvDetallePersonas);
             masInfo = itemView.findViewById(R.id.tvMasInfo);
+            fechas = itemView.findViewById(R.id.tvFechas);
         }
     }
 }

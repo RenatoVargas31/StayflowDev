@@ -2,12 +2,13 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!-- Toolbar -->
+    <!-- Toolbar de Material Design -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -61,10 +62,11 @@
                 android:translationY="-6dp"
                 app:layout_constraintTop_toTopOf="@id/notification_icon"
                 app:layout_constraintEnd_toEndOf="@id/notification_icon" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Card Container for Search -->
+    <!-- Buscador -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/searchCard"
         android:layout_width="0dp"
@@ -84,7 +86,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inputLayoutSearch"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:startIconDrawable="@drawable/ic_search"
                 app:endIconMode="clear_text"
@@ -92,9 +94,8 @@
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusBottomEnd="12dp"
-                android:hint="Buscar huésped o código"
+                android:hint="Buscar por código de reserva"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -108,7 +109,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Chips de ordenamiento -->
+    <!-- Filtros -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroupFiltroReservas"
         android:layout_width="0dp"
@@ -123,6 +124,8 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipRecientes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:text="Más recientes"
             app:chipIcon="@drawable/ic_trending_up"
@@ -130,17 +133,22 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipAntiguas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:text="Más antiguas"
             app:chipIcon="@drawable/ic_trending_down"
             app:chipIconVisible="true" />
+
     </com.google.android.material.chip.ChipGroup>
 
+    <!-- Botones de filtro por fecha -->
     <LinearLayout
         android:id="@+id/btnFilterContainer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/chipGroupFiltroReservas"
@@ -166,7 +174,6 @@
             style="@style/Widget.Material3.Button.TextButton" />
     </LinearLayout>
 
-
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerReservas"
@@ -174,7 +181,7 @@
         android:layout_height="0dp"
         android:padding="16dp"
         android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupFiltroReservas"
+        app:layout_constraintTop_toBottomOf="@id/btnFilterContainer"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -185,8 +192,10 @@
         style="@style/Widget.Material3.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/menu_admin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
