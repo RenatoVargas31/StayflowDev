@@ -10,8 +10,8 @@ public class SolicitudTaxi implements Serializable {
     // Campos de Viaje
     private String origen;
     private String origenDireccion;
-    private String destino;
-    private String destinoDireccion;
+    private String destino = "Aeropuerto Internacional Jorge Chávez";
+    private String destinoDireccion = "Av. Elmer Faucett s/n, Callao 07031";
     // Campos de Pasajero
     private String nombrePasajero;
     private String telefonoPasajero;

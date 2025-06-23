@@ -118,10 +118,10 @@
                 android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_omitir_finalizar"
+                android:id="@+id/btn_finalizar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Omitir y finalizar"
+                android:text="Finalizar registro"
                 style="@style/Widget.Material3.Button"
                 app:cornerRadius="15dp"
                 app:backgroundTint="#3C3C7C"

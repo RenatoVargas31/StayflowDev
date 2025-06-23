@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,12 +35,14 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
 
     private ShapeableImageView profileImageView;
     private MaterialButton btnSelectPhoto;
-    private MaterialButton btnOmitirFinalizar;
+    private MaterialButton btnFinalizar; // Cambiado de btnOmitirFinalizar a btnFinalizar
     private ImageView btnClose;
     private Uri selectedImageUri;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
 
     private String nombres, apellidos, numeroDocumento, tipoDocumento, fechaNacimiento, telefono, domicilio;
     private String placa, modelo, imagenVehiculo;
@@ -72,6 +76,8 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         recibirDatos();
         initializeViews();
@@ -81,7 +87,7 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
     private void initializeViews() {
         profileImageView = findViewById(R.id.profile_image);
         btnSelectPhoto = findViewById(R.id.btn_select_photo);
-        btnOmitirFinalizar = findViewById(R.id.btn_omitir_finalizar);
+        btnFinalizar = findViewById(R.id.btn_finalizar); // Cambiado de btnOmitirFinalizar a btnFinalizar
         btnClose = findViewById(R.id.btn_close);
 
         btnClose.setOnClickListener(v -> {
@@ -133,7 +139,7 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
     private void setupListeners() {
         btnSelectPhoto.setOnClickListener(v -> openGallery());
 
-        btnOmitirFinalizar.setOnClickListener(v -> finishRegistration());
+        btnFinalizar.setOnClickListener(v -> finishRegistration());
     }
 
     private void openGallery() {
@@ -149,9 +155,15 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
             return;
         }
 
+        // Verificar que se haya seleccionado una imagen
+        if (selectedImageUri == null) {
+            Toast.makeText(this, "Por favor, selecciona una foto de perfil para continuar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Toast.makeText(this, "Finalizando registro...", Toast.LENGTH_SHORT).show();
 
-        // Guardar datos en Firestore directamente (sin subir la imagen)
+        // Guardar datos en Firestore
         guardarDatosUsuarioFirestore(currentUser.getUid());
     }
 
@@ -178,18 +190,40 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
 
         // Campo estado con diferente valor según tipo de usuario
         if (esRegistroTaxista) {
-            userData.put("estado", "activo"); // Campo de estado con valor por defecto activo
+            userData.put("estado", true); // Campo de estado como booleano (true por defecto)
             userData.put("verificado", false); // Campo de verificación para drivers
             userData.put("activo", false); // Campo de activación para drivers
         } else {
-            userData.put("estado", "activo"); // Para usuarios regulares
+            userData.put("estado", true); // Para usuarios regulares (también booleano)
         }
 
-        // Si seleccionó una imagen, solo guardamos la referencia local (URI como string)
+        // Si seleccionó una imagen, subirla a Firebase Storage y guardar la URL
         if (selectedImageUri != null) {
-            userData.put("imagenPerfilURI", selectedImageUri.toString());
+            StorageReference profileImageRef = storageRef.child("fotos_perfil/" + userId + ".jpg");
+            profileImageRef.putFile(selectedImageUri)
+                    .addOnSuccessListener(taskSnapshot -> profileImageRef.getDownloadUrl()
+                            .addOnSuccessListener(uri -> {
+                                userData.put("imagenPerfilURL", uri.toString());
+                                guardarDatosEnFirestore(userId, userData, rol);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.w(TAG, "Error al obtener URL de la imagen", e);
+                                Toast.makeText(LoginCargarFotoActivity.this,
+                                        "Error al finalizar el registro: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                            }))
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error al subir imagen a Firebase Storage", e);
+                        Toast.makeText(LoginCargarFotoActivity.this,
+                                "Error al finalizar el registro: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            guardarDatosEnFirestore(userId, userData, rol);
         }
+    }
 
+    private void guardarDatosEnFirestore(String userId, Map<String, Object> userData, String rol) {
         // Si es taxista, añadir datos del vehículo
         if (esRegistroTaxista) {
             userData.put("placa", placa);
