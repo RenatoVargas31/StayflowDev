@@ -19,8 +19,8 @@ public class Reserva {
     private String id;
     @PropertyName("idUsuario")
     private String idUsuario; // ID del usuario que hizo la reserva
-    @PropertyName("hotelId")
-    private String hotelId; // ID del hotel reservado
+    @PropertyName("idHotel")
+    private String idHotel; // ID del hotel reservado
     @ServerTimestamp
     @PropertyName("fechaCreacion")
     private Timestamp fechaCreacion; // Fecha de creación de la reserva
@@ -38,6 +38,8 @@ public class Reserva {
     private String  costoTotal; // Costo total de la reserva
     @PropertyName("estado")
     private String estado; // Estado de la reserva (confirmada, cancelada)
+    @PropertyName("quieroTaxi")
+    private boolean quieroTaxi; // Indica si el usuario quiere taxi
 
     // Clase interna para representar la cantidad de huéspedes
     @Data
