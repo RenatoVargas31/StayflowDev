@@ -6,33 +6,62 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import java.util.concurrent.TimeUnit;
+
 public class PeriodicNotificationManager {
+    private static final String TAG = "PeriodicNotificationManager";
     private static final String ACTION_CHECK_REPORTS = "com.iot.stayflowdev.utils.ReportsCheckReceiver";
     private static final String ACTION_CHECK_LOGS = "com.iot.stayflowdev.utils.LogsCheckReceiver";
-    private static final long REPORTS_CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutos
-    private static final long LOGS_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutos
+
+    // Estos intervalos por defecto ya no se usan directamente
+    // Se utilizarán las preferencias del usuario, y estos valores solo como fallback
+    private static final long DEFAULT_REPORTS_CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutos por defecto
+    private static final long DEFAULT_LOGS_CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutos por defecto
 
     private final Context context;
     private final NotificationHelper notificationHelper;
     private final LocalStorageManager localStorageManager;
     private final AlarmManager alarmManager;
+    private final NotificationPreferences notificationPreferences;
 
     public PeriodicNotificationManager(Context context) {
         this.context = context;
         this.notificationHelper = new NotificationHelper(context);
         this.localStorageManager = new LocalStorageManager(context);
         this.alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        
+        this.notificationPreferences = new NotificationPreferences(context);
+
         // Registrar los receivers
         ContextCompat.registerReceiver(context, reportsReceiver, new IntentFilter(ACTION_CHECK_REPORTS), ContextCompat.RECEIVER_NOT_EXPORTED);
         ContextCompat.registerReceiver(context, logsReceiver, new IntentFilter(ACTION_CHECK_LOGS), ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     public void startPeriodicChecks() {
-        // Configurar el check de reportes
+        // Verificar si las notificaciones están habilitadas según las preferencias
+        boolean reportesEnabled = notificationPreferences.isReportesEnabled();
+        boolean logsEnabled = notificationPreferences.isLogsEnabled();
+
+        Log.d(TAG, "Iniciando verificaciones periódicas. Reportes habilitados: " + reportesEnabled +
+              ", Logs habilitados: " + logsEnabled);
+
+        if (reportesEnabled) {
+            scheduleReportsCheck();
+        }
+
+        if (logsEnabled) {
+            scheduleLogsCheck();
+        }
+    }
+
+    private void scheduleReportsCheck() {
+        // Obtener el intervalo desde las preferencias
+        long interval = getIntervalFromPreferences();
+        Log.d(TAG, "Programando verificación de reportes cada " + (interval / 60000) + " minutos");
+
         Intent reportsIntent = new Intent(context, ReportsCheckReceiver.class);
         reportsIntent.setAction(ACTION_CHECK_REPORTS);
         PendingIntent reportsPendingIntent = PendingIntent.getBroadcast(
@@ -42,7 +71,23 @@ public class PeriodicNotificationManager {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Configurar el check de logs
+        // Cancelar cualquier alarma existente antes de programar una nueva
+        alarmManager.cancel(reportsPendingIntent);
+
+        // Programar las alarmas con el intervalo configurado por el usuario
+        alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + interval,
+                interval,
+                reportsPendingIntent
+        );
+    }
+
+    private void scheduleLogsCheck() {
+        // Obtener el intervalo desde las preferencias (mismo que para reportes)
+        long interval = getIntervalFromPreferences();
+        Log.d(TAG, "Programando verificación de logs cada " + (interval / 60000) + " minutos");
+
         Intent logsIntent = new Intent(context, LogsCheckReceiver.class);
         logsIntent.setAction(ACTION_CHECK_LOGS);
         PendingIntent logsPendingIntent = PendingIntent.getBroadcast(
@@ -52,20 +97,38 @@ public class PeriodicNotificationManager {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Programar las alarmas
-        alarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + REPORTS_CHECK_INTERVAL,
-                REPORTS_CHECK_INTERVAL,
-                reportsPendingIntent
-        );
+        // Cancelar cualquier alarma existente antes de programar una nueva
+        alarmManager.cancel(logsPendingIntent);
 
+        // Programar las alarmas con el intervalo configurado por el usuario
         alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + LOGS_CHECK_INTERVAL,
-                LOGS_CHECK_INTERVAL,
+                System.currentTimeMillis() + interval,
+                interval,
                 logsPendingIntent
         );
+    }
+
+    // Método para convertir la periodicidad textual a milisegundos
+    private long getIntervalFromPreferences() {
+        String periodicidad = notificationPreferences.getPeriodicidadReportes();
+
+        if (periodicidad == null || periodicidad.isEmpty()) {
+            return DEFAULT_REPORTS_CHECK_INTERVAL; // Valor por defecto
+        }
+
+        switch (periodicidad) {
+            case "Cada 15 minutos":
+                return TimeUnit.MINUTES.toMillis(15);
+            case "Cada 2 horas":
+                return TimeUnit.HOURS.toMillis(2);
+            case "Cada 4 horas":
+                return TimeUnit.HOURS.toMillis(4);
+            case "Cada 6 horas":
+                return TimeUnit.HOURS.toMillis(6);
+            default:
+                return DEFAULT_REPORTS_CHECK_INTERVAL; // 15 minutos por defecto
+        }
     }
 
     public void cleanup() {
@@ -101,34 +164,33 @@ public class PeriodicNotificationManager {
         alarmManager.cancel(logsPendingIntent);
     }
 
-    private final BroadcastReceiver reportsReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver reportsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CHECK_REPORTS.equals(intent.getAction())) {
-                long lastCheck = localStorageManager.getLastReportCheck();
-                long currentTime = System.currentTimeMillis();
-
-                // Si han pasado más de 10 minutos desde la última revisión
-                if (currentTime - lastCheck >= REPORTS_CHECK_INTERVAL) {
-                    notificationHelper.showSystemNotification(
-                            "Revisión de Reportes Pendiente",
-                            "Han pasado más de 10 minutos desde la última revisión de reportes. Por favor, revise los reportes pendientes."
-                    );
-                    localStorageManager.saveLastReportCheck(currentTime);
+                // Verificar si todavía está habilitado antes de mostrar la notificación
+                if (notificationPreferences.isReportesEnabled()) {
+                    notificationHelper.showReportesNotification();
+                } else {
+                    Log.d(TAG, "Notificaciones de reportes deshabilitadas, no se muestra notificación");
                 }
             }
         }
     };
 
-    private final BroadcastReceiver logsReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver logsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CHECK_LOGS.equals(intent.getAction())) {
-                // Implementar la lógica de verificación de logs
-                notificationHelper.showSystemNotification(
-                        "Verificación de Logs",
-                        "Se ha realizado una verificación de logs del sistema."
-                );
+                // Verificar si todavía está habilitado antes de mostrar la notificación
+                if (notificationPreferences.isLogsEnabled()) {
+                    int umbral = notificationPreferences.getUmbralLogs();
+                    if (umbral > 0) {
+                        notificationHelper.showLogsNotification(umbral);
+                    }
+                } else {
+                    Log.d(TAG, "Notificaciones de logs deshabilitadas, no se muestra notificación");
+                }
             }
         }
     };

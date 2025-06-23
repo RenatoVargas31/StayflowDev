@@ -78,14 +78,50 @@
         android:layout_height="1dp"
         android:background="@color/md_theme_inverseSurface_mediumContrast"/>
 
-    <!-- Logs List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/logsRecyclerView"
+    <!-- Content container -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/white"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:background="@color/white">
 
+        <!-- SwipeRefreshLayout para actualización manual de logs -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Logs List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/logsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- Indicador de progreso -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <!-- Mensaje cuando no hay logs -->
+        <TextView
+            android:id="@+id/emptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="No hay registros disponibles"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_onBackground"
+            android:visibility="gone"
+            android:drawableTop="@drawable/ic_event_note"
+            android:drawablePadding="8dp"
+            android:gravity="center" />
+    </FrameLayout>
 
 </LinearLayout>

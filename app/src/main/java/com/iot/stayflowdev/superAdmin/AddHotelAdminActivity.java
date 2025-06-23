@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import android.widget.LinearLayout;
 import java.util.HashMap;
 import java.util.Map;
+import com.iot.stayflowdev.services.LogService;
 
 public class AddHotelAdminActivity extends AppCompatActivity {
 
@@ -36,6 +37,7 @@ public class AddHotelAdminActivity extends AppCompatActivity {
     // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private LogService logService; // Servicio para registrar logs
 
     // Constantes para los extras del Intent
     public static final String EXTRA_ADMIN_NAME = "admin_name";
@@ -181,18 +183,41 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         String pass = password.getText().toString();
         String confirm = confirmPassword.getText().toString();
 
-        if (pass.length() < 6) {
-            password.setError("Mínimo 6 caracteres");
+        // Validar longitud mínima de 8 caracteres
+        if (pass.length() < 8) {
+            password.setError("La contraseña debe tener al menos 8 caracteres");
             isValid = false;
         }
 
+        // Validar que contenga al menos una letra mayúscula
+        if (!pass.matches(".*[A-Z].*")) {
+            password.setError("La contraseña debe contener al menos una letra mayúscula");
+            isValid = false;
+        }
+
+        // Validar que contenga al menos dos caracteres especiales
+        String specialChars = "!@#$%^&*()_-+=<>?/[]{}|~";
+        int specialCharCount = 0;
+
+        for (char c : pass.toCharArray()) {
+            if (specialChars.contains(String.valueOf(c))) {
+                specialCharCount++;
+            }
+        }
+
+        if (specialCharCount < 2) {
+            password.setError("La contraseña debe contener al menos 2 caracteres especiales (!@#$%^&*()_-+=<>?/[]{}|~)");
+            isValid = false;
+        }
+
+        // Validar que las contraseñas coincidan
         if (!pass.equals(confirm)) {
             confirmPassword.setError("Las contraseñas no coinciden");
             isValid = false;
         }
 
         if (!isValid) {
-            Snackbar.make(password, "Corrige los errores en las credenciales", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(password, "La contraseña debe tener al menos 8 caracteres, una letra mayúscula y dos caracteres especiales", Snackbar.LENGTH_LONG).show();
         }
 
         return isValid;
@@ -274,6 +299,9 @@ public class AddHotelAdminActivity extends AppCompatActivity {
                 Log.d(TAG, "Documento guardado correctamente con UID: " + uid);
                 setLoadingState(false);
 
+                // Registrar en el servicio de logs
+                registrarCreacionAdministrador(uid, nombres, apellidos, email, telefono, tipoDocumento, numeroDocumento, habilitado);
+
                 // Crear un Intent con los datos completos para actualizar la UI
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra(EXTRA_ADMIN_NAME, nombres);
@@ -294,6 +322,28 @@ public class AddHotelAdminActivity extends AppCompatActivity {
                             "Error al guardar datos: " + e.getMessage(),
                             Snackbar.LENGTH_LONG).show();
             });
+    }
+
+    private void registrarCreacionAdministrador(String uid, String nombres, String apellidos,
+                                               String email, String telefono, String tipoDocumento,
+                                               String numeroDocumento, boolean habilitado) {
+        // Inicializar el servicio de logs si no existe
+        if (logService == null) {
+            logService = new LogService();
+        }
+
+        // Crear el nombre completo del administrador
+        String nombreCompleto = nombres + " " + apellidos;
+
+        // Usar el método logUserCreation del LogService para registrar la creación del administrador
+        logService.logUserCreation(
+            uid,                // ID del usuario creado
+            nombreCompleto,     // Nombre completo del admin
+            email,              // Email del admin
+            "adminhotel"        // Rol del usuario
+        );
+
+        Log.d(TAG, "Log de creación de administrador registrado para: " + nombreCompleto);
     }
 
     private void setLoadingState(boolean isLoading) {

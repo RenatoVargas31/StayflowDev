@@ -114,4 +114,18 @@ public class NotificationHelper {
         String title = "Error";
         showNotification(title, message, "error");
     }
+
+    // Método para mostrar notificación de reportes pendientes
+    public void showReportesNotification() {
+        String title = "Reportes Pendientes";
+        String message = "Tienes reportes de hoteles pendientes por revisar";
+        showNotification(title, message, "reports");
+    }
+
+    // Método para mostrar notificación de logs pendientes
+    public void showLogsNotification(int umbral) {
+        String title = "Logs por Revisar";
+        String message = "Hay " + umbral + " logs pendientes por revisar";
+        showNotification(title, message, "logs");
+    }
 }
