@@ -61,13 +61,12 @@
                 android:translationY="-6dp"
                 app:layout_constraintTop_toTopOf="@id/notification_icon"
                 app:layout_constraintEnd_toEndOf="@id/notification_icon" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Card Container for Search & Filter -->
+    <!-- Card Container for Search -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/searchFilterCard"
+        android:id="@+id/searchCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -82,28 +81,22 @@
             android:layout_height="wrap_content"
             android:padding="12dp">
 
-            <!-- Buscador por nombre con icono -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inputLayoutSearch"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 app:startIconDrawable="@drawable/ic_search"
                 app:endIconMode="clear_text"
-                app:hintAnimationEnabled="true"
-                app:hintEnabled="true"
-                app:boxStrokeWidth="1dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusBottomEnd="12dp"
-                android:hint="Buscar huésped"
+                android:hint="Buscar huésped o código"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/inputLayoutFilter"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="2">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSearch"
@@ -112,61 +105,76 @@
                     android:inputType="text"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Filtro por habitación con icono -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputLayoutFilter"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:startIconDrawable="@drawable/ic_filter"
-                app:boxStrokeWidth="1dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                android:hint="Habitación"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/inputLayoutSearch"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="1">
-
-                <AutoCompleteTextView
-                    android:id="@+id/inputFilter"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:editable="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false" />
-            </com.google.android.material.textfield.TextInputLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Información de filtros activos (opcional) -->
+    <!-- Chips de ordenamiento -->
     <com.google.android.material.chip.ChipGroup
-        android:id="@+id/activeFiltersChipGroup"
+        android:id="@+id/chipGroupFiltroReservas"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipRecientes"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:text="Más recientes"
+            app:chipIcon="@drawable/ic_trending_up"
+            app:chipIconVisible="true" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipAntiguas"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:text="Más antiguas"
+            app:chipIcon="@drawable/ic_trending_down"
+            app:chipIconVisible="true" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <LinearLayout
+        android:id="@+id/btnFilterContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/searchFilterCard"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFiltroReservas"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Los chips se añadirán dinámicamente -->
-    </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFiltrarFechas"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Filtrar por fechas"
+            app:icon="@drawable/ic_calendar"
+            app:iconPadding="8dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnQuitarFiltro"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Quitar filtro"
+            style="@style/Widget.Material3.Button.TextButton" />
+    </LinearLayout>
+
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerReservas"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
         android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/activeFiltersChipGroup"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFiltroReservas"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -177,10 +185,8 @@
         style="@style/Widget.Material3.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:labelVisibilityMode="labeled"
         app:menu="@menu/menu_admin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

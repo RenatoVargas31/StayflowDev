@@ -5,6 +5,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.adapter.ServicioAdapter;
 import com.iot.stayflowdev.model.Servicio;
@@ -79,6 +81,8 @@ public class ServiciosAdminActivity extends AppCompatActivity {
             binding.recyclerServicios.setAdapter(servicioAdapter);
 
             binding.fabAddService.setOnClickListener(v -> mostrarDialogoAgregar(hotelId));
+            binding.btnMontoTaxi.setOnClickListener(v -> mostrarDialogoMontoMinimoTaxi(hotelId));
+
 
             servicioViewModel.getServicios(hotelId).observe(this, servicios -> servicioAdapter.updateData(servicios));
         });
@@ -184,6 +188,47 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
+
+    private void mostrarDialogoMontoMinimoTaxi(String hotelId) {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_input_monto_taxi_admin, null);
+        TextInputEditText input = view.findViewById(R.id.inputMontoTaxi);
+
+        FirebaseFirestore.getInstance()
+                .collection("hoteles")
+                .document(hotelId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists() && document.contains("montoMinimoTaxiGratis")) {
+                        double montoActual = document.getDouble("montoMinimoTaxiGratis");
+                        input.setText(String.valueOf(montoActual));
+                    }
+
+                    new MaterialAlertDialogBuilder(this)
+                            .setTitle("Monto mínimo para taxi gratis")
+                            .setView(view)
+                            .setPositiveButton("Guardar", (dialog, which) -> {
+                                String valor = input.getText().toString().trim();
+                                if (!valor.isEmpty()) {
+                                    double montoNuevo = Double.parseDouble(valor);
+                                    FirebaseFirestore.getInstance()
+                                            .collection("hoteles")
+                                            .document(hotelId)
+                                            .update("montoMinimoTaxiGratis", montoNuevo)
+                                            .addOnSuccessListener(unused ->
+                                                    mostrarMensaje("Monto actualizado correctamente"))
+                                            .addOnFailureListener(e ->
+                                                    mostrarError("Error", "No se pudo actualizar el monto"));
+                                } else {
+                                    mostrarError("Error", "Ingresa un valor válido.");
+                                }
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                })
+                .addOnFailureListener(e -> mostrarError("Error", "No se pudo obtener el monto actual."));
+    }
+
+
 
     private void confirmarEliminar(Servicio servicio, String hotelId) {
         new MaterialAlertDialogBuilder(this)
