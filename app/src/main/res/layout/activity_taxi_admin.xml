@@ -147,7 +147,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:text="Limpiar"
-                    app:icon="@drawable/ic_clear"
                     app:iconSize="18dp"
                     android:textSize="12sp"
                     android:minWidth="0dp"
