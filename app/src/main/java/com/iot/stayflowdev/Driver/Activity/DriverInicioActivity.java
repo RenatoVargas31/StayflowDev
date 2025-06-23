@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -122,16 +123,17 @@ public class DriverInicioActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
+        // Crear colección de solicitudes de taxi
+        coleccionSolicitudesTaxi();
+
+        crearDatosDeSolicitudes();
+
         // Crear canales de notificación primero
         crearCanalesNotificacion();
 
         //   INICIALIZAR TODAS LAS VISTAS PRIMERO
         inicializarVistas();
 
-        // Crear colección de solicitudes de taxi
-        coleccionSolicitudesTaxi();
-
-        crearDatosDeSolicitudes();
         configurarRecyclerView();
         configurarSwitch();
         configurarBottomNavigation();
@@ -244,8 +246,6 @@ public class DriverInicioActivity extends AppCompatActivity {
             notificationManager.notify(999, builder.build()); // ID único para notificación GPS
         }
     }
-
-    // Metodo para verificar GPS cuando el usuario cambia el estado del switch
     private boolean verificarGPSParaServicio() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -275,7 +275,6 @@ public class DriverInicioActivity extends AppCompatActivity {
             }
         }
     }
-
     private void coleccionSolicitudesTaxi() {
         db.collection("reservas")
                 .whereEqualTo("quieroTaxi", true)
@@ -284,20 +283,37 @@ public class DriverInicioActivity extends AppCompatActivity {
                     Log.d("SolicitudTaxi", "Total de reservas con quieroTaxi=true: " + reservasSnapshot.size());
 
                     for (DocumentSnapshot reservaDoc : reservasSnapshot) {
-                        String reservaId = reservaDoc.getId(); // ← ID único de la reserva
+                        String reservaId = reservaDoc.getId();
                         String idUsuario = reservaDoc.getString("idUsuario");
                         String idHotel = reservaDoc.getString("idHotel");
-                        Map<String, Object> servicioTaxi = (Map<String, Object>) reservaDoc.get("servicioTaxi");
+                        Timestamp fechaSalida = reservaDoc.getTimestamp("fechaSalida");
                         Map<String, Object> cantHuespedes = (Map<String, Object>) reservaDoc.get("cantHuespedes");
 
                         Log.d("SolicitudTaxi", "Reserva ID: " + reservaId);
+                        Log.d("SolicitudTaxi", "idUsuario: " + idUsuario);
+                        Log.d("SolicitudTaxi", "idHotel: " + idHotel);
+                        Log.d("SolicitudTaxi", "cantHuespedes: " + cantHuespedes);
 
-                        if (idUsuario == null || idHotel == null || servicioTaxi == null || cantHuespedes == null) {
-                            Log.w("SolicitudTaxi", "Faltan datos en reserva: " + reservaId);
+                        boolean datosIncompletos = false;
+
+                        if (idUsuario == null) {
+                            Log.w("SolicitudTaxi", "Falta idUsuario en reserva: " + reservaId);
+                            datosIncompletos = true;
+                        }
+                        if (idHotel == null) {
+                            Log.w("SolicitudTaxi", "Falta idHotel en reserva: " + reservaId);
+                            datosIncompletos = true;
+                        }
+                        if (cantHuespedes == null) {
+                            Log.w("SolicitudTaxi", "Falta cantHuespedes en reserva: " + reservaId);
+                            datosIncompletos = true;
+                        }
+
+                        if (datosIncompletos) {
+                            Log.w("SolicitudTaxi", "Omisión de reserva por datos incompletos: " + reservaId);
                             continue;
                         }
 
-                        // Verificar si ya hay una solicitud creada para esta reserva
                         db.collection("solicitudesTaxi")
                                 .whereEqualTo("reservaId", reservaId)
                                 .get()
@@ -307,16 +323,52 @@ public class DriverInicioActivity extends AppCompatActivity {
                                         return;
                                     }
 
-                                    // Si no existe, continúa con la lógica original
-                                    String origen = (String) servicioTaxi.get("Origen");
-                                    String origenDireccion = (String) servicioTaxi.get("OrigenDireccion");
-                                    String destino = (String) servicioTaxi.get("Destino");
-                                    String destinoDireccion = (String) servicioTaxi.get("DestinoDireccion");
+                                    // Obtener número de pasajeros - CORREGIDO para manejar Strings
+                                    int adultos = 0;
+                                    int ninos = 0;
+                                    try {
+                                        Object adultosObj = cantHuespedes.get("adultos");
+                                        Object ninosObj = cantHuespedes.get("ninos");
 
-                                    int adultos = Integer.parseInt((String) cantHuespedes.get("adultos"));
-                                    int ninos = Integer.parseInt((String) cantHuespedes.get("ninos"));
+                                        Log.d("SolicitudTaxi", "Valor adultos: " + adultosObj + " (tipo: " +
+                                                (adultosObj != null ? adultosObj.getClass().getSimpleName() : "null") + ")");
+                                        Log.d("SolicitudTaxi", "Valor ninos: " + ninosObj + " (tipo: " +
+                                                (ninosObj != null ? ninosObj.getClass().getSimpleName() : "null") + ")");
+
+                                        // Manejar tanto String como Number
+                                        if (adultosObj instanceof String) {
+                                            try {
+                                                adultos = Integer.parseInt((String) adultosObj);
+                                            } catch (NumberFormatException e) {
+                                                Log.e("SolicitudTaxi", "Error al convertir adultos String a int: " + adultosObj);
+                                                adultos = 0;
+                                            }
+                                        } else if (adultosObj instanceof Number) {
+                                            adultos = ((Number) adultosObj).intValue();
+                                        }
+
+                                        if (ninosObj instanceof String) {
+                                            try {
+                                                ninos = Integer.parseInt((String) ninosObj);
+                                            } catch (NumberFormatException e) {
+                                                Log.e("Ayudddaaaaa", "Error al convertir ninos String a int: " + ninosObj);
+                                                ninos = 0;
+                                            }
+                                        } else if (ninosObj instanceof Number) {
+                                            ninos = ((Number) ninosObj).intValue();
+
+                                        }
+
+                                        Log.d("Ayudddaaaaa", "Adultos parseados: " + adultos + ", Niños parseados: " + ninos);
+
+                                    } catch (Exception e) {
+                                        Log.e("Ayudddaaaaa", "Error al leer cantidad de huéspedes", e);
+                                    }
+
                                     int totalPasajeros = adultos + ninos;
+                                    Log.d("Ayudddaaaaa", "Total de pasajeros calculado: " + totalPasajeros);
 
+                                    // Obtener datos del usuario
                                     db.collection("usuarios").document(idUsuario).get()
                                             .addOnSuccessListener(usuarioDoc -> {
                                                 if (!usuarioDoc.exists()) {
@@ -328,43 +380,63 @@ public class DriverInicioActivity extends AppCompatActivity {
                                                 String telefono = usuarioDoc.getString("telefono");
                                                 String rol = usuarioDoc.getString("rol");
 
-                                                Log.d("SolicitudTaxi", "Usuario: " + nombre + " | Rol: " + rol);
-
                                                 if (!"usuario".equalsIgnoreCase(rol)) {
-                                                    Log.d("SolicitudTaxi", "Rol no es usuario, se omite: " + rol);
+                                                    Log.d("SolicitudTaxi", "Rol no válido: " + rol);
                                                     return;
                                                 }
 
-                                                Map<String, Object> datosSolicitud = new HashMap<>();
-                                                datosSolicitud.put("reservaId", reservaId); // ← para no duplicar
-                                                datosSolicitud.put("idCliente", "usuarios/" + idUsuario);
-                                                datosSolicitud.put("idHotel", "hoteles/" + idHotel);
-                                                datosSolicitud.put("origen", origen);
-                                                datosSolicitud.put("origenDireccion", origenDireccion);
-                                                datosSolicitud.put("destino", destino);
-                                                datosSolicitud.put("destinoDireccion", destinoDireccion);
-                                                datosSolicitud.put("nombrePasajero", nombre);
-                                                datosSolicitud.put("telefonoPasajero", telefono != null ? telefono : "No disponible");
-                                                datosSolicitud.put("numeroPasajeros", totalPasajeros);
-                                                datosSolicitud.put("tipoVehiculo", determinarTipoVehiculo(totalPasajeros));
-                                                datosSolicitud.put("notas", "Solicitud generada automáticamente");
-                                                datosSolicitud.put("estado", "pendiente");
-                                                datosSolicitud.put("esAceptada", false);
-                                                datosSolicitud.put("idTaxista", null);
-                                                datosSolicitud.put("horaAceptacion", null);
-                                                datosSolicitud.put("fechaCreacion", FieldValue.serverTimestamp());
+                                                // Obtener datos del hotel
+                                                db.collection("hoteles").document(idHotel).get()
+                                                        .addOnSuccessListener(hotelDoc -> {
+                                                            if (!hotelDoc.exists()) {
+                                                                Log.w("SolicitudTaxi", "Hotel no encontrado: " + idHotel);
+                                                                return;
+                                                            }
 
-                                                db.collection("solicitudesTaxi")
-                                                        .add(datosSolicitud)
-                                                        .addOnSuccessListener(docRef -> Log.d("SolicitudTaxi", "Solicitud guardada con ID: " + docRef.getId()))
-                                                        .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al guardar solicitud", e));
+                                                            String nombreHotel = hotelDoc.getString("nombre");
+                                                            String direccionHotel = hotelDoc.getString("ubicacion");
+                                                            if (direccionHotel == null) direccionHotel = "Dirección no disponible";
+
+                                                            // Crear solicitud
+                                                            Map<String, Object> datosSolicitud = new HashMap<>();
+                                                            datosSolicitud.put("reservaId", reservaId);
+                                                            datosSolicitud.put("idCliente", "usuarios/" + idUsuario);
+                                                            datosSolicitud.put("idHotel", "hoteles/" + idHotel);
+                                                            datosSolicitud.put("origen", nombreHotel);
+                                                            datosSolicitud.put("origenDireccion", direccionHotel);
+                                                            datosSolicitud.put("destino", "Aeropuerto Internacional Jorge Chávez");
+                                                            datosSolicitud.put("destinoDireccion", "Av. Elmer Faucett s/n, Callao 07031, Lima, Perú");
+                                                            datosSolicitud.put("fechaSalida", fechaSalida);
+                                                            datosSolicitud.put("nombrePasajero", nombre);
+                                                            datosSolicitud.put("telefonoPasajero", telefono != null ? telefono : "No disponible");
+                                                            datosSolicitud.put("numeroPasajeros", totalPasajeros);
+                                                            datosSolicitud.put("tipoVehiculo", determinarTipoVehiculo(totalPasajeros));
+                                                            datosSolicitud.put("notas", "Solicitud generada automáticamente");
+                                                            datosSolicitud.put("estado", "pendiente");
+                                                            datosSolicitud.put("esAceptada", false);
+                                                            datosSolicitud.put("idTaxista", null);
+                                                            datosSolicitud.put("horaAceptacion", null);
+                                                            datosSolicitud.put("fechaCreacion", FieldValue.serverTimestamp());
+
+                                                            db.collection("solicitudesTaxi")
+                                                                    .add(datosSolicitud)
+                                                                    .addOnSuccessListener(docRef ->
+                                                                            Log.d("SolicitudTaxi", "Solicitud guardada con ID: " + docRef.getId()))
+                                                                    .addOnFailureListener(e ->
+                                                                            Log.e("SolicitudTaxi", "Error al guardar solicitud", e));
+                                                        })
+                                                        .addOnFailureListener(e ->
+                                                                Log.e("SolicitudTaxi", "Error al obtener hotel", e));
                                             })
-                                            .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al obtener usuario: " + e.getMessage()));
+                                            .addOnFailureListener(e ->
+                                                    Log.e("SolicitudTaxi", "Error al obtener usuario", e));
                                 })
-                                .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al verificar solicitud existente: " + e.getMessage()));
+                                .addOnFailureListener(e ->
+                                        Log.e("SolicitudTaxi", "Error al verificar solicitud existente", e));
                     }
                 })
-                .addOnFailureListener(e -> Log.e("SolicitudTaxi", "Error al consultar reservas: " + e.getMessage()));
+                .addOnFailureListener(e ->
+                        Log.e("SolicitudTaxi", "Error al consultar reservas", e));
     }
 
     private String determinarTipoVehiculo(int numeroPasajeros) {
