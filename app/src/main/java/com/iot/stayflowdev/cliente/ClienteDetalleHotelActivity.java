@@ -60,9 +60,6 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity {
         // Configurar el botón de retroceso
         binding.btnBack.setOnClickListener(v -> onBackPressed());
 
-        // Configurar el botón para elegir habitaciones
-        binding.btnElegirHabitaciones.setOnClickListener(v -> navegarAHabitaciones());
-
         // Obtener el ID del hotel desde el intent
         if (getIntent().hasExtra(EXTRA_HOTEL_ID)) {
             hotelId = getIntent().getStringExtra(EXTRA_HOTEL_ID);

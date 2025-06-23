@@ -154,8 +154,10 @@ public class ClienteBuscarActivity extends AppCompatActivity implements HotelesT
     // Implementación de la interfaz OnHotelClickListener
     @Override
     public void onHotelClick(Hotel hotel) {
-        // Por ahora solo mostramos un mensaje, después implementaremos la navegación al detalle
-        Toast.makeText(this, "Hotel seleccionado: " + hotel.getNombre(), Toast.LENGTH_SHORT).show();
+        // Navegar a la pantalla de detalle del hotel
+        Intent intent = new Intent(this, ClienteDetalleHotelActivity.class);
+        intent.putExtra(ClienteDetalleHotelActivity.EXTRA_HOTEL_ID, hotel.getId());
+        startActivity(intent);
     }
 
     // Inflar el menú

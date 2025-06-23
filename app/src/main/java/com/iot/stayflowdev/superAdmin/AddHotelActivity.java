@@ -23,6 +23,8 @@ import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.Hotel;
 import com.iot.stayflowdev.model.User;
 import com.iot.stayflowdev.superAdmin.adapter.AdminSelectorAdapter;
+import com.iot.stayflowdev.services.LogService;
+import com.iot.stayflowdev.model.SystemLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,16 +45,18 @@ public class AddHotelActivity extends AppCompatActivity {
     private String selectedAdminId;
     private String selectedAdminName;
 
-    // Firebase
+    // Firebase y servicios
     private FirebaseFirestore db;
+    private LogService logService; // Servicio para registrar logs
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.superadmin_add_hotel_form_activity);
 
-        // Inicializar Firebase
+        // Inicializar Firebase y servicios
         db = FirebaseFirestore.getInstance();
+        logService = new LogService(); // Inicializar servicio de logs
 
         // Configurar Toolbar con navegación hacia atrás
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
@@ -100,9 +104,13 @@ public class AddHotelActivity extends AppCompatActivity {
         adminSelectorDialog = builder.create();
 
         // Cargar los administradores de hotel desde Firestore
+        // Solo mostrar administradores que:
+        // 1. Tienen rol de administrador de hotel
+        // 2. Están activos (estado = true)
+        // 3. No tienen un hotel asignado (verificando tanto datosEspecificos.hotel como hotelAsignado)
         db.collection("usuarios")
                 .whereEqualTo("rol", "adminhotel")
-                .whereEqualTo("estado", true)  // Solo administradores activos (ahora con booleano)
+                .whereEqualTo("estado", true)  // Solo administradores activos
                 .get()
                 .addOnCompleteListener(task -> {
                     progressIndicator.setVisibility(View.GONE);
@@ -111,14 +119,43 @@ public class AddHotelActivity extends AppCompatActivity {
                         List<User> adminList = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            User admin = document.toObject(User.class);
-                            admin.setUid(document.getId());
-                            adminList.add(admin);
+                            // Verificar si el administrador ya tiene un hotel asignado
+                            // Comprobar tanto el campo hotelAsignado como datosEspecificos.hotel
+                            boolean tieneHotelAsignado = false;
+
+                            // Verificar si existe el campo hotelAsignado directamente en el documento
+                            if (document.contains("hotelAsignado")) {
+                                String hotelAsignado = document.getString("hotelAsignado");
+                                if (hotelAsignado != null && !hotelAsignado.isEmpty()) {
+                                    tieneHotelAsignado = true;
+                                    Log.d(TAG, "Admin " + document.getId() + " ya tiene hotel asignado: " + hotelAsignado);
+                                }
+                            }
+
+                            // También verificar en datosEspecificos.hotel
+                            if (!tieneHotelAsignado && document.contains("datosEspecificos")) {
+                                Map<String, Object> datosEspecificos = (Map<String, Object>) document.get("datosEspecificos");
+                                if (datosEspecificos != null && datosEspecificos.containsKey("hotel")) {
+                                    String hotel = (String) datosEspecificos.get("hotel");
+                                    if (hotel != null && !hotel.isEmpty()) {
+                                        tieneHotelAsignado = true;
+                                        Log.d(TAG, "Admin " + document.getId() + " ya tiene hotel en datosEspecificos: " + hotel);
+                                    }
+                                }
+                            }
+
+                            // Solo añadir administradores sin hotel asignado
+                            if (!tieneHotelAsignado) {
+                                User admin = document.toObject(User.class);
+                                admin.setUid(document.getId());
+                                adminList.add(admin);
+                                Log.d(TAG, "Admin añadido a la lista: " + admin.getNombres() + " " + admin.getApellidos());
+                            }
                         }
 
                         if (adminList.isEmpty()) {
                             Toast.makeText(AddHotelActivity.this,
-                                    "No hay administradores de hotel disponibles",
+                                    "No hay administradores disponibles sin hotel asignado",
                                     Toast.LENGTH_LONG).show();
                         } else {
                             // Configurar el adaptador
@@ -207,6 +244,9 @@ public class AddHotelActivity extends AppCompatActivity {
                             .addOnSuccessListener(aVoid -> {
                                 Log.d(TAG, "Administrador actualizado correctamente");
 
+                                // Registrar log de creación del hotel
+                                registrarLogCreacionHotel(hotelId, nombre, selectedAdminId, selectedAdminName);
+
                                 // Mostrar mensaje de éxito y finalizar la actividad
                                 Snackbar.make(findViewById(android.R.id.content),
                                         "Hotel registrado correctamente", Snackbar.LENGTH_SHORT).show();
@@ -229,5 +269,21 @@ public class AddHotelActivity extends AppCompatActivity {
                     Snackbar.make(findViewById(android.R.id.content),
                             "Error al registrar hotel: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
                 });
+    }
+
+    private void registrarLogCreacionHotel(String hotelId, String nombreHotel, String adminId, String adminName) {
+        // Título y descripción para el log
+        String title = "Hotel creado: " + nombreHotel;
+        String description = "Se ha registrado un nuevo hotel con nombre '" + nombreHotel + "' y se ha asignado al administrador " + adminName;
+
+        // Usar el nuevo método que permite establecer un título personalizado
+        logService.registrarEventoConTitulo(
+                "hotel_created",  // Tipo de evento
+                title,            // Título personalizado
+                description,      // Descripción detallada
+                hotelId           // ID del hotel creado
+        );
+
+        Log.d(TAG, "Log de creación de hotel registrado para: " + nombreHotel + " (ID: " + hotelId + ")");
     }
 }

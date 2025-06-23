@@ -29,12 +29,32 @@
 
                 <ImageView
                     android:id="@+id/imageViewProfile"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/ic_person"
                     android:background="@drawable/circle_bg"
-                    android:padding="16dp"
-                    app:tint="@color/md_theme_primary"/>
+                    android:scaleType="centerCrop"
+                    android:padding="2dp" />
+
+                <!-- Indicador de progreso para la carga de imagen -->
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-70dp"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/md_theme_primary"
+                    app:trackColor="@android:color/transparent" />
+
+                <!-- Botón para cambiar foto de perfil -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonChangePicture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cambiar Foto"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
                 <TextView
                     android:id="@+id/textViewName"
@@ -45,13 +65,160 @@
                     android:textSize="24sp"
                     android:textStyle="bold"/>
 
-                <TextView
-                    android:id="@+id/textViewEmail"
-                    android:layout_width="wrap_content"
+                <!-- Sección de datos personales -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="superadmin@stayflow.com"
-                    android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Email -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Correo:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewEmail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="superadmin@stayflow.com"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Tipo de Documento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Tipo de Documento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewTipoDocumento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="DNI"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Número de Documento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Número de Documento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewNumeroDocumento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="12345678"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Fecha de Nacimiento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Fecha de Nacimiento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewFechaNacimiento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="01/01/1990"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Teléfono -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Teléfono:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewTelefono"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="+51 999888777"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Domicilio -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Domicilio:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewDomicilio"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Av. Principal 123"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Estado -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Estado:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewEstado"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Activo"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -122,6 +289,17 @@
                             android:padding="16dp"
                             android:minHeight="48dp"/>
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Nota informativa sobre restricciones de notificaciones -->
+                    <TextView
+                        android:id="@+id/textViewNotificationInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Las notificaciones se programarán según el intervalo seleccionado. Los cambios se aplicarán inmediatamente al seleccionar una opción."
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/md_theme_onSurfaceVariant" />
                 </LinearLayout>
 
                 <!-- Notificaciones de Logs -->

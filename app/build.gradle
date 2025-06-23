@@ -35,9 +35,13 @@ android {
 
 dependencies {
     implementation 'com.mapbox.maps:android:11.12.2'
+    implementation libs.firebase.storage
     //Loombok
     compileOnly libs.lombok
     annotationProcessor libs.lombok
+
+    // Añadir SwipeRefreshLayout
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
     // Glide (para imágenes)
     implementation libs.glide.v4151
