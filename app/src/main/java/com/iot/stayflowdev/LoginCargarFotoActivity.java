@@ -193,17 +193,23 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
             userData.put("estado", true); // Campo de estado como booleano (true por defecto)
             userData.put("verificado", false); // Campo de verificación para drivers
             userData.put("activo", false); // Campo de activación para drivers
+
+            // Si es taxista, añadir referencia a la placa del vehículo
+            if (placa != null && !placa.isEmpty()) {
+                userData.put("placa", placa);
+            }
         } else {
             userData.put("estado", true); // Para usuarios regulares (también booleano)
         }
 
-        // Si seleccionó una imagen, subirla a Firebase Storage y guardar la URL
+        // Si seleccionó una imagen de perfil, subirla a Firebase Storage y guardar la URL
         if (selectedImageUri != null) {
             StorageReference profileImageRef = storageRef.child("fotos_perfil/" + userId + ".jpg");
             profileImageRef.putFile(selectedImageUri)
                     .addOnSuccessListener(taskSnapshot -> profileImageRef.getDownloadUrl()
                             .addOnSuccessListener(uri -> {
                                 userData.put("imagenPerfilURL", uri.toString());
+                                // Ya no necesitamos subir la foto del vehículo aquí porque se hizo en LoginDriverRegister
                                 guardarDatosEnFirestore(userId, userData, rol);
                             })
                             .addOnFailureListener(e -> {
