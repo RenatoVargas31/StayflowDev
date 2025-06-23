@@ -48,6 +48,12 @@ dependencies {
     implementation libs.work.runtime
     annotationProcessor libs.compiler.v4151
 
+    // PDF generation library
+    implementation libs.itext7.core
+
+    // CSV library
+    implementation libs.opencsv
+
     // Room
     implementation libs.room.runtime
     annotationProcessor libs.room.compiler

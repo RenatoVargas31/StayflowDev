@@ -86,6 +86,14 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.LogViewHolder>
         filterByCategory(currentFilter); // Re-apply current filter
     }
 
+    /**
+     * Obtiene la lista de elementos filtrados actualmente
+     * @return Lista de LogItems según el filtro actual
+     */
+    public List<LogItem> getFilteredItems() {
+        return new ArrayList<>(filteredLogItems);
+    }
+
     static class LogViewHolder extends RecyclerView.ViewHolder {
         TextView title, timestamp, description;
         ImageView icon;
