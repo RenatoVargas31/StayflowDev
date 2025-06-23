@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -27,10 +28,19 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class LoginDriverRegister extends AppCompatActivity {
+
+    private static final String TAG = "LoginDriverRegister";
 
     private MaterialButton btnContinuarRegistroDriver;
     private MaterialButton btnCargarImagen;
@@ -44,6 +54,13 @@ public class LoginDriverRegister extends AppCompatActivity {
     private static final Pattern PLACA_PATTERN = Pattern.compile("^[A-Z0-9]{3}-[A-Z0-9]{3}$");
 
     private Uri imageUri;
+
+    // Firebase
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+    private String fotoVehiculoURL;
 
     // Launcher para abrir la galería y obtener un resultado
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
@@ -73,6 +90,12 @@ public class LoginDriverRegister extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Inicializar Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         // Inicializar vistas
         initViews();
@@ -139,42 +162,8 @@ public class LoginDriverRegister extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (validarFormulario()) {
-                    // Navegar a la pantalla de creación de contraseña
-                    Intent intent = new Intent(LoginDriverRegister.this, LoginCrearPassActivity.class);
-                    // Pasar los datos del vehículo
-                    intent.putExtra("placa", etPlaca.getText().toString().trim());
-                    intent.putExtra("modelo", etModelo.getText().toString().trim());
-                    if (imageUri != null) {
-                        intent.putExtra("imagenVehiculo", imageUri.toString());
-                    }
-
-                    // Mantener los datos del usuario que vinieron del formulario anterior
-                    if (getIntent().hasExtra("nombres")) {
-                        intent.putExtra("nombres", getIntent().getStringExtra("nombres"));
-                    }
-                    if (getIntent().hasExtra("apellidos")) {
-                        intent.putExtra("apellidos", getIntent().getStringExtra("apellidos"));
-                    }
-                    if (getIntent().hasExtra("numeroDocumento")) {
-                        intent.putExtra("numeroDocumento", getIntent().getStringExtra("numeroDocumento"));
-                    }
-                    if (getIntent().hasExtra("tipoDocumento")) {
-                        intent.putExtra("tipoDocumento", getIntent().getStringExtra("tipoDocumento"));
-                    }
-                    if (getIntent().hasExtra("fechaNacimiento")) {
-                        intent.putExtra("fechaNacimiento", getIntent().getStringExtra("fechaNacimiento"));
-                    }
-                    if (getIntent().hasExtra("telefono")) {
-                        intent.putExtra("telefono", getIntent().getStringExtra("telefono"));
-                    }
-                    if (getIntent().hasExtra("domicilio")) {
-                        intent.putExtra("domicilio", getIntent().getStringExtra("domicilio"));
-                    }
-
-                    // Marcar que este es un registro de taxista
-                    intent.putExtra("esRegistroTaxista", true);
-
-                    startActivity(intent);
+                    // Subir la imagen a Firebase Storage
+                    subirImagenAFirebase();
                 }
             }
         });
@@ -244,4 +233,103 @@ public class LoginDriverRegister extends AppCompatActivity {
         intent.setType("image/*");
         galleryLauncher.launch(intent);
     }
+
+    private void subirImagenAFirebase() {
+        if (imageUri != null) {
+            // Deshabilitar botón para evitar múltiples clics
+            btnContinuarRegistroDriver.setEnabled(false);
+
+            // Mostrar mensaje de carga
+            Toast.makeText(this, "Subiendo imagen y guardando datos...", Toast.LENGTH_SHORT).show();
+
+            // Usar la placa como nombre para la imagen en Storage
+            String placa = etPlaca.getText().toString().trim();
+            StorageReference imagenRef = storageRef.child("fotos_vehiculo/" + placa + ".jpg");
+
+            imagenRef.putFile(imageUri)
+                    .addOnSuccessListener(taskSnapshot -> imagenRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        fotoVehiculoURL = uri.toString();
+                        guardarDatosEnFirestore();
+                    }))
+                    .addOnFailureListener(e -> {
+                        // Habilitar el botón nuevamente
+                        btnContinuarRegistroDriver.setEnabled(true);
+                        Log.e(TAG, "Error al subir la imagen", e);
+                        Toast.makeText(LoginDriverRegister.this, "Error al subir la imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void guardarDatosEnFirestore() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+
+            // Crear el objeto con los datos del vehículo
+            Map<String, Object> vehiculo = new HashMap<>();
+            vehiculo.put("driverId", userId);
+            vehiculo.put("placa", etPlaca.getText().toString().trim());
+            vehiculo.put("modelo", etModelo.getText().toString().trim());
+            vehiculo.put("fotoVehiculo", fotoVehiculoURL);
+            vehiculo.put("activo", false); // Por defecto en false
+
+            // Guardar en Firestore en la colección vehiculo
+            db.collection("vehiculo").document(etPlaca.getText().toString().trim())
+                    .set(vehiculo)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Datos del vehículo guardados correctamente");
+                        // Habilitar el botón nuevamente
+                        btnContinuarRegistroDriver.setEnabled(true);
+                        navegarACrearPass();
+                    })
+                    .addOnFailureListener(e -> {
+                        // Habilitar el botón nuevamente
+                        btnContinuarRegistroDriver.setEnabled(true);
+                        Log.e(TAG, "Error al guardar los datos del vehículo", e);
+                        Toast.makeText(LoginDriverRegister.this, "Error al guardar los datos del vehículo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void navegarACrearPass() {
+        // Navegar a la pantalla de creación de contraseña
+        Intent intent = new Intent(LoginDriverRegister.this, LoginCrearPassActivity.class);
+
+        // Pasar los datos del vehículo (ahora solo para referencia, ya están guardados en Firestore)
+        intent.putExtra("placa", etPlaca.getText().toString().trim());
+        intent.putExtra("modelo", etModelo.getText().toString().trim());
+
+        // Mantener los datos del usuario que vinieron del formulario anterior
+        if (getIntent().hasExtra("nombres")) {
+            intent.putExtra("nombres", getIntent().getStringExtra("nombres"));
+        }
+        if (getIntent().hasExtra("apellidos")) {
+            intent.putExtra("apellidos", getIntent().getStringExtra("apellidos"));
+        }
+        if (getIntent().hasExtra("numeroDocumento")) {
+            intent.putExtra("numeroDocumento", getIntent().getStringExtra("numeroDocumento"));
+        }
+        if (getIntent().hasExtra("tipoDocumento")) {
+            intent.putExtra("tipoDocumento", getIntent().getStringExtra("tipoDocumento"));
+        }
+        if (getIntent().hasExtra("fechaNacimiento")) {
+            intent.putExtra("fechaNacimiento", getIntent().getStringExtra("fechaNacimiento"));
+        }
+        if (getIntent().hasExtra("telefono")) {
+            intent.putExtra("telefono", getIntent().getStringExtra("telefono"));
+        }
+        if (getIntent().hasExtra("domicilio")) {
+            intent.putExtra("domicilio", getIntent().getStringExtra("domicilio"));
+        }
+        if (getIntent().hasExtra("email")) {
+            intent.putExtra("email", getIntent().getStringExtra("email"));
+        }
+
+        // Marcar que este es un registro de taxista
+        intent.putExtra("esRegistroTaxista", true);
+
+        Toast.makeText(this, "¡Datos del vehículo guardados correctamente!", Toast.LENGTH_SHORT).show();
+        startActivity(intent);
+    }
 }
+

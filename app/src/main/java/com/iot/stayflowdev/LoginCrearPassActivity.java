@@ -124,6 +124,10 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         }
         if (intent.hasExtra("numeroDocumento")) {
             numeroDocumento = intent.getStringExtra("numeroDocumento");
+            // Utilizar el número de documento como email por defecto si no se proporciona uno
+            if (email == null && numeroDocumento != null) {
+                email = numeroDocumento + "@stayflow.com";
+            }
         }
         if (intent.hasExtra("tipoDocumento")) {
             tipoDocumento = intent.getStringExtra("tipoDocumento");
@@ -138,6 +142,13 @@ public class LoginCrearPassActivity extends AppCompatActivity {
             domicilio = intent.getStringExtra("domicilio");
         }
 
+        // Recibir correo electrónico explícitamente (con alta prioridad)
+        if (intent.hasExtra("email")) {
+            email = intent.getStringExtra("email");
+        } else if (intent.hasExtra("correo")) {
+            email = intent.getStringExtra("correo");
+        }
+
         // Datos del vehículo (solo si es taxista)
         if (intent.hasExtra("placa")) {
             placa = intent.getStringExtra("placa");
@@ -145,9 +156,9 @@ public class LoginCrearPassActivity extends AppCompatActivity {
         if (intent.hasExtra("modelo")) {
             modelo = intent.getStringExtra("modelo");
         }
-        if (intent.hasExtra("imagenVehiculo")) {
-            imagenVehiculo = intent.getStringExtra("imagenVehiculo");
-        }
+
+        // Ya no necesitamos recibir la imagen del vehículo porque se ha subido a Firebase
+        // y sus datos se han guardado en la colección "vehiculo"
 
         // Flag para indicar si es registro de taxista
         if (intent.hasExtra("esRegistroTaxista")) {
