@@ -117,48 +117,26 @@
                 android:visibility="gone">
 
                 <GridLayout
+                    android:id="@+id/gridPreview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2"
-                    android:useDefaultMargins="true">
-
-                    <ImageView
-                        android:id="@+id/image1"
-                        android:layout_width="0dp"
-                        android:layout_height="140dp"
-                        android:layout_columnWeight="1"
-                        android:scaleType="centerCrop"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:contentDescription="Imagen 1" />
-
-                    <ImageView
-                        android:id="@+id/image2"
-                        android:layout_width="0dp"
-                        android:layout_height="140dp"
-                        android:layout_columnWeight="1"
-                        android:scaleType="centerCrop"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:contentDescription="Imagen 2" />
-
-                    <ImageView
-                        android:id="@+id/image3"
-                        android:layout_width="0dp"
-                        android:layout_height="140dp"
-                        android:layout_columnWeight="1"
-                        android:scaleType="centerCrop"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:contentDescription="Imagen 3" />
-
-                    <ImageView
-                        android:id="@+id/image4"
-                        android:layout_width="0dp"
-                        android:layout_height="140dp"
-                        android:layout_columnWeight="1"
-                        android:scaleType="centerCrop"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:contentDescription="Imagen 4" />
-                </GridLayout>
+                    android:useDefaultMargins="true"
+                    android:alignmentMode="alignMargins"
+                    android:padding="8dp" />
             </LinearLayout>
+
+            <!-- Botón para guardar galería -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarGaleria"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Guardar galería"
+                android:enabled="false"
+                app:icon="@drawable/ic_check"
+                style="@style/Widget.MaterialComponents.Button"
+                />
 
             <!-- Botón agregar fotos -->
             <com.google.android.material.button.MaterialButton
