@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:hint="Monto mínimo (S/.)">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputMontoTaxi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal" />
+</com.google.android.material.textfield.TextInputLayout>

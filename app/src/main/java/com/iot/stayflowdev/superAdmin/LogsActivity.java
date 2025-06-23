@@ -1,12 +1,21 @@
 package com.iot.stayflowdev.superAdmin;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -18,14 +27,12 @@ import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.SystemLog;
 import com.iot.stayflowdev.superAdmin.adapter.LogsAdapter;
 import com.iot.stayflowdev.superAdmin.model.LogItem;
+import com.iot.stayflowdev.superAdmin.utils.LogExportManager;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,6 +40,7 @@ public class LogsActivity extends BaseSuperAdminActivity {
 
     private static final String TAG = "LogsActivity";
     private static final String COLLECTION_LOGS = "system_logs";
+    private static final int PERMISSION_REQUEST_STORAGE = 1001;
 
     private LogsAdapter logsAdapter;
     private RecyclerView recyclerView;
@@ -41,6 +49,13 @@ public class LogsActivity extends BaseSuperAdminActivity {
     private TextView emptyView;
     private FirebaseFirestore db;
     private List<LogItem> logItems = new ArrayList<>();
+
+    // Variable para mantener el filtro de categoría actual
+    private String currentCategoryFilter = LogItem.CATEGORY_ALL;
+
+    // Variables para guardar la operación pendiente
+    private boolean exportPdfPending = false;
+    private boolean exportCsvPending = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,21 +101,40 @@ public class LogsActivity extends BaseSuperAdminActivity {
         logsAdapter.setOnItemClickListener(this::showLogDetailsDialog);
 
         // Set up chip listeners
-        chipAll.setOnClickListener(v -> logsAdapter.filterByCategory(LogItem.CATEGORY_ALL));
-        chipHotels.setOnClickListener(v -> logsAdapter.filterByCategory(LogItem.CATEGORY_HOTELS));
-        chipAccount.setOnClickListener(v -> logsAdapter.filterByCategory(LogItem.CATEGORY_ACCOUNT));
-        chipReservation.setOnClickListener(v -> logsAdapter.filterByCategory(LogItem.CATEGORY_RESERVATION));
+        chipAll.setOnClickListener(v -> {
+            currentCategoryFilter = LogItem.CATEGORY_ALL;
+            logsAdapter.filterByCategory(currentCategoryFilter);
+        });
+
+        chipHotels.setOnClickListener(v -> {
+            currentCategoryFilter = LogItem.CATEGORY_HOTELS;
+            logsAdapter.filterByCategory(currentCategoryFilter);
+        });
+
+        chipAccount.setOnClickListener(v -> {
+            currentCategoryFilter = LogItem.CATEGORY_ACCOUNT;
+            logsAdapter.filterByCategory(currentCategoryFilter);
+        });
+
+        chipReservation.setOnClickListener(v -> {
+            currentCategoryFilter = LogItem.CATEGORY_RESERVATION;
+            logsAdapter.filterByCategory(currentCategoryFilter);
+        });
 
         // Alternatively, you can use ChipGroup's selection listener
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chipAll) {
-                logsAdapter.filterByCategory(LogItem.CATEGORY_ALL);
+                currentCategoryFilter = LogItem.CATEGORY_ALL;
+                logsAdapter.filterByCategory(currentCategoryFilter);
             } else if (checkedId == R.id.chipHotels) {
-                logsAdapter.filterByCategory(LogItem.CATEGORY_HOTELS);
+                currentCategoryFilter = LogItem.CATEGORY_HOTELS;
+                logsAdapter.filterByCategory(currentCategoryFilter);
             } else if (checkedId == R.id.chipAccount) {
-                logsAdapter.filterByCategory(LogItem.CATEGORY_ACCOUNT);
+                currentCategoryFilter = LogItem.CATEGORY_ACCOUNT;
+                logsAdapter.filterByCategory(currentCategoryFilter);
             } else if (checkedId == R.id.chipReservation) {
-                logsAdapter.filterByCategory(LogItem.CATEGORY_RESERVATION);
+                currentCategoryFilter = LogItem.CATEGORY_RESERVATION;
+                logsAdapter.filterByCategory(currentCategoryFilter);
             }
         });
 
@@ -230,6 +264,158 @@ public class LogsActivity extends BaseSuperAdminActivity {
     @Override
     protected String getToolbarTitle() {
         return "Registros del Sistema";
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.logs_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_export_pdf) {
+            checkPermissionAndExportPdf();
+            return true;
+        }
+        else if (id == R.id.action_export_csv) {
+            checkPermissionAndExportCsv();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Verifica los permisos antes de exportar a PDF
+     */
+    private void checkPermissionAndExportPdf() {
+        // Para Android 10 (API 29) y superior, no necesitamos el permiso WRITE_EXTERNAL_STORAGE
+        // porque usamos el almacenamiento específico de la aplicación (getExternalFilesDir)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            exportLogsAsPdf();
+            return;
+        }
+
+        // Para Android 9 (API 28) y anteriores, verificar permiso
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Marcar que estamos esperando exportar a PDF
+            exportPdfPending = true;
+            exportCsvPending = false;
+
+            // Solicitar el permiso
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_STORAGE);
+        } else {
+            // Ya tenemos el permiso
+            exportLogsAsPdf();
+        }
+    }
+
+    /**
+     * Verifica los permisos antes de exportar a CSV
+     */
+    private void checkPermissionAndExportCsv() {
+        // Para Android 10 (API 29) y superior, no necesitamos el permiso WRITE_EXTERNAL_STORAGE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            exportLogsAsCsv();
+            return;
+        }
+
+        // Para Android 9 (API 28) y anteriores, verificar permiso
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Marcar que estamos esperando exportar a CSV
+            exportCsvPending = true;
+            exportPdfPending = false;
+
+            // Solicitar el permiso
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_STORAGE);
+        } else {
+            // Ya tenemos el permiso
+            exportLogsAsCsv();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso concedido, proceder con la exportación pendiente
+                if (exportPdfPending) {
+                    exportLogsAsPdf();
+                } else if (exportCsvPending) {
+                    exportLogsAsCsv();
+                }
+            } else {
+                // Permiso denegado
+                Toast.makeText(this, "Se requiere permiso de almacenamiento para exportar archivos",
+                        Toast.LENGTH_LONG).show();
+            }
+
+            // Resetear banderas
+            exportPdfPending = false;
+            exportCsvPending = false;
+        }
+    }
+
+    /**
+     * Exporta los logs actualmente filtrados a formato PDF
+     */
+    private void exportLogsAsPdf() {
+        // Verificar si hay logs para exportar
+        if (logsAdapter == null || logsAdapter.getFilteredItems().isEmpty()) {
+            Toast.makeText(this, "No hay logs para exportar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            // Obtener la lista filtrada actual
+            List<LogItem> filteredLogs = logsAdapter.getFilteredItems();
+
+            // Mostrar un mensaje de que se está generando el archivo
+            Toast.makeText(this, "Generando PDF...", Toast.LENGTH_SHORT).show();
+
+            // Usar el LogExportManager para generar el PDF
+            LogExportManager.exportToPdf(this, filteredLogs, currentCategoryFilter);
+        } catch (Exception e) {
+            Log.e(TAG, "Error al exportar a PDF", e);
+            Toast.makeText(this, "Error al exportar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Exporta los logs actualmente filtrados a formato CSV
+     */
+    private void exportLogsAsCsv() {
+        // Verificar si hay logs para exportar
+        if (logsAdapter == null || logsAdapter.getFilteredItems().isEmpty()) {
+            Toast.makeText(this, "No hay logs para exportar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            // Obtener la lista filtrada actual
+            List<LogItem> filteredLogs = logsAdapter.getFilteredItems();
+
+            // Mostrar un mensaje de que se está generando el archivo
+            Toast.makeText(this, "Generando CSV...", Toast.LENGTH_SHORT).show();
+
+            // Usar el LogExportManager para generar el CSV
+            LogExportManager.exportToCsv(this, filteredLogs, currentCategoryFilter);
+        } catch (Exception e) {
+            Log.e(TAG, "Error al exportar a CSV", e);
+            Toast.makeText(this, "Error al exportar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     /**

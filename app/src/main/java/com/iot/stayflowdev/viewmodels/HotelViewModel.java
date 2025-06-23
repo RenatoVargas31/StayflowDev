@@ -1,6 +1,7 @@
 package com.iot.stayflowdev.viewmodels;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.iot.stayflowdev.model.Hotel;
@@ -91,5 +92,10 @@ public class HotelViewModel extends ViewModel {
      */
     public LiveData<List<LugaresCercanos>> getLugaresHistoricosPorHotel(String hotelId) {
         return repository.obtenerLugaresHistoricosCercanos(hotelId);
+    }
+
+    private final MutableLiveData<String> descripcionHotel = new MutableLiveData<>();
+    public LiveData<String> getDescripcionHotel() {
+        return descripcionHotel;
     }
 }

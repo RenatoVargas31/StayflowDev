@@ -1,12 +1,21 @@
 package com.iot.stayflowdev.adminHotel.huesped;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.AdminInicioActivity;
 import com.iot.stayflowdev.adminHotel.HuespedAdminActivity;
@@ -14,16 +23,30 @@ import com.iot.stayflowdev.adminHotel.MensajeriaAdminActivity;
 import com.iot.stayflowdev.adminHotel.PerfilAdminActivity;
 import com.iot.stayflowdev.adminHotel.ReportesAdminActivity;
 import com.iot.stayflowdev.adminHotel.adapter.ReservaAdapter;
-import com.iot.stayflowdev.adminHotel.model.Reserva;
+import com.iot.stayflowdev.model.Reserva;
+import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
 import com.iot.stayflowdev.databinding.ActivityReservasAdminBinding;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ReservasAdminActivity extends AppCompatActivity {
 
     private ActivityReservasAdminBinding binding;
-    private List<Reserva> reservas = new ArrayList<>();
+    private List<Reserva> reservasOriginales = new ArrayList<>(); // Lista completa sin filtrar
+    private List<Reserva> reservasFiltradas = new ArrayList<>(); // Lista que se muestra
+    private ReservaAdapter adapter;
+
+    // Variables para filtros
+    private Date fechaInicioFiltro = null;
+    private Date fechaFinFiltro = null;
+    private String textoBusqueda = "";
+    private boolean ordenarPorRecientes = true; // true = recientes, false = antiguas
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,72 +54,221 @@ public class ReservasAdminActivity extends AppCompatActivity {
         binding = ActivityReservasAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Toolbar
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setTitle("Reservas");
 
-        // Menú inferior
+        configurarBottomNavigation();
+        configurarRecyclerView();
+        configurarFiltrosYBusqueda();
+
+        AdminHotelViewModel adminHotelViewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+        adminHotelViewModel.getHotelId().observe(this, hotelId -> {
+            if (hotelId != null && !hotelId.isEmpty()) {
+                cargarReservasDesdeFirestore(hotelId);
+            } else {
+                Log.e("ReservasAdmin", "Hotel ID no disponible.");
+            }
+        });
+    }
+
+    private void configurarBottomNavigation() {
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.setSelectedItemId(R.id.menu_huesped);
+
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_inicio) {
+            Class<?> currentClass = this.getClass();
+
+            if (id == R.id.menu_inicio && !currentClass.equals(AdminInicioActivity.class)) {
                 startActivity(new Intent(this, AdminInicioActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
-            } else if (id == R.id.menu_reportes) {
+            } else if (id == R.id.menu_reportes && !currentClass.equals(ReportesAdminActivity.class)) {
                 startActivity(new Intent(this, ReportesAdminActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
-            } else if (id == R.id.menu_huesped) {
-                startActivity(new Intent(this, HuespedAdminActivity.class));
+            } else if (id == R.id.menu_huesped && !currentClass.equals(ReservasAdminActivity.class)) {
+                startActivity(new Intent(this, ReservasAdminActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
-            } else if (id == R.id.menu_mensajeria) {
+            } else if (id == R.id.menu_mensajeria && !currentClass.equals(MensajeriaAdminActivity.class)) {
                 startActivity(new Intent(this, MensajeriaAdminActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
-            } else if (id == R.id.menu_perfil) {
+            } else if (id == R.id.menu_perfil && !currentClass.equals(PerfilAdminActivity.class)) {
                 startActivity(new Intent(this, PerfilAdminActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
             }
-            return false;
+            return true;
         });
+    }
 
-        // Simulación de datos
-        cargarReservas();
-
-        // RecyclerView con adapter actualizado
-        ReservaAdapter adapter = new ReservaAdapter(reservas, this);
+    private void configurarRecyclerView() {
+        adapter = new ReservaAdapter(reservasFiltradas, this);
         binding.recyclerReservas.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerReservas.setAdapter(adapter);
     }
 
-    private void cargarReservas() {
-        reservas.add(new Reserva("Alba Doden", "Suite", "2 adultos + 1 niño",
-                R.drawable.img_guest_placeholder, "ADER234", "25 Julio 2025", "29 Julio 2025"));
+    private void configurarFiltrosYBusqueda() {
+        // Configurar chips de ordenamiento
+        binding.chipRecientes.setOnClickListener(v -> {
+            ordenarPorRecientes = true;
+            binding.chipRecientes.setChecked(true);
+            binding.chipAntiguas.setChecked(false);
+            aplicarFiltros();
+        });
 
-        reservas.add(new Reserva("Juan Pérez", "Doble", "2 adultos",
-                R.drawable.img_guest_placeholder, "JP123", "20 Julio 2025", "22 Julio 2025"));
+        binding.chipAntiguas.setOnClickListener(v -> {
+            ordenarPorRecientes = false;
+            binding.chipRecientes.setChecked(false);
+            binding.chipAntiguas.setChecked(true);
+            aplicarFiltros();
+        });
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+        // Por defecto, seleccionar "Más recientes"
+        binding.chipRecientes.setChecked(true);
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+        // Configurar botón de filtrar por fechas
+        binding.btnFiltrarFechas.setOnClickListener(v -> mostrarDialogoFechas());
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+        // Configurar botón de quitar filtro
+        binding.btnQuitarFiltro.setOnClickListener(v -> quitarFiltroFechas());
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+        // Configurar buscador
+        binding.inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
-        reservas.add(new Reserva("Ana Gómez", "Simple", "1 adulto",
-                R.drawable.img_guest_placeholder, "AG456", "15 Julio 2025", "18 Julio 2025"));
+            @Override
+            public void afterTextChanged(Editable s) {
+                textoBusqueda = s.toString().trim();
+                aplicarFiltros();
+            }
+        });
+    }
 
+    private void mostrarDialogoFechas() {
+        Calendar calendar = Calendar.getInstance();
+
+        // Seleccionar fecha de inicio
+        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            Calendar fechaInicio = Calendar.getInstance();
+            fechaInicio.set(year, month, dayOfMonth, 0, 0, 0);
+            fechaInicioFiltro = fechaInicio.getTime();
+
+            // Ahora seleccionar fecha de fin
+            new DatePickerDialog(this, (view2, year2, month2, dayOfMonth2) -> {
+                Calendar fechaFin = Calendar.getInstance();
+                fechaFin.set(year2, month2, dayOfMonth2, 23, 59, 59);
+                fechaFinFiltro = fechaFin.getTime();
+
+                // Validar que fecha fin sea después de fecha inicio
+                if (fechaFinFiltro.before(fechaInicioFiltro)) {
+                    Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio", Toast.LENGTH_SHORT).show();
+                    fechaInicioFiltro = null;
+                    fechaFinFiltro = null;
+                } else {
+                    aplicarFiltros();
+                    actualizarTextoBotonFiltro();
+                }
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void quitarFiltroFechas() {
+        fechaInicioFiltro = null;
+        fechaFinFiltro = null;
+        binding.btnFiltrarFechas.setText("Filtrar por fechas");
+        aplicarFiltros();
+    }
+
+    private void actualizarTextoBotonFiltro() {
+        if (fechaInicioFiltro != null && fechaFinFiltro != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
+            String texto = sdf.format(fechaInicioFiltro) + " - " + sdf.format(fechaFinFiltro);
+            binding.btnFiltrarFechas.setText(texto);
+        } else {
+            binding.btnFiltrarFechas.setText("Filtrar por fechas");
+        }
+    }
+
+    private void aplicarFiltros() {
+        reservasFiltradas.clear();
+
+        for (Reserva reserva : reservasOriginales) {
+            boolean cumpleFiltros = true;
+
+            // Filtro por búsqueda (ID de reserva o código)
+            if (!textoBusqueda.isEmpty()) {
+                String id = reserva.getId() != null ? reserva.getId().toLowerCase() : "";
+                if (!id.contains(textoBusqueda.toLowerCase())) {
+                    cumpleFiltros = false;
+                }
+            }
+
+            // Filtro por fechas
+            if (cumpleFiltros && fechaInicioFiltro != null && fechaFinFiltro != null) {
+                Date fechaInicioReserva = reserva.getFechaInicio() != null ?
+                        reserva.getFechaInicio().toDate() : null;
+
+                if (fechaInicioReserva == null ||
+                        fechaInicioReserva.before(fechaInicioFiltro) ||
+                        fechaInicioReserva.after(fechaFinFiltro)) {
+                    cumpleFiltros = false;
+                }
+            }
+
+            if (cumpleFiltros) {
+                reservasFiltradas.add(reserva);
+            }
+        }
+
+        // Ordenar según el chip seleccionado
+        ordenarReservas();
+
+        // Notificar al adapter
+        adapter.notifyDataSetChanged();
+
+        // Mostrar mensaje si no hay resultados
+        if (reservasFiltradas.isEmpty() && !reservasOriginales.isEmpty()) {
+            Toast.makeText(this, "No se encontraron reservas con los filtros aplicados", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void ordenarReservas() {
+        Collections.sort(reservasFiltradas, (r1, r2) -> {
+            Date fecha1 = r1.getFechaInicio() != null ? r1.getFechaInicio().toDate() : new Date(0);
+            Date fecha2 = r2.getFechaInicio() != null ? r2.getFechaInicio().toDate() : new Date(0);
+
+            if (ordenarPorRecientes) {
+                return fecha2.compareTo(fecha1); // Más recientes primero
+            } else {
+                return fecha1.compareTo(fecha2); // Más antiguas primero
+            }
+        });
+    }
+
+    private void cargarReservasDesdeFirestore(String hotelId) {
+        FirebaseFirestore.getInstance()
+                .collection("reservas")
+                .whereEqualTo("idHotel", hotelId)
+                .get()
+                .addOnSuccessListener(querySnapshots -> {
+                    reservasOriginales.clear();
+                    for (QueryDocumentSnapshot doc : querySnapshots) {
+                        Reserva reserva = doc.toObject(Reserva.class);
+                        reservasOriginales.add(reserva);
+                    }
+                    aplicarFiltros(); // Aplicar filtros después de cargar
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ReservasAdmin", "Error al obtener reservas", e);
+                    Toast.makeText(this, "Error al cargar reservas", Toast.LENGTH_SHORT).show();
+                });
     }
 }

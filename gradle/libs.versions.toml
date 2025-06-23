@@ -26,6 +26,7 @@ constraintlayout = "2.2.1"
 materialVersion = "1.7.0"
 mpandroidchart = "v3.1.0"
 navigationUi = "2.8.9"
+opencsv = "5.7.1"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.2.0"
 recyclerview = "1.4.0"
@@ -66,6 +67,7 @@ material-v170 = { module = "com.google.android.material:material", version.ref =
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
 navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationUi" }
 navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationUi" }
+opencsv = { module = "com.opencsv:opencsv", version.ref = "opencsv" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }

@@ -21,6 +21,15 @@ public class Servicio {
     private String foto;
     private String precio;
     private Boolean esGratis;
+    private double montoMinimoTaxiGratis;
+
+    public double getMontoMinimoTaxiGratis() {
+        return montoMinimoTaxiGratis;
+    }
+
+    public void setMontoMinimoTaxiGratis(double montoMinimoTaxiGratis) {
+        this.montoMinimoTaxiGratis = montoMinimoTaxiGratis;
+    }
 
     public Boolean getEsGratis() {
         return esGratis;

@@ -47,9 +47,9 @@ public class Reserva {
     @NoArgsConstructor
     public static class CantHuespedes {
         @PropertyName("adultos")
-        private int adultos; // Cantidad de adultos
+        private String adultos; // Cantidad de adultos
         @PropertyName("ninos")
-        private int ninos; // Cantidad de niños
+        private String ninos; // Cantidad de niños
     }
     // Clase interna para representar los servicios
     @Data

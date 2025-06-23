@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
-        app:title="Stayflow"
+        app:title="Detalle de Reserva"
         app:titleCentered="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,6 +42,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
+            android:id="@+id/scrollContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -65,7 +66,7 @@
                         android:id="@+id/textNombre"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Alba Doden"
+                        android:text="Cargando..."
                         android:textAppearance="?attr/textAppearanceTitleMedium"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -73,7 +74,7 @@
                         android:id="@+id/textCodigoReserva"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Código de reserva: ADER234"
+                        android:text="Código de reserva: Cargando..."
                         android:textAppearance="?attr/textAppearanceLabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:layout_marginBottom="16dp" />
@@ -101,7 +102,7 @@
                                 android:id="@+id/textLlegada"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Vier, 25 Julio 2025"
+                                android:text="Cargando..."
                                 android:textAppearance="?attr/textAppearanceBodyLarge"
                                 android:textStyle="bold"
                                 android:textColor="?attr/colorOnSurface" />
@@ -124,7 +125,7 @@
                                 android:id="@+id/textSalida"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Vier, 29 Julio 2025"
+                                android:text="Cargando..."
                                 android:textAppearance="?attr/textAppearanceBodyLarge"
                                 android:textStyle="bold"
                                 android:textColor="?attr/colorOnSurface" />
@@ -143,7 +144,7 @@
                         android:id="@+id/textHuespedes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="3 adultos"
+                        android:text="Cargando..."
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface" />
@@ -158,37 +159,17 @@
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp" />
 
-            <com.google.android.material.card.MaterialCardView
+            <!-- Contenedor COMPLETAMENTE dinámico para habitaciones -->
+            <LinearLayout
+                android:id="@+id/containerHabitaciones"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="?attr/colorOutlineVariant">
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+                <!-- Aquí se agregarán las habitaciones dinámicamente -->
+            </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <TextView
-                        android:id="@+id/textHabitacion1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Habitación estándar"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2 adultos"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
+            <!-- Información de precio y servicios -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -201,39 +182,70 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/textHabitacion2"
+                        android:id="@+id/textPrecioTotal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Habitación estándar"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="Precio total: Cargando..."
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1 adulto"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:text="Servicios adicionales"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/textServicios"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cargando servicios..."
+                        android:textAppearance="?attr/textAppearanceBodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Estado de la reserva -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Precio total: 450$"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Incluye servicio de taxi gratuito"
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Estado de la reserva"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/textEstado"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cargando..."
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </ScrollView>
 

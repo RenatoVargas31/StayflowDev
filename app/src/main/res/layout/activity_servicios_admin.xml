@@ -64,6 +64,7 @@
                 app:layout_constraintTop_toTopOf="@id/notification_icon"
                 app:layout_constraintEnd_toEndOf="@id/notification_icon" />
 
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
@@ -93,9 +94,25 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Desde aquí puedes añadir, editar o eliminar servicios ofrecidos por el hotel."
+                android:text="Desde aquí puedes añadir, editar o eliminar servicios ofrecidos por el hotel.
+ Además recuerda establecer el monto mínimo para el servicio de taxi gratuito."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMontoTaxi"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Monto Taxi"
+                android:textSize="12sp"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/md_theme_primary"
+                android:textColor="@color/white"
+                app:cornerRadius="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/toolbar"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
