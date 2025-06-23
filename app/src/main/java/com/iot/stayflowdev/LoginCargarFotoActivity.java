@@ -178,11 +178,11 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
 
         // Campo estado con diferente valor según tipo de usuario
         if (esRegistroTaxista) {
-            userData.put("estado", "activo"); // Campo de estado con valor por defecto activo
+            userData.put("estado", true); // Campo de estado como booleano (true por defecto)
             userData.put("verificado", false); // Campo de verificación para drivers
             userData.put("activo", false); // Campo de activación para drivers
         } else {
-            userData.put("estado", "activo"); // Para usuarios regulares
+            userData.put("estado", true); // Para usuarios regulares (también booleano)
         }
 
         // Si seleccionó una imagen, solo guardamos la referencia local (URI como string)
