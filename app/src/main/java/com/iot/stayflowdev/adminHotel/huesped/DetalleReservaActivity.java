@@ -161,42 +161,33 @@ public class DetalleReservaActivity extends AppCompatActivity {
             return;
         }
 
-        // Buscar en la colección "users" el nombre real del usuario
-        db.collection("users")
+        db.collection("usuarios")
                 .document(idUsuario)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    Log.d("DEBUG", "Datos recibidos: " + documentSnapshot.getData());
+
                     if (documentSnapshot.exists()) {
-                        // Intentar obtener el nombre del usuario
-                        String nombre = documentSnapshot.getString("nombre");
-                        String apellido = documentSnapshot.getString("apellido");
-                        String email = documentSnapshot.getString("email");
+                        String nombre = documentSnapshot.getString("nombres");
+                        String apellido = documentSnapshot.getString("apellidos");
 
-                        String nombreCompleto = "";
-                        if (nombre != null && !nombre.isEmpty()) {
-                            nombreCompleto = nombre;
-                            if (apellido != null && !apellido.isEmpty()) {
-                                nombreCompleto += " " + apellido;
-                            }
-                        } else if (email != null && !email.isEmpty()) {
-                            // Si no hay nombre, usar email
-                            nombreCompleto = email;
+                        if (nombre != null && apellido != null) {
+                            String nombreCompleto = nombre + " " + apellido;
+                            binding.textNombre.setText(nombreCompleto);
                         } else {
-                            nombreCompleto = "Usuario " + idUsuario.substring(0, Math.min(8, idUsuario.length()));
+                            binding.textNombre.setText("⚠ Nombre o apellido vacíos");
                         }
-
-                        binding.textNombre.setText(nombreCompleto);
                     } else {
-                        // Usuario no encontrado, mostrar ID parcial
-                        binding.textNombre.setText("Usuario " + idUsuario.substring(0, Math.min(8, idUsuario.length())));
+                        binding.textNombre.setText("⚠ Documento no encontrado");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.w("DetalleReserva", "Error al buscar usuario", e);
-                    // En caso de error, mostrar ID parcial
-                    binding.textNombre.setText("Usuario " + idUsuario.substring(0, Math.min(8, idUsuario.length())));
+                    Log.e("ERROR_FIRESTORE", "Fallo al leer usuario", e);
+                    binding.textNombre.setText("⚠ Error de conexión");
                 });
     }
+
+
 
     private void mostrarInformacionHuespedes(Reserva.CantHuespedes cantHuespedes) {
         if (cantHuespedes != null) {
