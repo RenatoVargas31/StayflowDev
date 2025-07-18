@@ -35,28 +35,33 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.setSelectedItemId(R.id.menu_mensajeria);
+        // Guarda una referencia a la actividad actual
+        final Class<?> currentActivity = this.getClass();
+
         bottomNav.setOnItemSelectedListener(item -> {
+            Intent intent = null;
             int id = item.getItemId();
-            if (id == R.id.menu_inicio) {
-                startActivity(new Intent(this, AdminInicioActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_reportes) {
-                startActivity(new Intent(this, ReportesAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_huesped) {
-                startActivity(new Intent(this, HuespedAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.menu_mensajeria) {
-                return true;
-            } else if (id == R.id.menu_perfil) {
-                startActivity(new Intent(this, PerfilAdminActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
+
+            if (id == R.id.menu_inicio && currentActivity != AdminInicioActivity.class) {
+                intent = new Intent(this, AdminInicioActivity.class);
+            } else if (id == R.id.menu_reportes && currentActivity != ReportesAdminActivity.class) {
+                intent = new Intent(this, ReportesAdminActivity.class);
+            } else if (id == R.id.menu_huesped && currentActivity != HuespedAdminActivity.class) {
+                intent = new Intent(this, HuespedAdminActivity.class);
+            } else if (id == R.id.menu_mensajeria && currentActivity != MensajeriaAdminActivity.class) {
+                intent = new Intent(this, MensajeriaAdminActivity.class);
+            } else if (id == R.id.menu_perfil && currentActivity != PerfilAdminActivity.class) {
+                intent = new Intent(this, PerfilAdminActivity.class);
             }
-            return false;
+
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+            }
+
+            return true;
         });
 
         cargarMensajes();

@@ -41,17 +41,48 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         binding = ActivityServiciosAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(true); // si quieres mostrar "Ubicación"
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        BottomNavigationView bottomNav = binding.bottomNavigation;
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setSelectedItemId(R.id.menu_inicio);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_inicio) return true;
-            if (id == R.id.menu_reportes) startActivity(new Intent(this, ReportesAdminActivity.class));
-            else if (id == R.id.menu_huesped) startActivity(new Intent(this, HuespedAdminActivity.class));
-            else if (id == R.id.menu_mensajeria) startActivity(new Intent(this, MensajeriaAdminActivity.class));
-            else if (id == R.id.menu_perfil) startActivity(new Intent(this, PerfilAdminActivity.class));
+            if (id == R.id.menu_inicio) {
+                startActivity(new Intent(this, AdminInicioActivity.class));
+                overridePendingTransition(0, 0);
+
+                finish();
+            } else if (id == R.id.menu_reportes) {
+                startActivity(new Intent(this, ReportesAdminActivity.class));
+                overridePendingTransition(0, 0);
+
+                finish();
+
+            } else if (id == R.id.menu_huesped) {
+                startActivity(new Intent(this, HuespedAdminActivity.class));
+                overridePendingTransition(0, 0);
+
+                finish();
+
+            } else if (id == R.id.menu_mensajeria) {
+                startActivity(new Intent(this, MensajeriaAdminActivity.class));                overridePendingTransition(0, 0);
+                overridePendingTransition(0, 0);
+
+                finish();
+
+            } else if (id == R.id.menu_perfil) {
+                startActivity(new Intent(this, PerfilAdminActivity.class));
+                overridePendingTransition(0, 0);
+
+                finish();
+
+            }
             overridePendingTransition(0, 0);
             return true;
         });

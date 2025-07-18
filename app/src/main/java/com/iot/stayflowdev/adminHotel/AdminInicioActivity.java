@@ -85,15 +85,25 @@ public class AdminInicioActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.menu_inicio);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_inicio) return true;
-            else if (id == R.id.menu_reportes) {
+            if (id == R.id.menu_inicio) {
+                startActivity(new Intent(this, AdminInicioActivity.class));
+                finish();
+            } else if (id == R.id.menu_reportes) {
                 startActivity(new Intent(this, ReportesAdminActivity.class));
+                finish();
+
             } else if (id == R.id.menu_huesped) {
                 startActivity(new Intent(this, HuespedAdminActivity.class));
+                finish();
+
             } else if (id == R.id.menu_mensajeria) {
                 startActivity(new Intent(this, MensajeriaAdminActivity.class));
+                finish();
+
             } else if (id == R.id.menu_perfil) {
                 startActivity(new Intent(this, PerfilAdminActivity.class));
+                finish();
+
             }
             overridePendingTransition(0, 0);
             return true;
