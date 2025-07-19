@@ -82,6 +82,9 @@ public class AdminInicioActivity extends AppCompatActivity {
 
         configurarAccesosRapidos();
 
+        // Configurar card de mensajería de pruebas
+        configurarMensajeriaPruebas();
+
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -150,6 +153,17 @@ public class AdminInicioActivity extends AppCompatActivity {
         texto.setText(titulo);
 
         acceso.setOnClickListener(v -> startActivity(new Intent(this, destino)));
+    }
+
+    private void configurarMensajeriaPruebas() {
+        View cardMensajeriaPruebas = findViewById(R.id.cardMensajeriaPruebas);
+
+        cardMensajeriaPruebas.setOnClickListener(v -> {
+            // Abrir el chat con el Super Admin
+            Intent intent = new Intent(this, ChatSuperAdminActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
     }
 
     private void solicitarPermisoNotificaciones() {

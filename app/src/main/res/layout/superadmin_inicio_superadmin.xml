@@ -484,34 +484,59 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:gravity="center"
             android:layout_marginTop="8dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/goToLogsButton"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="wrap_content"
+            <!-- Primera fila de botones -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Ir a Logs"
-                android:icon="@drawable/ic_description"
-                android:paddingHorizontal="24dp"
-                android:layout_marginEnd="12dp"
-                app:backgroundTint="@color/md_theme_primary"
-                app:iconTint="@color/white"
-                android:textColor="@color/white" />
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/goToLogsButton"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Ir a Logs"
+                    android:icon="@drawable/ic_description"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginEnd="6dp"
+                    app:backgroundTint="@color/md_theme_primary"
+                    app:iconTint="@color/white"
+                    android:textColor="@color/white" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/goToUsersButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Gestionar Usuarios"
+                    android:icon="@drawable/ic_person"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginStart="6dp"
+                    app:strokeColor="@color/md_theme_primary"
+                    app:iconTint="@color/md_theme_primary"
+                    android:textColor="@color/md_theme_primary" />
+            </LinearLayout>
+
+            <!-- Segunda fila - Botón de mensajería de prueba -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/goToUsersButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
+                android:id="@+id/goToMessagingTestButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gestionar Usuarios"
-                android:icon="@drawable/ic_person"
+                android:text="🧪 Mensajería (Pruebas)"
+                android:icon="@drawable/ic_chat"
                 android:paddingHorizontal="24dp"
-                app:strokeColor="@color/md_theme_primary"
-                app:iconTint="@color/md_theme_primary"
-                android:textColor="@color/md_theme_primary" />
+                app:backgroundTint="@color/md_theme_secondaryContainer"
+                app:iconTint="@color/md_theme_onSecondaryContainer"
+                android:textColor="@color/md_theme_onSecondaryContainer" />
         </LinearLayout>
 
     </LinearLayout>

@@ -185,6 +185,7 @@ public class InicioActivity extends BaseSuperAdminActivity {
     private void setupContentListeners() {
         MaterialButton btnLogs = findViewById(R.id.goToLogsButton);
         MaterialButton btnUsers = findViewById(R.id.goToUsersButton);
+        MaterialButton btnMessagingTest = findViewById(R.id.goToMessagingTestButton);
 
         if (btnLogs != null) {
             btnLogs.setOnClickListener(v -> {
@@ -197,6 +198,14 @@ public class InicioActivity extends BaseSuperAdminActivity {
         if (btnUsers != null) {
             btnUsers.setOnClickListener(v -> {
                 Intent intent = new Intent(InicioActivity.this, PerfilActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+
+        if (btnMessagingTest != null) {
+            btnMessagingTest.setOnClickListener(v -> {
+                Intent intent = new Intent(InicioActivity.this, SelectUserForChatActivity.class);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
             });
