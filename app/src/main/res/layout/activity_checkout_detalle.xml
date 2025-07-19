@@ -2,71 +2,26 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
     android:fitsSystemWindows="true">
 
-    <!-- Toolbar Stayflow -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
         android:background="@color/md_theme_primary"
         android:elevation="4dp"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="Galería"
+        app:titleTextColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Stayflow"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <ImageView
-                android:id="@+id/notification_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_notifications"
-                app:tint="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                android:id="@+id/badge_text"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:background="@drawable/notification_badge"
-                android:text="8"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnError"
-                android:gravity="center"
-                android:translationX="6dp"
-                android:translationY="-6dp"
-                app:layout_constraintTop_toTopOf="@id/notification_icon"
-                app:layout_constraintEnd_toEndOf="@id/notification_icon" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.appbar.MaterialToolbar>
-
-    <!-- ScrollView -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -94,24 +49,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Header -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/headerContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="#F8F5FF"
                         android:padding="16dp">
-
-                        <ImageButton
-                            android:id="@+id/btnBack"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Regresar"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:tint="#000000" />
 
                         <TextView
                             android:id="@+id/tvTituloCheckout"
@@ -121,9 +64,10 @@
                             android:textColor="#000000"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            app:layout_constraintStart_toEndOf="@id/btnBack"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
                             android:layout_marginStart="16dp" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -143,7 +87,7 @@
                         android:layout_height="1dp"
                         android:background="#E0E0E0" />
 
-                    <!-- Hospedaje -->
+                    <!-- Desglose detallado -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -152,40 +96,83 @@
                         android:background="#FFFFFF">
 
                         <TextView
-                            android:id="@+id/tvHospedajeTitulo"
+                            android:id="@+id/tvDesgloseTitulo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Hospedaje"
+                            android:text="Desglose de la reserva"
                             android:textColor="#212121"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="12dp" />
 
+                        <!-- Contenedor para habitaciones -->
+                        <LinearLayout
+                            android:id="@+id/containerHabitaciones"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                        <!-- Contenedor para servicios -->
+                        <LinearLayout
+                            android:id="@+id/containerServicios"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                        <!-- Subtotal -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#E0E0E0"
+                            android:layout_marginVertical="8dp" />
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="8dp">
+                            android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/tvHospedajeLabel"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Monto del hospedaje"
-                                android:textColor="#757575"
-                                android:textSize="14sp" />
+                                android:text="Subtotal hospedaje"
+                                android:textColor="#212121"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/tvHospedajeMonto"
+                                android:id="@+id/tvSubtotalHospedaje"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="S/. 1000.00"
+                                android:text="S/. 0.00"
                                 android:textColor="#212121"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0" />
+
+                    <!-- Información de pago -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:background="#FFFFFF">
+
+                        <TextView
+                            android:id="@+id/tvPagoTitulo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Información de pago"
+                            android:textColor="#212121"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="12dp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -217,7 +204,7 @@
                         android:layout_height="1dp"
                         android:background="#E0E0E0" />
 
-                    <!-- Cobros adicionales -->
+                    <!-- Sección de Daños Adicionales -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -229,43 +216,49 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
 
                             <TextView
-                                android:id="@+id/tvCobrosAdicionalesTitulo"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:text="Cobros Adicionales"
                                 android:textColor="#212121"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAgregarDanio"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="36dp"
+                                android:text="Agregar daño"
+                                android:textSize="12sp"
+                                app:icon="@drawable/ic_add"
+                                app:iconSize="16dp"
+                                app:cornerRadius="18dp" />
                         </LinearLayout>
 
+                        <!-- Contenedor dinámico para los daños -->
                         <LinearLayout
+                            android:id="@+id/containerDanios"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginTop="12dp">
+                            android:orientation="vertical" />
 
-                            <TextView
-                                android:id="@+id/tvDaniosLabel"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Daños en la ropa de cama"
-                                android:textColor="#757575"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:id="@+id/tvDaniosMonto"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="S/.100.00"
-                                android:textColor="#212121"
-                                android:textSize="14sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                        <!-- Mensaje cuando no hay daños -->
+                        <TextView
+                            android:id="@+id/tvSinDanios"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="No se han registrado daños adicionales"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            android:padding="24dp"
+                            android:visibility="visible" />
                     </LinearLayout>
 
                     <View
@@ -292,7 +285,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Hospedaje"
+                                android:text="Subtotal hospedaje"
                                 android:textColor="#212121"
                                 android:textSize="14sp" />
 
@@ -300,7 +293,7 @@
                                 android:id="@+id/tvResumenHospedajeMonto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="S/.1000.00"
+                                android:text="S/.0.00"
                                 android:textColor="#212121"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -316,7 +309,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Daños en la ropa de cama"
+                                android:text="Sin daños adicionales"
                                 android:textColor="#212121"
                                 android:textSize="14sp" />
 
@@ -324,7 +317,7 @@
                                 android:id="@+id/tvResumenDaniosMonto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="S/.100.00"
+                                android:text="S/.0.00"
                                 android:textColor="#212121"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -348,7 +341,7 @@
                                 android:id="@+id/tvTotalMonto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="S/.1100.00"
+                                android:text="S/.1000.00"
                                 android:textColor="#212121"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
