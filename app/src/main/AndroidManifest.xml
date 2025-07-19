@@ -97,6 +97,9 @@
             android:name=".superAdmin.LogsActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.ActiveUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".superAdmin.UserDetailActivity"
             android:exported="false" />
         <activity

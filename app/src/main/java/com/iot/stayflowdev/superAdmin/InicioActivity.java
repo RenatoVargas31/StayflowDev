@@ -60,6 +60,9 @@ public class InicioActivity extends BaseSuperAdminActivity {
         // Configurar listeners para usuarios activos
         setupActiveUsersListener();
 
+        // Configurar click en el cuadro de usuarios activos
+        setupActiveUsersCardClick();
+
         // Configurar listeners específicos de esta pantalla
         setupContentListeners();
     }
@@ -149,6 +152,16 @@ public class InicioActivity extends BaseSuperAdminActivity {
                 overridePendingTransition(0, 0);
             });
         }
+    }
+
+    private void setupActiveUsersCardClick() {
+        // Configurar el click en la tarjeta grande de usuarios activos (sección "Actividad del Sistema")
+        findViewById(R.id.activeUsersDetailCard).setOnClickListener(v -> {
+            // Abrir la pantalla de usuarios conectados
+            Intent intent = new Intent(InicioActivity.this, ActiveUsersActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
     }
 
     @Override
