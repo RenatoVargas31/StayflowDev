@@ -103,6 +103,9 @@
             android:name=".superAdmin.UserDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.SystemMetricsActivity"
+            android:exported="false" />
+        <activity
             android:name=".Driver.Activity.DriverPruebaMapa"
             android:exported="false" />
         <activity

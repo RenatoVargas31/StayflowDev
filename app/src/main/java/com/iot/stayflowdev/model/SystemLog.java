@@ -45,6 +45,7 @@ public class SystemLog {
     @ServerTimestamp
     private Timestamp timestamp;
 
+    private boolean leido;  // Campo para indicar si el log ha sido leído
     private Map<String, Object> additionalData;  // Datos adicionales específicos de cada tipo de log
 
     // Constructor vacío requerido para Firestore
@@ -63,6 +64,7 @@ public class SystemLog {
         this.userName = userName;
         this.targetId = targetId;
         this.targetName = targetName;
+        this.leido = false;  // Por defecto, los logs se crean como no leídos
         this.additionalData = new HashMap<>();
     }
 
@@ -145,6 +147,14 @@ public class SystemLog {
 
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean isLeido() {
+        return leido;
+    }
+
+    public void setLeido(boolean leido) {
+        this.leido = leido;
     }
 
     public Map<String, Object> getAdditionalData() {
