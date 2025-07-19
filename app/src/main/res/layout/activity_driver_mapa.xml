@@ -4,24 +4,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/md_theme_surfaceDim_highContrast"
     tools:context=".Driver.Activity.DriverMapaActivity">
+
+    <!-- ==================== BUSCADOR DEL MAPA ==================== -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_input_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:elevation="4dp"
+        android:background="@drawable/search_background"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/search_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="12dp"
+            android:hint="¿A dónde quieres ir?"
+            android:inputType="text"
+            android:background="@android:color/transparent"
+            android:padding="16dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- ==================== CONTENEDOR DEL MAPA ==================== -->
     <FrameLayout
         android:id="@+id/map_container"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_input_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/destination_card">
+        app:layout_constraintBottom_toTopOf="@+id/destination_card_container">
 
-        <!-- MAPBOX MAP VIEW -->
-        <com.mapbox.maps.MapView
-            android:id="@+id/mapView"
+        <!-- GOOGLE MAPS FRAGMENT -->
+        <fragment
+            android:id="@+id/google_map_fragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -34,193 +61,366 @@
             android:layout_marginTop="16dp"
             android:background="#80FFFFFF"
             android:padding="12dp"
-            android:text="Showing route from initial location to destination"
+            android:text="Mostrando ruta del origen al destino"
             android:textAlignment="center"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:elevation="4dp"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
-        <!-- Botón de ubicación actual (opcional) -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_current_location"
+        <!-- Botones flotantes del mapa -->
+        <LinearLayout
+            android:id="@+id/floating_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_mylocation"
-            app:tint="@color/white"
-            app:backgroundTint="?attr/colorPrimary"
-            android:contentDescription="Mi ubicación" />
+            android:orientation="vertical">
+
+            <!-- Botón de ubicación actual -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_current_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_mylocation"
+                app:tint="@android:color/white"
+                app:backgroundTint="?attr/colorPrimary"
+                android:contentDescription="Mi ubicación" />
+
+        </LinearLayout>
 
     </FrameLayout>
 
-    <!-- ==================== TARJETA DE INFORMACIÓN DEL DESTINO ==================== -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/destination_card"
-        android:layout_width="match_parent"
+    <!-- ==================== CONTENEDOR PARA CARD DE DESTINO ==================== -->
+    <LinearLayout
+        android:id="@+id/destination_card_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="0dp"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigation">
 
-        <LinearLayout
+        <!-- ==================== CARD DE DESTINO FIJO ==================== -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/destination_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_margin="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:visibility="visible"
+            android:animateLayoutChanges="true">
 
-            <!-- Información del destino -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Nombre del hotel/destino -->
-                <TextView
-                    android:id="@+id/destination_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Hotel Marriot, Miraflores"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                <!-- ==================== HANDLE PARA ARRASTRAR ==================== -->
+                <View
+                    android:id="@+id/bottom_sheet_handle"
+                    android:layout_width="40dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bottom_sheet_handle"
+                    android:alpha="0.6" />
 
-                <!-- Dirección -->
-                <TextView
-                    android:id="@+id/direccion_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Av. Malecón de la Reserva 615, Miraflores 15074, Lima"
-                    android:textColor="@android:color/black"
-                    android:textSize="13sp" />
-
-            </LinearLayout>
-
-            <!-- Información de distancia y tiempo -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <!-- Sección de distancia -->
+                <!-- ==================== CONTENIDO COLAPSADO (Vista Mínima) ==================== -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/collapsed_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                    <TextView
+                    <!-- Icono del destino -->
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@android:drawable/ic_dialog_map"
+                        android:layout_marginEnd="12dp"
+                        app:tint="@color/md_theme_error" />
+
+                    <!-- Información básica -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/destination_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Destino seleccionado"
+                            android:textColor="@android:color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/direccion_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Dirección del destino"
+                            android:textColor="#757575"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+
+                    </LinearLayout>
+
+                    <!-- Información rápida de tiempo -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Distancia"
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp">
 
-                    <TextView
-                        android:id="@+id/distance_value"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/arrival_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-- mins"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="tiempo"
+                            android:textColor="#757575"
+                            android:textSize="10sp" />
+
+                    </LinearLayout>
+
+                    <!-- Botón cerrar -->
+                    <ImageButton
+                        android:id="@+id/btn_close_destination"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:contentDescription="Cerrar" />
+
+                </LinearLayout>
+
+                <!-- ==================== CONTENIDO EXPANDIDO (Vista Completa) ==================== -->
+                <LinearLayout
+                    android:id="@+id/expanded_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone">
+
+                    <!-- Separador -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Información detallada de distancia y tiempo -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="5 km"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="20dp">
 
+                        <!-- Sección de distancia -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_directions"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:id="@+id/distance_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="-- km"
+                                android:textColor="@android:color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Distancia"
+                                android:textColor="#757575"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <!-- Sección de tiempo detallado -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_recent_history"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:id="@+id/arrival_time_detailed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="-- mins"
+                                android:textColor="@android:color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Tiempo estimado"
+                                android:textColor="#757575"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <!-- Sección de costo -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_gallery"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:id="@+id/estimated_cost"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="S/ --"
+                                android:textColor="@android:color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Costo estimado"
+                                android:textColor="#757575"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Estado adicional -->
                     <TextView
                         android:id="@+id/remaining_distance"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="-2 km"
+                        android:text="Calculando ruta más rápida..."
                         android:textColor="#757575"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="20dp" />
 
-                </LinearLayout>
-
-                <!-- Divisor vertical -->
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="16dp"
-                    android:background="#E0E0E0" />
-
-                <!-- Sección de tiempo -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Botones de acción -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tiempo de llegada"
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/arrival_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="15 mins"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        <!-- Botón principal - Iniciar Viaje -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_start_trip"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:layout_marginBottom="12dp"
+                            android:drawableStart="@drawable/ic_carro"
+                            android:drawablePadding="8dp"
+                            android:text="Iniciar viaje"
+                            android:textAllCaps="false"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <!-- Botones secundarios -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Botón Contactar Pasajero -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_contact_passenger"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="6dp"
+                                android:drawableStart="@drawable/ic_chat"
+                                android:drawablePadding="8dp"
+                                android:text="Chat"
+                                android:textAllCaps="false"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                app:strokeColor="?attr/colorOutline" />
+
+                            <!-- Botón Llamar -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_call_passenger"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                android:drawableStart="@android:drawable/ic_menu_call"
+                                android:drawablePadding="8dp"
+                                android:text="Llamar"
+                                android:textAllCaps="false"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                app:strokeColor="?attr/colorOutline" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Botones de acción -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal">
+        </androidx.cardview.widget.CardView>
 
-                <!-- Botón Iniciar Viaje -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_start_trip"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:drawableStart="@drawable/ic_carro"
-                    android:drawablePadding="8dp"
-                    android:text="Iniciar viaje"
-                    android:textAllCaps="false"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    app:strokeColor="?attr/colorOutline" />
+    </LinearLayout>
 
-                <!-- Botón Contactar Pasajero -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_contact_passenger"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:drawableStart="@drawable/ic_chat"
-                    android:drawablePadding="8dp"
-                    android:text="Contactar pasajero"
-                    android:textAllCaps="false"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    app:strokeColor="?attr/colorOutline" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- ==================== NAVEGACIÓN INFERIOR ==================== -->
+    <!-- ==================== NAVEGACIÓN INFERIOR (SIEMPRE FIJA) ==================== -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         style="@style/Widget.Material3.BottomNavigationView"
@@ -228,9 +428,9 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         app:labelVisibilityMode="labeled"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:menu="@menu/driver_menu"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/driver_menu" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

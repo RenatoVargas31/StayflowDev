@@ -1,655 +1,662 @@
 package com.iot.stayflowdev.Driver.Activity;
-
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.Button;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.iot.stayflowdev.Driver.Helper.LocationHelper;
+import com.google.android.material.textfield.TextInputEditText;
 import com.iot.stayflowdev.R;
-import com.mapbox.geojson.Point;
-import com.mapbox.maps.CameraOptions;
-import com.mapbox.maps.MapView;
-import com.mapbox.maps.Style;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
+import android.view.inputmethod.InputMethodManager;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
-
-public class DriverMapaActivity extends AppCompatActivity implements LocationHelper.LocationUpdateListener{
-    // ==================== VARIABLES DE DATOS DEL VIAJE ====================
-    private String solicitudId;
-    private String nombreDestino;
-    private String direccionDestino;
-    private String nombrePasajero;
-    private String telefonoPasajero;
-
-    // ==================== VARIABLES DE VISTAS ====================
-    // Card de destino
-    private TextView destination_name;
-    private TextView direccion_name;
-    private TextView distance_value;
-    private TextView arrival_time;
-    private MaterialButton btn_start_trip;
-    private MaterialButton btn_contact_passenger;
-
-    // Navegación
-    private BottomNavigationView bottomNavigation;
-
-    // Mapa
-    private MapView mapView;
+public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyCallback {
+    private GoogleMap mMap;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
+    private LocationRequest locationRequest;
+    private LatLng currentLocation;
+    private boolean isFirstLocation = true;
+    private boolean mostroDialogoGps = false;
     private FloatingActionButton fabCurrentLocation;
-    private TextView routeText;
+    private BottomNavigationView bottomNavigation;
+    private static final int LOCATION_REQUEST_CODE = 1;
+    // ==================== NUEVAS VARIABLES PARA CARD DE DESTINO ====================
+    private CardView destinationCard;
+    private LinearLayout destinationCardContainer;
+    private LinearLayout collapsedContent;
+    private LinearLayout expandedContent;
+    private TextView destinationName;
+    private TextView direccionName;
+    private TextView arrivalTime;
+    private TextView arrivalTimeDetailed;
+    private TextView distanceValue;
+    private TextView estimatedCost;
+    private TextView remainingDistance;
+    private ImageButton btnCloseDestination;
+    private MaterialButton btnStartTrip;
+    private MaterialButton btnContactPassenger;
+    private MaterialButton btnCallPassenger;
+    private TextInputEditText searchInput;
 
-    // ==================== VARIABLES DE UBICACIÓN ====================
-    private LocationHelper locationHelper;
-    private boolean locationPermissionGranted = false;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private boolean autoFollowLocation = true;
-    private boolean isFirstLocationUpdate = true;
-
-
+    // Variables para manejo de destino
+    private LatLng destinationLocation;
+    private String destinationAddress;
+    private boolean isCardExpanded = false;
+    private Marker destinationMarker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_driver_mapa);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        initializeViews();
+        setupClickListeners();
+        createLocationRequest();
+        createLocationCallback();
+        configurarBottomNavigation();
+        initializeMap();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
-        // Inicialización en orden
-        initLocationHelper();
-        initViews();
-        cargarDatosSolicitud(); // NUEVO: Cargar datos de Firebase
-        setupListeners();
-        setupBottomNavigation();
-        setupMap();
-        verificarPermisosUbicacion();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mapView != null) {
-            mapView.onStart();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Reseleccionar item de navegación
-        if (bottomNavigation != null) {
-            bottomNavigation.post(() -> {
-                bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-                Log.d("DriverMapaActivity", "✅ Selección verificada en onResume()");
-            });
-        }
-
-        // Reanudar ubicación
-        if (locationPermissionGranted && locationHelper != null && !locationHelper.isTracking()) {
-            Log.d("DriverMapaActivity", "🔄 Reanudando ubicación");
-            locationHelper.startLocationTracking();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (locationHelper != null) {
-            locationHelper.stopLocationTracking();
-            Log.d("DriverMapaActivity", "🔄 Ubicación pausada");
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mapView != null) {
-            mapView.onStop();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Limpiar recursos
-        if (locationHelper != null) {
-            locationHelper.cleanup();
-            locationHelper = null;
-        }
-
-        if (mapView != null) {
-            mapView.onDestroy();
-        }
-
-        Log.d("DriverMapaActivity", "🗑️ Recursos liberados");
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        if (mapView != null) {
-            mapView.onLowMemory();
-        }
-    }
-
-// ==================== INICIALIZACIÓN ====================
-
-    private void initLocationHelper() {
-        locationHelper = new LocationHelper(this, this);
-    }
-    private void initViews() {
-        // Card de destino
-        destination_name = findViewById(R.id.destination_name);
-        direccion_name = findViewById(R.id.direccion_name);
-        distance_value = findViewById(R.id.distance_value);
-        arrival_time = findViewById(R.id.arrival_time);
-        btn_start_trip = findViewById(R.id.btn_start_trip);
-        btn_contact_passenger = findViewById(R.id.btn_contact_passenger);
-
-        // Navegación
+    private void initializeViews() {
         bottomNavigation = findViewById(R.id.bottomNavigation);
-
-        // Mapa
-        mapView = findViewById(R.id.mapView);
         fabCurrentLocation = findViewById(R.id.fab_current_location);
-        routeText = findViewById(R.id.route_text);
+        destinationCard = findViewById(R.id.destination_card);
+        destinationCardContainer = findViewById(R.id.destination_card_container);
+        collapsedContent = findViewById(R.id.collapsed_content);
+        expandedContent = findViewById(R.id.expanded_content);
+        destinationName = findViewById(R.id.destination_name);
+        direccionName = findViewById(R.id.direccion_name);
+        arrivalTime = findViewById(R.id.arrival_time);
+        arrivalTimeDetailed = findViewById(R.id.arrival_time_detailed);
+        distanceValue = findViewById(R.id.distance_value);
+        estimatedCost = findViewById(R.id.estimated_cost);
+        remainingDistance = findViewById(R.id.remaining_distance);
+        btnCloseDestination = findViewById(R.id.btn_close_destination);
+        btnStartTrip = findViewById(R.id.btn_start_trip);
+        btnContactPassenger = findViewById(R.id.btn_contact_passenger);
+        btnCallPassenger = findViewById(R.id.btn_call_passenger);
+        searchInput = findViewById(R.id.search_input);
 
-        // Validaciones
-        if (bottomNavigation == null) {
-            Log.e("DriverMapaActivity", "❌ ERROR: bottomNavigation es null!");
-        } else {
-            Log.d("DriverMapaActivity", "✅ bottomNavigation encontrado correctamente");
-        }
-
-        if (mapView == null) {
-            Log.e("DriverMapaActivity", "❌ ERROR: mapView es null!");
-        } else {
-            Log.d("DriverMapaActivity", "✅ mapView encontrado correctamente");
-        }
+        // Inicialmente ocultar el card
+        hideDestinationCard();
     }
 
-    // ==================== CARGA DE DATOS DESDE FIREBASE ====================
+    private void setupClickListeners() {
+        fabCurrentLocation.setOnClickListener(v -> {
+            if (currentLocation != null && mMap != null)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
+            else
+                showToast("Obteniendo ubicación...");
+        });
+        // Toggle expandir/colapsar card
+        collapsedContent.setOnClickListener(v -> toggleCardExpansion());
 
-    private void cargarDatosSolicitud() {
-        solicitudId = getIntent().getStringExtra("SOLICITUD_ID");
+        // Cerrar destino
+        btnCloseDestination.setOnClickListener(v -> clearDestination());
 
-        if (solicitudId == null || solicitudId.isEmpty()) {
-            Log.w("DriverMapa", "No se recibió SOLICITUD_ID, usando datos de ejemplo");
-            configurarDatosEjemplo();
-            return;
-        }
+        // Iniciar viaje
+        btnStartTrip.setOnClickListener(v -> startTrip());
 
-        FirebaseFirestore.getInstance()
-                .collection("solicitudesTaxi")
-                .document(solicitudId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        // Obtener datos del destino
-                        nombreDestino = documentSnapshot.getString("destino");
-                        direccionDestino = documentSnapshot.getString("destinoDireccion");
+        // Contactar pasajero
+        btnContactPassenger.setOnClickListener(v -> openChat());
 
-                        // Obtener datos del pasajero
-                        nombrePasajero = documentSnapshot.getString("nombrePasajero");
-                        telefonoPasajero = documentSnapshot.getString("telefonoPasajero");
+        // Llamar pasajero
+        btnCallPassenger.setOnClickListener(v -> callPassenger());
 
-                        // Actualizar las vistas
-                        actualizarVistaDestino();
+        // Búsqueda de destino
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                String searchText = v.getText().toString().trim();
+                if (!searchText.isEmpty()) {
+                    // Ocultar teclado
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
-                        Log.d("DriverMapa", "✅ Datos cargados desde Firebase");
-                    } else {
-                        Log.w("DriverMapa", "Documento no encontrado, usando datos de ejemplo");
-                        configurarDatosEjemplo();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("DriverMapa", "Error al cargar datos: " + e.getMessage());
-                    configurarDatosEjemplo();
-                });
-    }
-
-    private void actualizarVistaDestino() {
-        if (nombreDestino != null && destination_name != null) {
-            destination_name.setText(nombreDestino);
-        }
-
-        if (direccionDestino != null && direccion_name != null) {
-            direccion_name.setText(direccionDestino);
-        }
-
-        // Los valores de distancia y tiempo se calculan después
-        if (distance_value != null) {
-            distance_value.setText("Calculando...");
-        }
-        if (arrival_time != null) {
-            arrival_time.setText("Calculando...");
-        }
-    }
-
-    private void configurarDatosEjemplo() {
-        // Datos por defecto si no se reciben del Intent
-        nombreDestino = "Hotel Monte Claro";
-        direccionDestino = "Av. Ejemplo 123, Lima";
-        nombrePasajero = "Pasajero Ejemplo";
-        telefonoPasajero = "999888777";
-
-        // Actualizar vistas con datos de ejemplo
-        if (destination_name != null) {
-            destination_name.setText(nombreDestino);
-        }
-        if (direccion_name != null) {
-            direccion_name.setText(direccionDestino);
-        }
-        if (distance_value != null) {
-            distance_value.setText("5 km");
-        }
-        if (arrival_time != null) {
-            arrival_time.setText("15 mins");
-        }
-    }
-// ==================== CONFIGURACIÓN DE LISTENERS ====================
-
-    private void setupListeners() {
-        setupTripButtons();
-        setupLocationButton();
-    }
-
-    private void setupTripButtons() {
-        if (btn_start_trip != null) {
-            btn_start_trip.setOnClickListener(v -> {
-                Toast.makeText(this, "Iniciando viaje...", Toast.LENGTH_SHORT).show();
-                iniciarViaje();
-            });
-        }
-
-        if (btn_contact_passenger != null) {
-            btn_contact_passenger.setOnClickListener(v -> {
-                contactarPasajero();
-            });
-        }
-    }
-
-    private void setupLocationButton() {
-        if (fabCurrentLocation != null) {
-            fabCurrentLocation.setOnClickListener(v -> {
-                toggleAutoFollow();
-            });
-        }
-    }
-
-    // ==================== FUNCIONALIDAD DE BOTONES ====================
-
-    private void iniciarViaje() {
-        Log.d("DriverMapaActivity", "🚗 Iniciando viaje - actualizando mapa");
-        if (routeText != null) {
-            routeText.setText("Viaje en progreso - Sigue la ruta");
-        }
-    }
-
-    private void contactarPasajero() {
-        Toast.makeText(this, "Abriendo chat con el pasajero...", Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(this, DriverChatActivity.class);
-
-        // Pasar ID de la solicitud
-        if (solicitudId != null) {
-            intent.putExtra("SOLICITUD_ID", solicitudId);
-        }
-
-        // Pasar datos del pasajero para mostrar en el chat
-        if (nombrePasajero != null) {
-            intent.putExtra("NOMBRE_PASAJERO", nombrePasajero);
-        }
-
-        if (telefonoPasajero != null) {
-            intent.putExtra("TELEFONO_PASAJERO", telefonoPasajero);
-        }
-
-        // Pasar datos del destino para contexto
-        if (nombreDestino != null) {
-            intent.putExtra("DESTINO", nombreDestino);
-        }
-
-        if (direccionDestino != null) {
-            intent.putExtra("DIRECCION_DESTINO", direccionDestino);
-        }
-
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-    }
-
-    private void toggleAutoFollow() {
-        autoFollowLocation = !autoFollowLocation;
-
-        if (autoFollowLocation) {
-            Toast.makeText(this, "🎯 Seguimiento automático activado", Toast.LENGTH_SHORT).show();
-
-            // Centrar inmediatamente en ubicación actual
-            if (locationHelper != null) {
-                Point currentLocation = locationHelper.getCurrentLocation();
-                if (currentLocation != null) {
-                    CameraOptions cameraOptions = new CameraOptions.Builder()
-                            .center(currentLocation)
-                            .zoom(17.0)
-                            .build();
-                    mapView.getMapboxMap().setCamera(cameraOptions);
+                    // Buscar destino
+                    searchByCoordinates(searchText);
                 }
+                return true;
             }
-        } else {
-            Toast.makeText(this, "📍 Seguimiento manual - mueve el mapa libremente", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // ==================== CONFIGURACIÓN DEL MAPA ====================
-
-    private void setupMap() {
-        if (mapView == null) {
-            Log.e("DriverMapaActivity", "❌ MapView es null");
-            return;
-        }
-
-        Log.d("DriverMapaActivity", "🗺️ Configurando Mapbox...");
-
-        try {
-            CameraOptions initialCamera = new CameraOptions.Builder()
-                    .center(Point.fromLngLat(-77.0428, -12.0464)) // Lima
-                    .zoom(15.0)
-                    .pitch(0.0)
-                    .bearing(0.0)
-                    .build();
-
-            mapView.getMapboxMap().setCamera(initialCamera);
-
-            mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
-                Log.d("DriverMapaActivity", "✅ Estilo del mapa cargado");
-
-                if (locationPermissionGranted) {
-                    iniciarUbicacionTiempoReal();
-                }
-
-                configurarElementosDelMapa();
-            });
-
-        } catch (Exception e) {
-            Log.e("DriverMapaActivity", "❌ Error configurando mapa: " + e.getMessage());
-        }
-    }
-
-    private void configurarElementosDelMapa() {
-        Log.d("DriverMapaActivity", "🎯 Configurando elementos del mapa (marcadores, rutas, etc.)");
-
-        if (routeText != null) {
-            String textoRuta = nombreDestino != null ?
-                    "Ruta hacia " + nombreDestino :
-                    "Ruta hacia destino";
-            routeText.setText(textoRuta);
-        }
-    }
-
-    // ==================== GESTIÓN DE PERMISOS Y UBICACIÓN ====================
-
-    private void verificarPermisosUbicacion() {
-        if (locationHelper.hasLocationPermission()) {
-            locationPermissionGranted = true;
-            Log.d("DriverMapaActivity", "✅ Permisos de ubicación concedidos");
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermissionGranted = true;
-                Log.d("DriverMapaActivity", "✅ Permisos concedidos por el usuario");
-                iniciarUbicacionTiempoReal();
-            } else {
-                locationPermissionGranted = false;
-                Toast.makeText(this, "Se necesitan permisos de ubicación", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private void iniciarUbicacionTiempoReal() {
-        if (locationHelper == null) {
-            Log.e("DriverMapaActivity", "❌ LocationHelper es null");
-            return;
-        }
-
-        mostrarEstadoInicial();
-
-        boolean success = locationHelper.startLocationTracking();
-        if (!success) {
-            Log.e("DriverMapaActivity", "❌ No se pudo iniciar ubicación");
-        }
-    }
-
-    // ==================== IMPLEMENTACIÓN DE LocationUpdateListener ====================
-
-    @Override
-    public void onLocationUpdate(Location location, String address, String timeString) {
-        Log.d("DriverMapaActivity", "📍 Ubicación actualizada: " + address);
-
-        mostrarUbicacionConDireccion(location, address, timeString);
-
-        if (autoFollowLocation) {
-            moverMapaATuUbicacion(location);
-        }
-    }
-
-    @Override
-    public void onLocationError(String error) {
-        Log.e("DriverMapaActivity", "❌ Error de ubicación: " + error);
-
-        if (routeText != null) {
-            runOnUiThread(() -> {
-                String textoError = "❌ " + error + "\n🚗 Ruta hacia " +
-                        (nombreDestino != null ? nombreDestino : "destino");
-                routeText.setText(textoError);
-            });
-        }
-
-        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onProviderStateChanged(String provider, boolean enabled) {
-        String message = provider + (enabled ? " habilitado" : " deshabilitado");
-        Log.d("DriverMapaActivity", "🔄 " + message);
-
-        if (provider.equals(LocationManager.GPS_PROVIDER)) {
-            if (enabled) {
-                mostrarEstadoInicial();
-                Toast.makeText(this, "GPS habilitado", Toast.LENGTH_SHORT).show();
-            } else {
-                if (routeText != null) {
-                    runOnUiThread(() -> {
-                        routeText.setText("❌ GPS desactivado\nActiva el GPS para obtener ubicación");
-                    });
-                }
-                Toast.makeText(this, "GPS deshabilitado", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    // ==================== MÉTODOS DE UTILIDAD PARA UBICACIÓN ====================
-
-    private void moverMapaATuUbicacion(Location location) {
-        if (mapView == null || mapView.getMapboxMap() == null) {
-            return;
-        }
-
-        try {
-            Point userLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-
-            double zoomLevel;
-            if (isFirstLocationUpdate) {
-                zoomLevel = 17.0;
-                isFirstLocationUpdate = false;
-            } else {
-                zoomLevel = mapView.getMapboxMap().getCameraState().getZoom();
-                if (zoomLevel < 15.0) {
-                    zoomLevel = 16.0;
-                }
-            }
-
-            CameraOptions cameraOptions = new CameraOptions.Builder()
-                    .center(userLocation)
-                    .zoom(zoomLevel)
-                    .build();
-
-            mapView.getMapboxMap().setCamera(cameraOptions);
-
-            Log.d("DriverMapaActivity", "✅ Mapa movido automáticamente a nueva ubicación");
-
-        } catch (Exception e) {
-            Log.e("DriverMapaActivity", "❌ Error moviendo mapa: " + e.getMessage());
-        }
-    }
-
-    private void mostrarUbicacionConDireccion(Location location, String direccion, String hora) {
-        if (routeText != null) {
-            String ubicacionTexto = String.format(
-                    "📍%s\n🎯 Precisión: %.0fm | 🕐 %s",
-                    direccion,
-                    location.getAccuracy(),
-                    hora
-            );
-
-            runOnUiThread(() -> {
-                routeText.setText(ubicacionTexto);
-            });
-        }
-    }
-
-    private void mostrarEstadoInicial() {
-        if (routeText != null) {
-            runOnUiThread(() -> {
-                routeText.setText("📡 Obteniendo tu ubicación actual...");
-            });
-        }
-    }
-
-    // ==================== NAVEGACIÓN ====================
-
-    private void setupBottomNavigation() {
-        if (bottomNavigation == null) {
-            Log.e("DriverMapaActivity", "❌ No se puede configurar: bottomNavigation es null");
-            return;
-        }
-
-        if (bottomNavigation.getMenu() == null || bottomNavigation.getMenu().size() == 0) {
-            Log.e("DriverMapaActivity", "❌ ERROR: El menú no se cargó correctamente");
-            return;
-        }
-
-        // Debug del menú
-        Log.d("DriverMapaActivity", "📋 Ítems del menú encontrados:");
-        for (int i = 0; i < bottomNavigation.getMenu().size(); i++) {
-            MenuItem item = bottomNavigation.getMenu().getItem(i);
-            Log.d("DriverMapaActivity", "- Ítem " + i + ": ID=" + item.getItemId() + ", Título=" + item.getTitle());
-        }
-
-        // Seleccionar item actual
-        try {
-            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-            Log.d("DriverMapaActivity", "✅ Intentando seleccionar nav_mapa con ID: " + R.id.nav_mapa);
-
-            MenuItem selectedItem = bottomNavigation.getMenu().findItem(R.id.nav_mapa);
-            if (selectedItem != null) {
-                Log.d("DriverMapaActivity", "✅ Ítem nav_mapa encontrado: " + selectedItem.getTitle());
-                selectedItem.setChecked(true);
-            } else {
-                Log.e("DriverMapaActivity", "❌ ERROR: No se encontró el ítem nav_mapa");
-                if (bottomNavigation.getMenu().size() >= 3) {
-                    bottomNavigation.getMenu().getItem(2).setChecked(true);
-                    Log.d("DriverMapaActivity", "✅ Seleccionado por posición (ítem 2)");
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e("DriverMapaActivity", "❌ ERROR al seleccionar ítem: " + e.getMessage());
-        }
-
-        bottomNavigation.post(() -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_mapa);
-            Log.d("DriverMapaActivity", "✅ Selección aplicada con post()");
+            return false;
         });
 
-        // Listener de navegación
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            Log.d("DriverMapaActivity", "🔄 Ítem seleccionado: " + itemId);
+        // Click en el mapa para seleccionar destino
+        setupMapClickListener();
+    }
+// ==================== MÉTODOS PARA MANEJO DEL CARD DE DESTINO ====================
 
-            if (itemId == R.id.nav_mapa) {
-                Log.d("DriverMapaActivity", "✅ Ya en Mapa");
-                return true;
-            } else if (itemId == R.id.nav_inicio) {
-                Log.d("DriverMapaActivity", "🏠 Navegando a Inicio");
-                navegarSinAnimacion(DriverInicioActivity.class);
-                return true;
-            } else if (itemId == R.id.nav_reservas) {
-                Log.d("DriverMapaActivity", "📋 Navegando a Reservas");
+    private void showDestinationCard() {
+        destinationCard.setVisibility(View.VISIBLE);
+        destinationCard.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .start();
+    }
+
+    private void hideDestinationCard() {
+        destinationCard.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> destinationCard.setVisibility(View.GONE))
+                .start();
+
+        // Colapsar si estaba expandido
+        if (isCardExpanded) {
+            collapseCard();
+        }
+    }
+
+    private void toggleCardExpansion() {
+        if (isCardExpanded) {
+            collapseCard();
+        } else {
+            expandCard();
+        }
+    }
+
+    private void expandCard() {
+        expandedContent.setVisibility(View.VISIBLE);
+        expandedContent.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .start();
+        isCardExpanded = true;
+    }
+
+    private void collapseCard() {
+        expandedContent.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    expandedContent.setVisibility(View.GONE);
+                    isCardExpanded = false;
+                })
+                .start();
+    }
+
+    private void setDestination(LatLng destination, String address) {
+        this.destinationLocation = destination;
+        this.destinationAddress = address;
+
+        // Agregar marcador en el mapa
+        if (destinationMarker != null) {
+            destinationMarker.remove();
+        }
+
+        destinationMarker = mMap.addMarker(new MarkerOptions()
+                .position(destination)
+                .title("Destino")
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+        // Actualizar información del card
+        updateDestinationInfo(address);
+
+        // Mostrar card
+        showDestinationCard();
+
+        // Calcular ruta si tenemos ubicación actual
+        if (currentLocation != null) {
+            calculateRoute();
+        }
+
+        // Ajustar cámara para mostrar origen y destino
+        adjustCameraToShowBothPoints();
+    }
+
+    private void updateDestinationInfo(String address) {
+        // Extraer nombre del lugar y dirección
+        String[] addressParts = address.split(",");
+        String placeName = addressParts.length > 0 ? addressParts[0].trim() : "Destino";
+
+        destinationName.setText(placeName);
+        direccionName.setText(address);
+
+        // Valores por defecto mientras se calculan
+        arrivalTime.setText("-- mins");
+        arrivalTimeDetailed.setText("-- mins");
+        distanceValue.setText("-- km");
+        estimatedCost.setText("S/ --");
+        remainingDistance.setText("Calculando ruta...");
+    }
+
+    private void calculateRoute() {
+        if (currentLocation == null || destinationLocation == null) return;
+        // Aquí implementarías la lógica para calcular la ruta
+        // Por ahora, simularemos con datos de ejemplo
+        simulateRouteCalculation();
+    }
+
+    private void simulateRouteCalculation() {
+        // Simulación de cálculo de ruta
+        new Handler().postDelayed(() -> {
+            if (currentLocation != null && destinationLocation != null) {
+                // Calcular distancia aproximada
+                float[] results = new float[1];
+                Location.distanceBetween(
+                        currentLocation.latitude, currentLocation.longitude,
+                        destinationLocation.latitude, destinationLocation.longitude,
+                        results
+                );
+
+                float distanceKm = results[0] / 1000;
+                int estimatedMinutes = Math.round(distanceKm * 2.5f); // Aproximación
+                double estimatedCostValue = distanceKm * 1.5 + 3.0; // Tarifa base + km
+
+                // Actualizar UI
+                runOnUiThread(() -> {
+                    distanceValue.setText(String.format(Locale.getDefault(), "%.1f km", distanceKm));
+                    arrivalTime.setText(String.format(Locale.getDefault(), "%d mins", estimatedMinutes));
+                    arrivalTimeDetailed.setText(String.format(Locale.getDefault(), "%d mins", estimatedMinutes));
+                    estimatedCost.setText(String.format(Locale.getDefault(), "S/ %.2f", estimatedCostValue));
+                    remainingDistance.setText("Ruta calculada - Listo para iniciar");
+                });
+            }
+        }, 2000);
+    }
+
+    private void adjustCameraToShowBothPoints() {
+        if (currentLocation != null && destinationLocation != null) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(currentLocation);
+            builder.include(destinationLocation);
+
+            LatLngBounds bounds = builder.build();
+            int padding = 200; // Padding en pixels
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        }
+    }
+
+    private void clearDestination() {
+        destinationLocation = null;
+        destinationAddress = null;
+
+        if (destinationMarker != null) {
+            destinationMarker.remove();
+            destinationMarker = null;
+        }
+
+        hideDestinationCard();
+
+        // Limpiar campo de búsqueda
+        searchInput.setText("");
+
+        showToast("Destino eliminado");
+    }
+
+    // ==================== MÉTODOS DE ACCIÓN DEL CARD ====================
+
+    private void startTrip() {
+        if (destinationLocation == null) {
+            showToast("No hay destino seleccionado");
+            return;
+        }
+
+        // Aquí implementarías la lógica para iniciar el viaje
+        showToast("Iniciando viaje...");
+
+        // Ejemplo: Cambiar el botón para indicar viaje en curso
+        btnStartTrip.setText("Viaje en curso");
+        btnStartTrip.setEnabled(false);
+    }
+
+    private void openChat() {
+        // Implementar apertura del chat
+        showToast("Abriendo chat...");
+    }
+
+    private void callPassenger() {
+        // Implementar llamada al pasajero
+        showToast("Llamando al pasajero...");
+    }
+
+    // ==================== BÚSQUEDA Y SELECCIÓN DE DESTINO ====================
+
+    private void searchDestination(String query) {
+        if (query.trim().isEmpty()) {
+            showToast("Ingresa una dirección o lugar");
+            return;
+        }
+        showToast("Buscando: " + query);
+        remainingDistance.setText("Buscando ubicación...");
+        // Usar Geocoder para buscar la dirección
+        searchWithGeocoder(query);
+    }
+    private void searchWithGeocoder(String query) {
+        new Thread(() -> {
+            try {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocationName(query, 5);
+
+                runOnUiThread(() -> {
+                    if (addresses != null && !addresses.isEmpty()) {
+                        // Tomar la primera dirección encontrada
+                        Address address = addresses.get(0);
+                        LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+
+                        // Construir dirección legible
+                        StringBuilder addressText = new StringBuilder();
+
+                        // Agregar nombre del lugar si existe
+                        if (address.getFeatureName() != null && !address.getFeatureName().equals(address.getSubThoroughfare())) {
+                            addressText.append(address.getFeatureName()).append(", ");
+                        }
+
+                        // Agregar dirección
+                        if (address.getAddressLine(0) != null) {
+                            addressText.append(address.getAddressLine(0));
+                        } else {
+                            // Construir dirección manualmente
+                            if (address.getThoroughfare() != null) {
+                                addressText.append(address.getThoroughfare());
+                                if (address.getSubThoroughfare() != null) {
+                                    addressText.append(" ").append(address.getSubThoroughfare());
+                                }
+                                addressText.append(", ");
+                            }
+                            if (address.getSubLocality() != null) {
+                                addressText.append(address.getSubLocality()).append(", ");
+                            }
+                            if (address.getLocality() != null) {
+                                addressText.append(address.getLocality());
+                            }
+                        }
+
+                        setDestination(location, addressText.toString());
+                        showToast("Ubicación encontrada");
+
+                    } else {
+                        showToast("No se encontró la ubicación. Intenta con una dirección más específica");
+                        remainingDistance.setText("Ubicación no encontrada");
+                    }
+                });
+
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    showToast("Error al buscar la ubicación. Verifica tu conexión");
+                    remainingDistance.setText("Error en la búsqueda");
+                });
+            }
+        }).start();
+    }
+    // Método alternativo usando coordenadas directas si el usuario ingresa lat,lng
+    private void searchByCoordinates(String query) {
+        try {
+            String[] parts = query.split(",");
+            if (parts.length == 2) {
+                double lat = Double.parseDouble(parts[0].trim());
+                double lng = Double.parseDouble(parts[1].trim());
+
+                // Validar que las coordenadas estén en un rango válido
+                if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                    LatLng location = new LatLng(lat, lng);
+                    getAddressFromLatLng(location);
+                    return;
+                }
+            }
+        } catch (NumberFormatException e) {
+            // No son coordenadas válidas, continuar con búsqueda normal
+        }
+
+        // Si no son coordenadas, buscar como dirección normal
+        searchWithGeocoder(query);
+    }
+    private void setupMapClickListener() {
+        // Este método se llamará después de que el mapa esté listo
+    }
+    private void configurarBottomNavigation() {
+        bottomNavigation.setSelectedItemId(R.id.nav_mapa);
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_mapa) {
+                return true; // Ya estás en la vista actual
+            } else if (id == R.id.nav_reservas) {
                 navegarSinAnimacion(DriverReservaActivity.class);
                 return true;
-            } else if (itemId == R.id.nav_perfil) {
-                Log.d("DriverMapaActivity", "👤 Navegando a Perfil");
+            } else if (id == R.id.nav_inicio) {
+                navegarSinAnimacion(DriverInicioActivity.class);
+                return true;
+            } else if (id == R.id.nav_perfil) {
                 navegarSinAnimacion(DriverPerfilActivity.class);
                 return true;
             }
-
             return false;
         });
     }
+    private boolean isGpsEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        return locationManager != null && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
 
-    private void navegarSinAnimacion(Class<?> activityClass) {
-        Intent intent = new Intent(this, activityClass);
-        startActivity(intent);
+    private void showGpsAlertDialog() {
+        if (mostroDialogoGps) return;
+        mostroDialogoGps = true;
+        new AlertDialog.Builder(this)
+                .setTitle("Activar GPS")
+                .setMessage("Necesitamos que actives tu GPS para mostrar tu ubicación.")
+                .setCancelable(false)
+                .setPositiveButton("Activar", (dialog, which) -> {
+                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+
+
+
+    private void navegarSinAnimacion(Class<?> cls) {
+        startActivity(new Intent(this, cls));
         overridePendingTransition(0, 0);
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        navegarSinAnimacion(DriverInicioActivity.class);
+    private void initializeMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.google_map_fragment);
+        if (mapFragment == null) {
+            mapFragment = SupportMapFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.map_container, mapFragment).commit();
+        }
+        mapFragment.getMapAsync(this);
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        navegarSinAnimacion(DriverInicioActivity.class);
-        return true;
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(true);
+        mMap.getUiSettings().setRotateGesturesEnabled(true);
+        mMap.getUiSettings().setTiltGesturesEnabled(true);
+        mMap.setOnMapClickListener(latLng -> {
+            // Obtener dirección del punto clickeado
+            getAddressFromLatLng(latLng);
+        });
+        verificarUbicacionYGps();
+    }
+    private void getAddressFromLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                String addressText = address.getAddressLine(0);
+                setDestination(latLng, addressText);
+            } else {
+                setDestination(latLng, "Ubicación seleccionada");
+            }
+        } catch (IOException e) {
+            setDestination(latLng, "Lat: " + String.format("%.6f", latLng.latitude) +
+                    ", Lng: " + String.format("%.6f", latLng.longitude));
+        }
+    }
+    private boolean tienePermisosUbicacion() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+    private void verificarUbicacionYGps() {
+        if (tienePermisosUbicacion()) {
+            if (isGpsEnabled()) {
+                mMap.setMyLocationEnabled(true);
+                startLocationUpdates();
+            } else {
+                showGpsAlertDialog();
+            }
+        } else {
+            requestLocationPermission();
+        }
+    }
+    private void createLocationRequest() {
+        locationRequest = LocationRequest.create()
+                .setInterval(2000)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setSmallestDisplacement(1.0f);
+    }
+    private void createLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult result) {
+                if (result != null && result.getLastLocation() != null) {
+                    currentLocation = new LatLng(
+                            result.getLastLocation().getLatitude(),
+                            result.getLastLocation().getLongitude()
+                    );
+                    if (isFirstLocation) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
+                        isFirstLocation = false;
+                        showToast("Ubicación encontrada");
+                    }
+
+                    // Si hay destino, recalcular ruta
+                    if (destinationLocation != null) {
+                        calculateRoute();
+                    }
+                }
+            }
+        };
+    }
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                LOCATION_REQUEST_CODE);
+    }
+    private void startLocationUpdates() {
+        if (!tienePermisosUbicacion()) {
+            requestLocationPermission();
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        showToast("Iniciando seguimiento de ubicación");
     }
 
+    private void stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+        showToast("Seguimiento de ubicación pausado");
+    }
+    private void showToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_REQUEST_CODE && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (tienePermisosUbicacion()) {
+                mMap.setMyLocationEnabled(true);
+                startLocationUpdates();
+            }
+            showToast("Permisos de ubicación concedidos");
+        } else {
+            showToast("Se requieren permisos de ubicación para funcionar");
+            showPermissionExplanationDialog();
+        }
+    }
+    private void showPermissionExplanationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Permisos de ubicación requeridos")
+                .setMessage("Esta aplicación necesita acceso a tu ubicación para mostrarte tu posición actual.")
+                .setPositiveButton("Intentar de nuevo", (dialog, which) -> requestLocationPermission())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+    public LatLng getCurrentCoordinates() {
+        return currentLocation;
+    }
+
+    public String getCurrentCoordinatesAsString() {
+        return currentLocation != null
+                ? String.format(Locale.getDefault(), "%.6f,%.6f",
+                currentLocation.latitude, currentLocation.longitude)
+                : "Ubicación no disponible";
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMap != null && isGpsEnabled() && tienePermisosUbicacion()) {
+            mMap.setMyLocationEnabled(true);
+            startLocationUpdates();
+        }
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        stopLocationUpdates();
+    }
 }

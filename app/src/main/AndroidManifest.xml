@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Permisos para vibración -->
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permiso de internet para Mapbox -->
     <uses-permission android:name="android.permission.INTERNET" /> <!-- Permiso para acceso al estado de la red -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
@@ -28,6 +27,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+
+        <!-- Meta-data for Google Maps API key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyArgXmLe6Bk6km2wSEN8RDpk2qbPd73ryc" />
+
         <activity
             android:name=".cliente.ClienteDetalleHotelActivity"
             android:exported="false" />
