@@ -13,7 +13,8 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -34,7 +35,11 @@
             android:value="AIzaSyArgXmLe6Bk6km2wSEN8RDpk2qbPd73ryc" />
 
         <activity
+            android:name=".adminHotel.NotificacionAdminActivity"
+            android:exported="false" />
+        <activity
             android:name=".cliente.ClienteDetalleHotelActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".cliente.ClienteBusquedaHotelActivity"
@@ -47,13 +52,14 @@
             android:exported="false" />
         <activity
             android:name=".cliente.ClienteBuscarActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".cliente.ClientePerfilActivity"
             android:exported="false" />
         <activity
             android:name=".LoginCuentaFireBase"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".LoginFireBaseActivity"
             android:exported="true">
@@ -65,13 +71,13 @@
         </activity>
         <activity
             android:name=".superAdmin.AddHotelAdminActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".superAdmin.GestionActivity"
             android:exported="false" />
         <activity
             android:name=".superAdmin.InicioActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".superAdmin.PerfilActivity"
             android:exported="false" />
@@ -101,7 +107,7 @@
             android:exported="false" />
         <activity
             android:name=".superAdmin.SuperAdminActivity"
-            android:exported="false"></activity> <!-- Dentro de <application> -->
+            android:exported="false" /> <!-- Dentro de <application> -->
         <receiver
             android:name=".Driver.Activity.DriverReservaActivity$ResumenDiarioReceiver"
             android:enabled="true"
@@ -224,9 +230,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver>
-
-        <!-- FileProvider para compartir archivos generados -->
+        </receiver> <!-- FileProvider para compartir archivos generados -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.iot.stayflowdev.fileprovider"

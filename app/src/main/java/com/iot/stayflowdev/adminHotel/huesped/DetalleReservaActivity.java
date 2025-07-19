@@ -235,7 +235,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         if (habitaciones == null || habitaciones.isEmpty()) {
             Log.d("DetalleReserva", "No hay habitaciones disponibles");
             // Crear un card que diga "No hay habitaciones"
-            MaterialCardView cardVacio = crearCardHabitacion("Información no disponible", "Sin habitaciones", 0);
+            MaterialCardView cardVacio = crearCardHabitacion("Información no disponible", "Sin habitaciones", null);
             containerHabitaciones.addView(cardVacio);
             return;
         }
@@ -243,29 +243,40 @@ public class DetalleReservaActivity extends AppCompatActivity {
         Log.d("DetalleReserva", "Número total de habitaciones: " + habitaciones.size());
 
         // Crear un card para CADA habitación dinámicamente
+        double subtotalHabitaciones = 0.0;
+
         for (int i = 0; i < habitaciones.size(); i++) {
             Reserva.Habitacion habitacion = habitaciones.get(i);
             if (habitacion != null) {
                 String tipoHabitacion = habitacion.getTipo() != null ? habitacion.getTipo() : "Sin tipo";
                 String descripcion = "Habitación " + (i + 1);
+                String precioStr = habitacion.getPrecio() != null ? habitacion.getPrecio() : "0";
 
-                Log.d("DetalleReserva", "Creando card para habitación " + (i+1) + ": " + tipoHabitacion);
+                // Convertir precio a double y acumular
+                try {
+                    double precio = Double.parseDouble(precioStr);
+                    subtotalHabitaciones += precio;
+                } catch (NumberFormatException e) {
+                    Log.e("DetalleReserva", "Precio inválido: " + precioStr);
+                }
 
                 MaterialCardView cardHabitacion = crearCardHabitacion(
                         "Habitación " + tipoHabitacion,
                         descripcion,
-                        i + 1
+                        precioStr
                 );
 
                 containerHabitaciones.addView(cardHabitacion);
             }
         }
 
+
+
         Log.d("DetalleReserva", "=== FIN HABITACIONES DEBUG ===");
     }
 
     // NUEVO MÉTODO PARA CREAR CARDS DINÁMICOS
-    private MaterialCardView crearCardHabitacion(String tipoHabitacion, String descripcion, int numero) {
+    private MaterialCardView crearCardHabitacion(String tipoHabitacion, String descripcion, String precio) {
         // Crear el card principal
         MaterialCardView card = new MaterialCardView(this);
 
@@ -302,9 +313,17 @@ public class DetalleReservaActivity extends AppCompatActivity {
         textDescripcion.setTextSize(14f);
         textDescripcion.setTextColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
 
+        // Texto del precio
+        TextView textPrecio = new TextView(this);
+        textPrecio.setText("Precio: S/. " + precio);
+        textPrecio.setTextSize(14f);
+        textPrecio.setTextColor(getResources().getColor(android.R.color.black, getTheme()));
+
+
         // Agregar los textos al layout
         layout.addView(textTipo);
         layout.addView(textDescripcion);
+        layout.addView(textPrecio);
 
         // Agregar el layout al card
         card.addView(layout);

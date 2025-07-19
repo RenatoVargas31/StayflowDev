@@ -40,6 +40,8 @@ public class Reserva {
     private String estado; // Estado de la reserva (confirmada, cancelada)
     @PropertyName("quieroTaxi")
     private boolean quieroTaxi; // Indica si el usuario quiere taxi
+    @PropertyName("danios")
+    private List<Danio> danios; // para registrar daños en la habitación
 
     // Clase interna para representar la cantidad de huéspedes
     @Data
@@ -74,5 +76,16 @@ public class Reserva {
         private int cantidad; // Cantidad de habitaciones de este tipo
         @PropertyName("precio")
         private String precio; // Precio por noche de la habitación
+    }
+    // Clase interna para representar los daños
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Danio {
+        @PropertyName("descripcion")
+        private String descripcion;
+
+        @PropertyName("precio")
+        private String precio;
     }
 }
