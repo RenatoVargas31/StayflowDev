@@ -23,6 +23,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.Driver.Activity.DriverInicioActivity;
 import com.iot.stayflowdev.adminHotel.AdminInicioActivity;
+import com.iot.stayflowdev.utils.UserSessionManager;
+
+import java.util.UUID;
 
 public class LoginCuentaFireBase extends AppCompatActivity {
 
@@ -33,6 +36,7 @@ public class LoginCuentaFireBase extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private UserSessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,7 @@ public class LoginCuentaFireBase extends AppCompatActivity {
         // Inicializar Firebase Auth y Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        sessionManager = UserSessionManager.getInstance();
 
         // Inicializar vistas
         emailInput = findViewById(R.id.emailInput);
@@ -139,6 +144,14 @@ public class LoginCuentaFireBase extends AppCompatActivity {
                         // Obtener los datos del usuario
                         DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
                         String rol = document.getString("rol");
+                        String userId = document.getId();
+
+                        // Marcar usuario como conectado y generar token de sesión
+                        String sessionToken = UUID.randomUUID().toString();
+                        sessionManager.setUserConnected(userId, sessionToken);
+
+                        Log.d(TAG, "Usuario " + userId + " marcado como conectado con token: " + sessionToken);
+
                         irAActividadSegunRol(rol);
                     } else {
                         Log.w(TAG, "No se encontró información del usuario en Firestore");
@@ -202,4 +215,3 @@ public class LoginCuentaFireBase extends AppCompatActivity {
         finish();
     }
 }
-

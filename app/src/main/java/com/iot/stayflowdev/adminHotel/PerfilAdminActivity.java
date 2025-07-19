@@ -1,6 +1,7 @@
 package com.iot.stayflowdev.adminHotel;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,6 +15,7 @@ import com.iot.stayflowdev.LoginFireBaseActivity;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.databinding.ActivityPerfilAdminBinding;
 import com.iot.stayflowdev.model.User;
+import com.iot.stayflowdev.utils.UserSessionManager;
 
 public class PerfilAdminActivity extends AppCompatActivity {
 
@@ -106,12 +108,52 @@ public class PerfilAdminActivity extends AppCompatActivity {
 
         // Cerrar sesión
         binding.btnCerrarSesion.setOnClickListener(v -> {
-            Toast.makeText(this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
-            mAuth.signOut();
-            Intent intent = new Intent(this, LoginFireBaseActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+            cerrarSesion();
         });
+    }
+
+    // Método para cerrar sesión con integración completa
+    private void cerrarSesion() {
+        // 1. Obtener el ID del usuario actual antes de cerrar sesión
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String currentUserEmail = null;
+        if (auth.getCurrentUser() != null) {
+            currentUserEmail = auth.getCurrentUser().getEmail();
+        }
+
+        // 2. Marcar usuario como desconectado en Firestore
+        if (currentUserEmail != null) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("usuarios")
+                    .whereEqualTo("correo", currentUserEmail)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                            UserSessionManager.getInstance().setUserDisconnected(userId);
+                            Log.d(TAG, "Usuario Admin " + userId + " marcado como desconectado");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error al marcar usuario admin como desconectado: " + e.getMessage());
+                    });
+        }
+
+        // 3. Mostrar mensaje
+        Toast.makeText(this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
+
+        // 4. Cerrar sesión en Firebase
+        auth.signOut();
+
+        // 5. Limpiar SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        sharedPreferences.edit().clear().apply();
+
+        // 6. Redirigir al login
+        Intent intent = new Intent(this, LoginFireBaseActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

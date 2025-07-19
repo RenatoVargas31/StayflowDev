@@ -18,7 +18,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.utils.UserSessionManager;
 
 public class DriverPerfilActivity extends AppCompatActivity {
 
@@ -211,17 +213,43 @@ public class DriverPerfilActivity extends AppCompatActivity {
 
     // Método para cerrar sesión
     private void cerrarSesion() {
-        // 1. Cerrar sesión en Firebase
-        FirebaseAuth.getInstance().signOut();
+        // 1. Obtener el ID del usuario actual antes de cerrar sesión
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String currentUserEmail = null;
+        if (auth.getCurrentUser() != null) {
+            currentUserEmail = auth.getCurrentUser().getEmail();
+        }
 
-        // 2. Limpiar SharedPreferences
+        // 2. Marcar usuario como desconectado en Firestore
+        if (currentUserEmail != null) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("usuarios")
+                    .whereEqualTo("correo", currentUserEmail)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                            UserSessionManager.getInstance().setUserDisconnected(userId);
+                            Log.d("DriverPerfilActivity", "Usuario " + userId + " marcado como desconectado");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("DriverPerfilActivity", "Error al marcar usuario como desconectado: " + e.getMessage());
+                    });
+        }
+
+        // 3. Cerrar sesión en Firebase
+        auth.signOut();
+
+        // 4. Limpiar SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         sharedPreferences.edit().clear().apply();
 
-        // 3. Mostrar mensaje
+        // 5. Mostrar mensaje
         Toast.makeText(this, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show();
 
-        // 4. Redirigir al login
+        // 6. Redirigir al login
         Intent intent = new Intent(this, com.iot.stayflowdev.LoginFireBaseActivity.class);
         // Flags para limpiar la pila de actividades
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
