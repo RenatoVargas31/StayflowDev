@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +24,19 @@ import com.iot.stayflowdev.model.LugaresCercanos;
 import com.iot.stayflowdev.model.Servicio;
 import com.iot.stayflowdev.viewmodels.HotelViewModel;
 
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import com.iot.stayflowdev.model.Habitacion;
+import com.iot.stayflowdev.viewmodels.HabitacionViewModel;
+import com.iot.stayflowdev.cliente.adapter.ClienteHabitacionAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.List;
 
-public class ClienteDetalleHotelActivity extends AppCompatActivity {
+public class ClienteDetalleHotelActivity extends AppCompatActivity implements ClienteHabitacionAdapter.OnHabitacionSeleccionadaListener {
 
     private ActivityClienteDetalleHotelBinding binding;
     private HotelViewModel hotelViewModel;
@@ -35,7 +47,12 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity {
 
     // ID del hotel seleccionado
     private String hotelId;
-
+    // ViewModel para manejar las habitaciones
+    private HabitacionViewModel habitacionViewModel;
+    private ClienteHabitacionAdapter habitacionAdapter;
+    private RecyclerView rvHabitaciones;
+    private Map<String, Integer> habitacionesSeleccionadas = new HashMap<>();
+    private double totalHabitaciones = 0.0;
     // Objeto hotel
     private Hotel hotel;
 
@@ -56,6 +73,10 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity {
 
         // Inicializar ViewModel
         hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
+        habitacionViewModel = new ViewModelProvider(this).get(HabitacionViewModel.class);
+
+        // Configurar RecyclerView de habitaciones
+        configurarRecyclerViewHabitaciones();
 
         // Configurar el botón de retroceso
         binding.btnBack.setOnClickListener(v -> onBackPressed());
@@ -85,6 +106,169 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity {
                 Log.e(TAG, "Hotel no encontrado con ID: " + hotelId);
             }
         });
+        // Cargar habitaciones del hotel
+        cargarHabitacionesDisponibles(hotelId);
+    }
+    private void configurarRecyclerViewHabitaciones() {
+        rvHabitaciones = findViewById(R.id.rvHabitacionesDinamicas);
+
+        if (rvHabitaciones != null) {
+            rvHabitaciones.setLayoutManager(new LinearLayoutManager(this));
+            rvHabitaciones.setNestedScrollingEnabled(false);
+
+            habitacionAdapter = new ClienteHabitacionAdapter(this);
+            rvHabitaciones.setAdapter(habitacionAdapter);
+
+            Log.d(TAG, "RecyclerView de habitaciones configurado");
+        } else {
+            Log.e(TAG, "No se encontró RecyclerView rvHabitacionesDinamicas");
+        }
+    }
+    private void cargarHabitacionesDisponibles(String hotelId) {
+        mostrarEstadoCargaHabitaciones(true);
+
+        habitacionViewModel.cargarHabitaciones(hotelId);
+
+        habitacionViewModel.getHabitaciones().observe(this, habitaciones -> {
+            mostrarEstadoCargaHabitaciones(false);
+
+            if (habitaciones != null && !habitaciones.isEmpty()) {
+                // Filtrar solo habitaciones disponibles
+                List<Habitacion> disponibles = new ArrayList<>();
+                for (Habitacion hab : habitaciones) {
+                    if (hab.getDisponible() != null && hab.getDisponible()) {
+                        disponibles.add(hab);
+                    }
+                }
+
+                if (!disponibles.isEmpty()) {
+                    habitacionAdapter.setHabitaciones(disponibles);
+                    mostrarHabitaciones(true);
+                    Log.d(TAG, "Habitaciones disponibles cargadas: " + disponibles.size());
+                } else {
+                    mostrarMensajeSinHabitaciones();
+                    Log.d(TAG, "No hay habitaciones disponibles");
+                }
+            } else {
+                mostrarMensajeSinHabitaciones();
+                Log.d(TAG, "No se encontraron habitaciones para el hotel");
+            }
+        });
+    }
+    private void mostrarEstadoCargaHabitaciones(boolean mostrar) {
+        ProgressBar progressBar = findViewById(R.id.progressBarHabitaciones);
+        if (progressBar != null) {
+            progressBar.setVisibility(mostrar ? View.VISIBLE : View.GONE);
+        }
+    }
+    private void mostrarHabitaciones(boolean mostrar) {
+        if (rvHabitaciones != null) {
+            rvHabitaciones.setVisibility(mostrar ? View.VISIBLE : View.GONE);
+        }
+
+        TextView tvNoHabitaciones = findViewById(R.id.tvNoHabitaciones);
+        if (tvNoHabitaciones != null) {
+            tvNoHabitaciones.setVisibility(mostrar ? View.GONE : View.VISIBLE);
+        }
+    }
+    private void mostrarMensajeSinHabitaciones() {
+        mostrarHabitaciones(false);
+        TextView tvNoHabitaciones = findViewById(R.id.tvNoHabitaciones);
+        if (tvNoHabitaciones != null) {
+            tvNoHabitaciones.setVisibility(View.VISIBLE);
+        }
+    }
+    @Override
+    public void onSeleccionCambiada(String habitacionId, int cantidad, double subtotal) {
+        Log.d(TAG, "Habitación " + habitacionId + " - Cantidad: " + cantidad + " - Subtotal: " + subtotal);
+        // Aquí puedes agregar lógica adicional si necesitas reaccionar a cambios individuales
+    }
+    @Override
+    public void onTotalCambiado(double total, Map<String, Integer> selecciones) {
+        this.totalHabitaciones = total;
+        this.habitacionesSeleccionadas = new HashMap<>(selecciones);
+
+        Log.d(TAG, "Total habitaciones: S/. " + total);
+        Log.d(TAG, "Habitaciones seleccionadas: " + selecciones.size());
+
+        actualizarResumenHabitaciones();
+        actualizarBotonContinuar();
+    }
+    private void actualizarResumenHabitaciones() {
+        TextView tvResumenHabitaciones = findViewById(R.id.tvResumenHabitaciones);
+        TextView tvTotalHabitaciones = findViewById(R.id.tvTotalHabitaciones);
+        View cardResumen = findViewById(R.id.cardResumenHabitaciones);
+
+        if (habitacionesSeleccionadas.isEmpty()) {
+            // Ocultar resumen si no hay selecciones
+            if (cardResumen != null) {
+                cardResumen.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        // Mostrar card de resumen
+        if (cardResumen != null) {
+            cardResumen.setVisibility(View.VISIBLE);
+        }
+
+        // Crear texto de resumen
+        StringBuilder resumen = new StringBuilder();
+        int totalHabitacionesCount = 0;
+
+        for (Map.Entry<String, Integer> entry : habitacionesSeleccionadas.entrySet()) {
+            String habitacionId = entry.getKey();
+            int cantidad = entry.getValue();
+
+            // Buscar tipo de habitación por ID
+            String tipoHabitacion = obtenerTipoHabitacionPorId(habitacionId);
+
+            if (resumen.length() > 0) {
+                resumen.append(", ");
+            }
+            resumen.append(cantidad).append(" ").append(tipoHabitacion);
+            totalHabitacionesCount += cantidad;
+        }
+
+        // Actualizar textos
+        if (tvResumenHabitaciones != null) {
+            tvResumenHabitaciones.setText(resumen.toString());
+        }
+
+        if (tvTotalHabitaciones != null) {
+            tvTotalHabitaciones.setText(String.format("S/. %.2f", totalHabitaciones));
+        }
+
+        Log.d(TAG, "Resumen actualizado: " + resumen.toString() + " - Total: S/. " + totalHabitaciones);
+    }
+    private String obtenerTipoHabitacionPorId(String habitacionId) {
+        if (habitacionAdapter != null) {
+            // Necesitamos acceder a las habitaciones del adapter
+            // Por simplicidad, usaremos un método genérico
+            return "Habitación"; // Puedes mejorar esto después
+        }
+        return "Habitación";
+    }
+    private void actualizarBotonContinuar() {
+        Button btnContinuar = findViewById(R.id.btnContinuarReserva);
+
+        if (btnContinuar != null) {
+            boolean haySeleccion = !habitacionesSeleccionadas.isEmpty();
+            btnContinuar.setEnabled(haySeleccion);
+
+            if (haySeleccion) {
+                int totalHabitacionesCount = 0;
+                for (int cantidad : habitacionesSeleccionadas.values()) {
+                    totalHabitacionesCount += cantidad;
+                }
+
+                String textoBoton = "Continuar con " + totalHabitacionesCount +
+                        " habitación" + (totalHabitacionesCount == 1 ? "" : "es");
+                btnContinuar.setText(textoBoton);
+            } else {
+                btnContinuar.setText("Selecciona habitaciones");
+            }
+        }
     }
 
     private void mostrarDatosHotel(Hotel hotel) {
@@ -224,18 +408,5 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity {
             // Añadir al contenedor
             binding.layoutLugaresHistoricos.addView(textView);
         }
-    }
-
-    private void navegarAHabitaciones() {
-        // Aquí implementaremos la navegación a la vista de habitaciones
-        // Por ahora, solo mostraremos un mensaje
-        Toast.makeText(this, "Función de habitaciones en desarrollo", Toast.LENGTH_SHORT).show();
-
-        // Ejemplo de cómo sería la navegación:
-        /*
-        Intent intent = new Intent(this, ClienteHabitacionesHotelActivity.class);
-        intent.putExtra(EXTRA_HOTEL_ID, hotelId);
-        startActivity(intent);
-        */
     }
 }

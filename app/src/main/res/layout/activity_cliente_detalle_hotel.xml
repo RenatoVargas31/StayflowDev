@@ -35,18 +35,19 @@
             android:textColor="@color/black" />
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Contenido desplazable en NestedScrollView -->
+    <!-- Contenido desplazable en NestedScrollView - MODIFICADO: ahora termina antes del botón -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/containerBotonFijo"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/main"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
 
             <!-- Imagen principal del hotel -->
             <ImageView
@@ -56,7 +57,7 @@
                 android:contentDescription="Imagen del hotel"
                 android:scaleType="centerCrop"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:src="@drawable/placeholder_hotel" />
+                tools:src="@drawable/ic_hotel" />
 
             <!-- Información básica del hotel -->
             <TextView
@@ -187,7 +188,8 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_restaurant" />
+                        android:src="@drawable/ic_restaurant"
+                        app:tint="@color/md_theme_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -210,7 +212,8 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_pool" />
+                        android:src="@drawable/ic_pool"
+                        app:tint="@color/md_theme_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -233,7 +236,8 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_wifi" />
+                        android:src="@drawable/ic_wifi"
+                        app:tint="@color/md_theme_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -256,7 +260,8 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_garage" />
+                        android:src="@drawable/ic_garage"
+                        app:tint="@color/md_theme_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -279,7 +284,8 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_pets" />
+                        android:src="@drawable/ic_pets"
+                        app:tint="@color/md_theme_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -422,464 +428,156 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvHabitacionesLabel" />
 
-            <!-- Habitación Individual -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardHabitacionIndividual"
+            <!-- RecyclerView para habitaciones dinámicas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHabitacionesDinamicas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dividerHabitaciones"
+                tools:listitem="@layout/item_cliente_habitacion"
+                tools:itemCount="3" />
+
+            <!-- Mensaje cuando no hay habitaciones -->
+            <TextView
+                android:id="@+id/tvNoHabitaciones"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="No hay habitaciones disponibles para este hotel"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="@color/md_theme_primary"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dividerHabitaciones"
+                tools:visibility="visible" />
+
+            <!-- Indicador de carga -->
+            <ProgressBar
+                android:id="@+id/progressBarHabitaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dividerHabitaciones"
+                tools:visibility="visible" />
+
+            <!-- Resumen de selección - ELIMINADO constraintBottom_toBottomOf="parent" -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardResumenHabitaciones"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/md_theme_primary"
+                app:strokeWidth="1dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/dividerHabitaciones">
+                app:layout_constraintTop_toBottomOf="@id/rvHabitacionesDinamicas"
+                tools:visibility="visible">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/ivHabitacionIndividual"
-                        android:layout_width="100dp"
-                        android:layout_height="80dp"
-                        android:contentDescription="Habitación Individual"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:src="@drawable/placeholder_hotel" />
-
                     <TextView
-                        android:id="@+id/tvTipoIndividual"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="Habitación Individual"
+                        android:text="Resumen de habitaciones"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/black"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionIndividual"
-                        app:layout_constraintTop_toTopOf="@id/ivHabitacionIndividual" />
+                        android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvTamanoIndividual"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Tamaño: 20 m²"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionIndividual"
-                        app:layout_constraintTop_toBottomOf="@id/tvTipoIndividual" />
-
-                    <TextView
-                        android:id="@+id/tvCapacidadIndividual"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Capacidad: 1 adulto, 0 niños"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionIndividual"
-                        app:layout_constraintTop_toBottomOf="@id/tvTamanoIndividual" />
-
-                    <TextView
-                        android:id="@+id/tvPrecioIndividual"
+                        android:id="@+id/tvResumenHabitaciones"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="$80 / noche"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="?attr/colorPrimary"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivHabitacionIndividual" />
-
-                    <TextView
-                        android:id="@+id/tvDisponiblesIndividual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="5 disponibles"
+                        android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioIndividual"
-                        app:layout_constraintStart_toEndOf="@id/tvPrecioIndividual"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioIndividual" />
+                        tools:text="2 Individual, 1 Suite" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilCantidadIndividual"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="120dp"
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="@color/md_theme_primary" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Cantidad"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioIndividual"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioIndividual">
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCantidadIndividual"
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:maxLength="2"
-                            android:text="0" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
+                            android:layout_weight="1"
+                            android:text="Total por noche:"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textStyle="bold" />
 
-            <!-- Habitación Doble -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardHabitacionDoble"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardHabitacionIndividual">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/ivHabitacionDoble"
-                        android:layout_width="100dp"
-                        android:layout_height="80dp"
-                        android:contentDescription="Habitación Doble"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:src="@drawable/placeholder_hotel" />
-
-                    <TextView
-                        android:id="@+id/tvTipoDoble"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="Habitación Doble"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="@color/black"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionDoble"
-                        app:layout_constraintTop_toTopOf="@id/ivHabitacionDoble" />
-
-                    <TextView
-                        android:id="@+id/tvTamanoDoble"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Tamaño: 30 m²"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionDoble"
-                        app:layout_constraintTop_toBottomOf="@id/tvTipoDoble" />
-
-                    <TextView
-                        android:id="@+id/tvCapacidadDoble"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Capacidad: 2 adultos, 1 niño"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionDoble"
-                        app:layout_constraintTop_toBottomOf="@id/tvTamanoDoble" />
-
-                    <TextView
-                        android:id="@+id/tvPrecioDoble"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="$120 / noche"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="?attr/colorPrimary"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivHabitacionDoble" />
-
-                    <TextView
-                        android:id="@+id/tvDisponiblesDoble"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="3 disponibles"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioDoble"
-                        app:layout_constraintStart_toEndOf="@id/tvPrecioDoble"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioDoble" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilCantidadDoble"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:hint="Cantidad"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioDoble"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioDoble">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCantidadDoble"
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/tvTotalHabitaciones"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:maxLength="2"
-                            android:text="0" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/md_theme_primary"
+                            android:textStyle="bold"
+                            tools:text="S/. 540" />
 
-            <!-- Habitación Triple -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardHabitacionTriple"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardHabitacionDoble">
+                    </LinearLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
+                </LinearLayout>
 
-                    <ImageView
-                        android:id="@+id/ivHabitacionTriple"
-                        android:layout_width="100dp"
-                        android:layout_height="80dp"
-                        android:contentDescription="Habitación Triple"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:src="@drawable/placeholder_hotel" />
-
-                    <TextView
-                        android:id="@+id/tvTipoTriple"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="Habitación Triple"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="@color/black"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionTriple"
-                        app:layout_constraintTop_toTopOf="@id/ivHabitacionTriple" />
-
-                    <TextView
-                        android:id="@+id/tvTamanoTriple"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Tamaño: 35 m²"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionTriple"
-                        app:layout_constraintTop_toBottomOf="@id/tvTipoTriple" />
-
-                    <TextView
-                        android:id="@+id/tvCapacidadTriple"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Capacidad: 3 adultos, 1 niño"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionTriple"
-                        app:layout_constraintTop_toBottomOf="@id/tvTamanoTriple" />
-
-                    <TextView
-                        android:id="@+id/tvPrecioTriple"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="$150 / noche"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="?attr/colorPrimary"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivHabitacionTriple" />
-
-                    <TextView
-                        android:id="@+id/tvDisponiblesTriple"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="2 disponibles"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioTriple"
-                        app:layout_constraintStart_toEndOf="@id/tvPrecioTriple"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioTriple" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilCantidadTriple"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:hint="Cantidad"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioTriple"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioTriple">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCantidadTriple"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:maxLength="2"
-                            android:text="0" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Habitación Suite Familiar -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardHabitacionSuiteFamiliar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardHabitacionTriple">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/ivHabitacionSuiteFamiliar"
-                        android:layout_width="100dp"
-                        android:layout_height="80dp"
-                        android:contentDescription="Suite Familiar"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:src="@drawable/placeholder_hotel" />
-
-                    <TextView
-                        android:id="@+id/tvTipoSuiteFamiliar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="Suite Familiar"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="@color/black"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionSuiteFamiliar"
-                        app:layout_constraintTop_toTopOf="@id/ivHabitacionSuiteFamiliar" />
-
-                    <TextView
-                        android:id="@+id/tvTamanoSuiteFamiliar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Tamaño: 50 m²"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionSuiteFamiliar"
-                        app:layout_constraintTop_toBottomOf="@id/tvTipoSuiteFamiliar" />
-
-                    <TextView
-                        android:id="@+id/tvCapacidadSuiteFamiliar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="Capacidad: 4 adultos, 2 niños"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivHabitacionSuiteFamiliar"
-                        app:layout_constraintTop_toBottomOf="@id/tvTamanoSuiteFamiliar" />
-
-                    <TextView
-                        android:id="@+id/tvPrecioSuiteFamiliar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="$220 / noche"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="?attr/colorPrimary"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivHabitacionSuiteFamiliar" />
-
-                    <TextView
-                        android:id="@+id/tvDisponiblesSuiteFamiliar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="1 disponible"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioSuiteFamiliar"
-                        app:layout_constraintStart_toEndOf="@id/tvPrecioSuiteFamiliar"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioSuiteFamiliar" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilCantidadSuiteFamiliar"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:hint="Cantidad"
-                        app:layout_constraintBottom_toBottomOf="@id/tvPrecioSuiteFamiliar"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvPrecioSuiteFamiliar">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCantidadSuiteFamiliar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:maxLength="2"
-                            android:text="0" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Botón para confirmar selección de habitaciones -->
-            <Button
-                android:id="@+id/btnConfirmarSeleccion"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="24dp"
-                android:backgroundTint="@color/md_theme_primary"
-                android:padding="12dp"
-                android:text="Confirmar selección"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:cornerRadius="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardHabitacionSuiteFamiliar"
-                app:layout_constraintVertical_bias="0.0" />
+            </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- NUEVO: Contenedor fijo para el botón en la parte inferior -->
+    <LinearLayout
+        android:id="@+id/containerBotonFijo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Botón movido aquí desde dentro del scroll -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContinuarReserva"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="12dp"
+            android:text="Continuar con la reserva"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

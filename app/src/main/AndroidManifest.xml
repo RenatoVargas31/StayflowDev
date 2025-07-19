@@ -34,6 +34,7 @@
             android:exported="false" />
         <activity
             android:name=".cliente.ClienteDetalleHotelActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".cliente.ClienteBusquedaHotelActivity"
@@ -46,6 +47,7 @@
             android:exported="false" />
         <activity
             android:name=".cliente.ClienteBuscarActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".cliente.ClientePerfilActivity"
