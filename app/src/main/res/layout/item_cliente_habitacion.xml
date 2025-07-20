@@ -163,7 +163,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvLabelCantidad"
             app:helperText="Solo números"
-            app:helperTextTextColor="@color/md_theme_primary">
+            app:helperTextTextColor="@color/black">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etCantidad"
