@@ -22,6 +22,11 @@ public class User {
     private String domicilio;
     private Map<String, Object> datosEspecificos;
 
+    // Nuevos campos para manejo de sesiones
+    private boolean conectado; // Usuario actualmente conectado
+    private long ultimaConexion; // Timestamp de última conexión
+    private String tokenSesion; // Token de sesión actual
+
     // Constructor vacío requerido por Firestore
     public User() {
         // Constructor vacío necesario para Firestore
@@ -30,7 +35,8 @@ public class User {
     public User(String uid, String nombres, String apellidos, String email, String telefono,
                 String rol, String fotoPerfilUrl, boolean estado, String fechaNacimiento,
                 String tipoDocumento, String numeroDocumento, String domicilio,
-                Map<String, Object> datosEspecificos) {
+                Map<String, Object> datosEspecificos, boolean conectado, long ultimaConexion,
+                String tokenSesion) {
         this.uid = uid;
         this.nombres = nombres;
         this.apellidos = apellidos;
@@ -44,6 +50,9 @@ public class User {
         this.numeroDocumento = numeroDocumento;
         this.domicilio = domicilio;
         this.datosEspecificos = datosEspecificos;
+        this.conectado = conectado;
+        this.ultimaConexion = ultimaConexion;
+        this.tokenSesion = tokenSesion;
     }
 
     // Constructor simplificado para compatibilidad con código existente
@@ -212,5 +221,29 @@ public class User {
     @Exclude
     public void setEnabled(boolean enabled) {
         this.estado = enabled;
+    }
+
+    public boolean isConectado() {
+        return conectado;
+    }
+
+    public void setConectado(boolean conectado) {
+        this.conectado = conectado;
+    }
+
+    public long getUltimaConexion() {
+        return ultimaConexion;
+    }
+
+    public void setUltimaConexion(long ultimaConexion) {
+        this.ultimaConexion = ultimaConexion;
+    }
+
+    public String getTokenSesion() {
+        return tokenSesion;
+    }
+
+    public void setTokenSesion(String tokenSesion) {
+        this.tokenSesion = tokenSesion;
     }
 }

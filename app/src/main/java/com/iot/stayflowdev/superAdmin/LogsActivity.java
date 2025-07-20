@@ -140,6 +140,9 @@ public class LogsActivity extends BaseSuperAdminActivity {
 
         // Cargar logs desde Firestore
         loadLogsFromFirestore();
+
+        // NO marcar automáticamente todos los logs como leídos al abrir la vista
+        // Los logs se marcarán como leídos individualmente cuando se abran sus detalles
     }
 
     private void loadLogsFromFirestore() {
@@ -161,6 +164,8 @@ public class LogsActivity extends BaseSuperAdminActivity {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         // Convertir documento de Firestore a SystemLog
                         SystemLog systemLog = document.toObject(SystemLog.class);
+                        // Establecer el ID del documento
+                        systemLog.setId(document.getId());
 
                         // Convertir SystemLog a LogItem (para compatibilidad con el adapter actual)
                         LogItem logItem = convertSystemLogToLogItem(systemLog);
@@ -219,11 +224,13 @@ public class LogsActivity extends BaseSuperAdminActivity {
         }
 
         return new LogItem(
+            systemLog.getId(),
             systemLog.getTitle(),
             formattedTime,
             systemLog.getDescription(),
             category,
-            iconResId
+            iconResId,
+            systemLog.isLeido()
         );
     }
 
@@ -422,6 +429,12 @@ public class LogsActivity extends BaseSuperAdminActivity {
      * Muestra un diálogo con los detalles del log seleccionado
      */
     private void showLogDetailsDialog(LogItem logItem) {
+        // Marcar este log específico como leído si no lo está ya
+        if (!logItem.isRead && logItem.id != null) {
+            markLogAsRead(logItem.id);
+            logItem.isRead = true; // Actualizar el estado local
+        }
+
         // Crear un diálogo personalizado
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_log_details, null);
@@ -469,5 +482,51 @@ public class LogsActivity extends BaseSuperAdminActivity {
 
         // Mostrar el diálogo
         dialog.show();
+    }
+
+    /**
+     * Marca un log específico como leído en Firestore
+     */
+    private void markLogAsRead(String logId) {
+        db.collection(COLLECTION_LOGS)
+            .document(logId)
+            .update("leido", true)
+            .addOnSuccessListener(aVoid -> {
+                Log.d(TAG, "Log marcado como leído: " + logId);
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error al marcar log como leído: " + logId, e);
+            });
+    }
+
+    /**
+     * Marca todos los logs sin leer como leídos cuando se abre la vista de logs
+     */
+    private void markAllLogsAsRead() {
+        db.collection(COLLECTION_LOGS)
+            .whereEqualTo("leido", false)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    // Usar WriteBatch para actualizar múltiples documentos eficientemente
+                    var batch = db.batch();
+
+                    for (var document : queryDocumentSnapshots) {
+                        batch.update(document.getReference(), "leido", true);
+                    }
+
+                    // Ejecutar el batch
+                    batch.commit()
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Todos los logs marcados como leídos: " + queryDocumentSnapshots.size());
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error al marcar logs como leídos", e);
+                        });
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error al buscar logs sin leer", e);
+            });
     }
 }

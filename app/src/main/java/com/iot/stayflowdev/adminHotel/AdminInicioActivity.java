@@ -127,6 +127,9 @@ public class AdminInicioActivity extends AppCompatActivity {
         // Cargar notificaciones al iniciar
         viewModel.cargarNotificacionesCheckout();
 
+        // Configurar card de mensajería de pruebas
+        configurarMensajeriaPruebas();
+
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
     }
@@ -225,6 +228,17 @@ public class AdminInicioActivity extends AppCompatActivity {
             }
             overridePendingTransition(0, 0);
             return true;
+        });
+    }
+
+    private void configurarMensajeriaPruebas() {
+        View cardMensajeriaPruebas = findViewById(R.id.cardMensajeriaPruebas);
+
+        cardMensajeriaPruebas.setOnClickListener(v -> {
+            // Abrir el chat con el Super Admin
+            Intent intent = new Intent(this, ChatSuperAdminActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
         });
     }
 

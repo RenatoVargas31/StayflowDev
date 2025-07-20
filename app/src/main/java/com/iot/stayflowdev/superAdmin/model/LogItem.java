@@ -10,11 +10,13 @@ public class LogItem {
     public static final String CATEGORY_ACCOUNT = "account";
     public static final String CATEGORY_RESERVATION = "reservation";
 
+    public String id; // Agregar ID del log para poder marcarlo como leído
     public String title;
     public String timestamp;
     public String description;
     public String category;
     public int iconResId;
+    public boolean isRead; // Agregar campo para indicar si está leído
 
     public LogItem(String title, String timestamp, String description, String category) {
         this.title = title;
@@ -22,6 +24,7 @@ public class LogItem {
         this.description = description;
         this.category = category;
         this.iconResId = getIconResourceForCategory(category);
+        this.isRead = false;
     }
 
     public LogItem(String title, String timestamp, String description, String category, @DrawableRes int iconResId) {
@@ -30,6 +33,18 @@ public class LogItem {
         this.description = description;
         this.category = category;
         this.iconResId = iconResId;
+        this.isRead = false;
+    }
+
+    // Constructor completo con ID y estado de lectura
+    public LogItem(String id, String title, String timestamp, String description, String category, @DrawableRes int iconResId, boolean isRead) {
+        this.id = id;
+        this.title = title;
+        this.timestamp = timestamp;
+        this.description = description;
+        this.category = category;
+        this.iconResId = iconResId;
+        this.isRead = isRead;
     }
 
     // For backward compatibility

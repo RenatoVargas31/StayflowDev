@@ -138,6 +138,20 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(0, 0);
             finish();
+        } else if (this instanceof MessagingTestActivity) {
+            // Si estamos en el chat, volver a la lista de usuarios
+            Intent intent = new Intent(this, SelectUserForChatActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        } else if (this instanceof SelectUserForChatActivity) {
+            // Si estamos en la lista de usuarios para chat, volver a inicio
+            Intent intent = new Intent(this, InicioActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
         } else {
             // Si no estamos en inicio ni en detalles, volver a la pantalla de inicio
             Intent intent = new Intent(this, InicioActivity.class);
@@ -146,6 +160,7 @@ public abstract class BaseSuperAdminActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
             finish();
         }
+        super.onBackPressed();
     }
 
     // Método para obtener el título de la toolbar (puede ser sobrescrito)

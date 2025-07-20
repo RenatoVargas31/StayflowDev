@@ -7,13 +7,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Permisos para vibración -->
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permiso de internet para Mapbox -->
     <uses-permission android:name="android.permission.INTERNET" /> <!-- Permiso para acceso al estado de la red -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -30,6 +32,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+
+        <!-- Meta-data for Google Maps API key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyArgXmLe6Bk6km2wSEN8RDpk2qbPd73ryc" />
+
         <activity
             android:name=".adminHotel.NotificacionesAdminActivity"
             android:exported="false" />
@@ -93,7 +101,19 @@
             android:name=".superAdmin.LogsActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.ActiveUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".superAdmin.UserDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.SystemMetricsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.MessagingTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.SelectUserForChatActivity"
             android:exported="false" />
         <activity
             android:name=".Driver.Activity.DriverPruebaMapa"
@@ -207,6 +227,9 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.MensajeriaAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adminHotel.ChatSuperAdminActivity"
             android:exported="false" />
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
