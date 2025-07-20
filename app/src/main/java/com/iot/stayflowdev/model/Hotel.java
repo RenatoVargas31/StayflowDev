@@ -1,6 +1,7 @@
 package com.iot.stayflowdev.model;
 
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
 import java.util.List;
@@ -31,6 +32,9 @@ public class Hotel {
 
     @PropertyName("fotos")
     private List<String> fotos; // Lista de URLs de fotos del hotel
+
+    @PropertyName("geoposicion")
+    private GeoPoint geoposicion;
 
     // Constructor para los campos obligatorios
     public Hotel(String nombre, String administradorAsignado) {

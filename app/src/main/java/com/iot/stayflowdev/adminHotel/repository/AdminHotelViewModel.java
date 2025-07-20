@@ -6,9 +6,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.model.Reserva;
 import com.iot.stayflowdev.adminHotel.model.NotificacionCheckout;
@@ -396,5 +398,17 @@ public class AdminHotelViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         detenerActualizacionAutomatica();
+    }
+
+    public void actualizarUbicacionConCoordenadas(String hotelId, String direccion, LatLng coordenadas,
+                                                  Runnable onSuccess, Runnable onFailure) {
+        FirebaseFirestore.getInstance().collection("hoteles")
+                .document(hotelId)
+                .update(
+                        "ubicacion", direccion,
+                        "geoposicion", new GeoPoint(coordenadas.latitude, coordenadas.longitude)
+                )
+                .addOnSuccessListener(aVoid -> onSuccess.run())
+                .addOnFailureListener(e -> onFailure.run());
     }
 }

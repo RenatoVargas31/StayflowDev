@@ -137,13 +137,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="300dp">
 
-                    <ImageView
-                        android:id="@+id/imagenMapa"
+                    <fragment
+                        android:id="@+id/mapFragment"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/maxresdefault"
-                        android:contentDescription="Mapa simulado" />
+                        android:layout_height="match_parent" />
+
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
