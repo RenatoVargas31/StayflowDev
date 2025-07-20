@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.iot.stayflowdev.Driver.Dtos.Vehiculo;
 import com.iot.stayflowdev.Driver.Repository.TarjetaCreditoRepository;
 import com.iot.stayflowdev.Driver.Repository.TaxistaRepository;
 import com.iot.stayflowdev.Driver.Repository.VehiculoRepository;
@@ -121,6 +122,8 @@ public class DriverPerfilActivity extends AppCompatActivity {
         }
     }
     // Cargar información del vehículo
+
+    /*
     private void configurarInformacionVehiculo(User usuario) {
         // Obtener datos básicos del usuario
         String modeloUsuario = usuario.getModelo();
@@ -143,7 +146,119 @@ public class DriverPerfilActivity extends AppCompatActivity {
             binding.tvPlacaTexto.setText("XXX-000");
             binding.tvMarcaAnio.setText("Configura tu vehículo");
         }
+    }   */
+    private void configurarInformacionVehiculo(User usuario) {
+        // Obtener la placa del usuario
+        String placaUsuario = usuario.getPlaca();
+
+        if (placaUsuario != null && !placaUsuario.isEmpty()) {
+            Log.d(TAG, "Buscando vehículo con placa del usuario: " + placaUsuario);
+
+            // Usar la placa del usuario para buscar en la colección vehiculo
+            vehiculoRepository.obtenerVehiculoTaxista(placaUsuario,
+                    vehiculo -> {
+                        runOnUiThread(() -> {
+                            Log.d(TAG, "Vehículo encontrado: " + vehiculo.toString());
+                            mostrarInformacionVehiculo(vehiculo, true);
+                        });
+                    },
+                    exception -> {
+                        runOnUiThread(() -> {
+                            Log.w(TAG, "No se encontró vehículo con placa: " + placaUsuario +
+                                    " - Error: " + exception.getMessage());
+                            mostrarVehiculoNoConfigurado();
+                        });
+                    }
+            );
+        } else {
+            Log.w(TAG, "Usuario no tiene placa configurada");
+            mostrarVehiculoNoConfigurado();
+        }
     }
+
+    private void mostrarInformacionVehiculo(Vehiculo vehiculo, boolean tieneVehiculo) {
+        if (tieneVehiculo && vehiculo != null) {
+            // Mostrar información del vehículo encontrado
+            binding.tvModeloVehiculo.setText(vehiculo.getMarcaYModelo());
+            binding.tvPlacaTexto.setText(vehiculo.getPlacaFormateada());
+
+            // Información adicional basada en el estado
+            if (vehiculo.isActivo()) {
+                binding.tvCapacidadNumero.setText("4 personas");
+                binding.tvMarcaAnio.setText("Activo • Disponible");
+
+                // Cambiar color a verde para activo
+                binding.tvMarcaAnio.setTextColor(ContextCompat.getColor(this, R.color.green_500));
+            } else {
+                binding.tvCapacidadNumero.setText("No disponible");
+                binding.tvMarcaAnio.setText("Inactivo • No disponible");
+
+                // Cambiar color a rojo para inactivo
+                binding.tvMarcaAnio.setTextColor(ContextCompat.getColor(this, R.color.md_theme_error));
+            }
+
+            Log.d(TAG, "Vehículo mostrado: " + vehiculo.getPlacaFormateada() +
+                    " - Estado: " + (vehiculo.isActivo() ? "Activo" : "Inactivo"));
+        } else {
+            mostrarVehiculoNoConfigurado();
+        }
+    }
+
+    private void mostrarVehiculoNoConfigurado() {
+        binding.tvModeloVehiculo.setText("Sin vehículo");
+        binding.tvPlacaTexto.setText("XXX-000");
+        binding.tvMarcaAnio.setText("Configura tu vehículo");
+        binding.tvCapacidadNumero.setText("0 personas");
+
+        // Color gris para no configurado
+        binding.tvMarcaAnio.setTextColor(ContextCompat.getColor(this, R.color.md_theme_onSurfaceVariant));
+
+        Log.d(TAG, "Vehículo no configurado - mostrando valores por defecto");
+    }
+
+    // Método específico para recargar solo la información del vehículo
+    private void recargarInformacionVehiculo() {
+        Log.d(TAG, "Recargando información del vehículo...");
+
+        // Primero necesitamos obtener la información del usuario actualizada
+        taxistaRepository.obtenerTaxistaConImagen(
+                taxistaConImagen -> {
+                    User usuario = taxistaConImagen.getUsuario();
+                    String placaUsuario = usuario.getPlaca();
+
+                    if (placaUsuario != null && !placaUsuario.isEmpty()) {
+                        // Buscar vehículo por la placa del usuario
+                        vehiculoRepository.obtenerVehiculoTaxista(placaUsuario,
+                                vehiculo -> {
+                                    runOnUiThread(() -> {
+                                        mostrarInformacionVehiculo(vehiculo, true);
+                                        Log.d(TAG, "Información del vehículo actualizada exitosamente");
+                                    });
+                                },
+                                exception -> {
+                                    runOnUiThread(() -> {
+                                        Log.e(TAG, "Error al recargar vehículo: " + exception.getMessage());
+                                        mostrarVehiculoNoConfigurado();
+                                    });
+                                }
+                        );
+                    } else {
+                        runOnUiThread(() -> {
+                            Log.d(TAG, "Usuario no tiene placa - mostrando estado no configurado");
+                            mostrarVehiculoNoConfigurado();
+                        });
+                    }
+                },
+                exception -> {
+                    runOnUiThread(() -> {
+                        Log.e(TAG, "Error al obtener usuario para recargar vehículo: " + exception.getMessage());
+                        Toast.makeText(this, "Error al actualizar información del vehículo",
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+        );
+    }
+
     private void cargarDetallesVehiculo(String placa) {
         Log.d(TAG, "Iniciando carga de detalles para placa: " + placa);
 
@@ -271,7 +386,9 @@ public class DriverPerfilActivity extends AppCompatActivity {
     private void configurarOpcionesPerfil() {
         // Vehículo
         binding.layoutVehicleModel.setOnClickListener(v -> {
-            Toast.makeText(this, "Configuración de vehículo próximamente", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, DriverVehiculoActivity.class);
+            startActivity(intent);
+
         });
 
         // Correo

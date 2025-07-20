@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Driver.Activity.DriverVehicleEditActivity">
+
+  <!-- Barra superior -->
+  <com.google.android.material.appbar.AppBarLayout
+      android:id="@+id/appbar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@color/md_theme_primary"
+      android:elevation="4dp"
+      app:layout_constraintTop_toTopOf="parent">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:title="Editar Vehículo"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/white" />
+
+  </com.google.android.material.appbar.AppBarLayout>
+
+  <!-- ScrollView para contenido -->
+  <androidx.core.widget.NestedScrollView
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:clipToPadding="false"
+      android:paddingBottom="16dp"
+      app:layout_constraintTop_toBottomOf="@id/appbar"
+      app:layout_constraintBottom_toTopOf="@id/layout_buttons">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+      <!-- Sección: Foto del Vehículo -->
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Foto del Vehículo"
+          android:textSize="18sp"
+          android:textStyle="bold"
+          android:textColor="@color/black"
+          android:layout_marginBottom="12dp"/>
+
+      <!-- Tarjeta de la foto -->
+      <com.google.android.material.card.MaterialCardView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          app:cardCornerRadius="16dp"
+          app:cardElevation="6dp"
+          app:cardBackgroundColor="@color/white"
+          android:layout_marginBottom="24dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:id="@+id/photo_container"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+
+          <ImageView
+              android:id="@+id/iv_vehicle_photo"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:contentDescription="Foto del vehículo"
+              android:scaleType="centerCrop"
+              android:src="@drawable/pexels_alexgtacar_745150_1592384"
+              android:background="@color/md_theme_surfaceVariant" />
+
+          <!-- Overlay para cambiar foto -->
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:gravity="center"
+              android:background="#80000000"
+              android:alpha="0.8">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_camera"
+                app:tint="@color/white"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tocar para cambiar foto"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+          </LinearLayout>
+
+        </FrameLayout>
+
+      </com.google.android.material.card.MaterialCardView>
+
+      <!-- Sección: Datos del Vehículo -->
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Datos del Vehículo"
+          android:textSize="18sp"
+          android:textStyle="bold"
+          android:textColor="@color/black"
+          android:layout_marginBottom="16dp"/>
+
+      <!-- Campo: Placa (solo lectura) -->
+      <com.google.android.material.textfield.TextInputLayout
+          android:id="@+id/til_placa"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="16dp"
+          android:hint="Placa del vehículo"
+          app:helperText="La placa no se puede modificar"
+          style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_placa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"
+            android:enabled="false"
+            android:textColor="#757575" />
+
+      </com.google.android.material.textfield.TextInputLayout>
+
+      <!-- Campo: Modelo -->
+      <com.google.android.material.textfield.TextInputLayout
+          android:id="@+id/til_modelo"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="24dp"
+          android:hint="Modelo del vehículo"
+          app:startIconDrawable="@drawable/ic_carro"
+          app:helperText="Ejemplo: Toyota Yaris"
+          style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_modelo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:maxLength="50" />
+
+      </com.google.android.material.textfield.TextInputLayout>
+
+      <!-- Estado del vehículo -->
+      <com.google.android.material.card.MaterialCardView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          app:cardCornerRadius="8dp"
+          app:cardElevation="2dp"
+          app:cardBackgroundColor="@color/md_theme_surfaceVariant"
+          android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+          <ImageView
+              android:id="@+id/iv_status_icon"
+              android:layout_width="24dp"
+              android:layout_height="24dp"
+              android:src="@drawable/ic_check_circle"
+              app:tint="@color/green_500"
+              android:layout_marginEnd="12dp" />
+
+          <LinearLayout
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado del vehículo"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tv_status_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Activo - Disponible para viajes"
+                android:textSize="12sp"
+                android:textColor="@color/green_500" />
+
+          </LinearLayout>
+
+          <com.google.android.material.switchmaterial.SwitchMaterial
+              android:id="@+id/switch_active"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:checked="true" />
+
+        </LinearLayout>
+
+      </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+  </androidx.core.widget.NestedScrollView>
+
+  <!-- Botones de acción fijos en la parte inferior -->
+  <LinearLayout
+      android:id="@+id/layout_buttons"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:padding="16dp"
+      android:background="@color/white"
+      android:elevation="8dp"
+      app:layout_constraintBottom_toBottomOf="parent">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cancel"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_weight="1"
+        android:layout_marginEnd="8dp"
+        android:text="Cancelar"
+        android:textSize="16sp"
+        app:cornerRadius="8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_save"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:text="Guardar"
+        android:textSize="16sp"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_save"
+        app:iconGravity="textStart" />
+
+  </LinearLayout>
+
+  <!-- Progress Bar -->
+  <ProgressBar
+      android:id="@+id/progress_bar"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
