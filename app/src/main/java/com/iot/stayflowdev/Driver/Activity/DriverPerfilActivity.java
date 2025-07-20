@@ -2,111 +2,265 @@ package com.iot.stayflowdev.Driver.Activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.iot.stayflowdev.Driver.Repository.TarjetaCreditoRepository;
+import com.iot.stayflowdev.Driver.Repository.TaxistaRepository;
+import com.iot.stayflowdev.Driver.Repository.VehiculoRepository;
+import com.iot.stayflowdev.LoginActivity;
 import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.databinding.ActivityDriverPerfilBinding;
+import com.iot.stayflowdev.model.User;
 import com.iot.stayflowdev.utils.UserSessionManager;
 
-public class DriverPerfilActivity extends AppCompatActivity {
+import java.util.Map;
 
-    private BottomNavigationView bottomNavigation;
+public class DriverPerfilActivity extends AppCompatActivity {
+    private VehiculoRepository vehiculoRepository;
+    private static final String TAG = "DriverPerfilActivity";
+    private ActivityDriverPerfilBinding binding;
+    private TaxistaRepository taxistaRepository;
+    private TarjetaCreditoRepository tarjetaRepository; // ← AGREGAR ESTO
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_perfil);
-        setSupportActionBar(findViewById(R.id.toolbar)); // Si tienes un toolbar
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Inicializar View Binding
+        binding = ActivityDriverPerfilBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
+        // Inicializar Repository
+        taxistaRepository = new TaxistaRepository();
+        vehiculoRepository = new VehiculoRepository();
+        tarjetaRepository = new TarjetaCreditoRepository(); // ← AGREGAR ESTO
 
-        // ✅ PRIMERO: INICIALIZAR TODAS LAS VISTAS
-        inicializarVistas();
-
-        // ✅ SEGUNDO: CONFIGURAR NAVEGACIÓN
+        // Cargar información del perfil
+        cargarInformacionPerfil();
         configurarBottomNavigationFluido();
-
-        // ✅ TERCERO: CONFIGURAR OPCIONES DEL PERFIL
         configurarOpcionesPerfil();
     }
 
-    // ✅ MÉTODO CRÍTICO QUE FALTABA: INICIALIZAR VISTAS
-    private void inicializarVistas() {
-        bottomNavigation = findViewById(R.id.bottomNavigation); // ✅ ESTO FALTABA!
-
-        // ✅ VERIFICAR QUE SE ENCONTRÓ
-        if (bottomNavigation == null) {
-            Log.e("DriverPerfilActivity", "❌ ERROR: bottomNavigation es null!");
-        } else {
-            Log.d("DriverPerfilActivity", "✅ bottomNavigation encontrado correctamente");
+    private void cargarInformacionPerfil() {
+        if (!taxistaRepository.usuarioEstaAutenticado()) {
+            Log.e(TAG, "Usuario no autenticado");
+            redirigirALogin();
+            return;
         }
+
+        taxistaRepository.obtenerTaxistaConImagen(
+                taxistaConImagen -> {
+                    User usuario = taxistaConImagen.getUsuario();
+
+                    Log.d(TAG, "Información del usuario cargada exitosamente");
+
+                    // Configurar información básica
+                    configurarInformacionBasica(usuario);
+
+                    // Configurar imagen de perfil
+                    configurarImagenPerfil(taxistaConImagen);
+
+                    // Configurar información del vehículo (si está disponible)
+                    configurarInformacionVehiculo(usuario);
+
+                    // Configurar información de la cuenta
+                    configurarInformacionCuenta(usuario);
+                },
+                exception -> {
+                    Log.e(TAG, "Error al cargar información del perfil: " + exception.getMessage());
+                    manejarErrorCargaPerfil(exception);
+                }
+        );
     }
 
-    // ✅ CONFIGURACIÓN CON DEBUG
+    private void configurarInformacionBasica(User usuario) {
+        // Nombre del taxista
+        binding.tvNombreTaxista.setText(usuario.getName());
+
+        // Rol con descripción
+        binding.tvRol.setText(usuario.getRoleDescription());
+    }
+
+    private void configurarImagenPerfil(TaxistaRepository.TaxistaConImagen taxistaConImagen) {
+        if (taxistaConImagen.tieneImagen()) {
+            Log.d(TAG, "Cargando imagen de perfil desde: " + taxistaConImagen.getUrlImagen());
+
+            Glide.with(this)
+                    .load(taxistaConImagen.getUrlImagen())
+                    .placeholder(R.drawable.taxista)
+                    .error(R.drawable.taxista)
+                    .into(binding.ivProfilePicture);
+        } else {
+            Log.d(TAG, "Sin imagen de perfil, usando imagen por defecto");
+            binding.ivProfilePicture.setImageResource(R.drawable.taxista);
+        }
+    }
+    // Cargar información del vehículo
+    private void configurarInformacionVehiculo(User usuario) {
+        // Obtener datos básicos del usuario
+        String modeloUsuario = usuario.getModelo();
+        String placaUsuario = usuario.getPlaca();
+
+        // Configurar información básica del vehículo desde el usuario
+        if (modeloUsuario != null && !modeloUsuario.isEmpty()) {
+            binding.tvModeloVehiculo.setText(modeloUsuario);
+        } else {
+            binding.tvModeloVehiculo.setText("Vehículo");
+        }
+
+        // Configurar placa desde el usuario - MÉTODO CORREGIDO
+        if (placaUsuario != null && !placaUsuario.isEmpty()) {
+            binding.tvPlacaTexto.setText(placaUsuario);
+            Log.d(TAG, "Llamando cargarDetallesVehiculo con placa: " + placaUsuario);
+            cargarDetallesVehiculo(placaUsuario); // ← Verifica que esto se ejecute
+        } else {
+            Log.w(TAG, "No se puede cargar detalles - placa vacía o null");
+            binding.tvPlacaTexto.setText("XXX-000");
+            binding.tvMarcaAnio.setText("Configura tu vehículo");
+        }
+    }
+    private void cargarDetallesVehiculo(String placa) {
+        Log.d(TAG, "Iniciando carga de detalles para placa: " + placa);
+
+        vehiculoRepository.obtenerVehiculoTaxista(placa,
+                vehiculo -> {
+                    Log.d(TAG, "SUCCESS - Detalles del vehículo cargados: " + vehiculo.toString());
+                    Log.d(TAG, "Vehículo activo: " + vehiculo.isActivo());
+
+                    // Información adicional (estado, etc.)
+                    if (vehiculo.isActivo()) {
+                        Log.d(TAG, "Configurando capacidad: 4 personas");
+                        binding.tvCapacidadNumero.setText("4 personas");
+                    } else {
+                        Log.d(TAG, "Vehículo inactivo, configurando: No disponible");
+                        binding.tvCapacidadNumero.setText("No disponible");
+                    }
+
+                    Log.d(TAG, "Capacidad configurada en TextView");
+                },
+                error -> {
+                    Log.e(TAG, "ERROR - No se pudieron cargar detalles del vehículo: " + error.getMessage());
+                    Log.d(TAG, "Configurando capacidad por defecto: 4 personas");
+                    binding.tvCapacidadNumero.setText("4 personas");
+                }
+        );
+    }
+    private void configurarInformacionCuenta(User usuario) {
+        // Correo electrónico
+        String email = usuario.getEmail();
+        binding.tvCorreoUser.setText(email != null ? email : "No disponible");
+
+        // Tarjeta de crédito - verificar si tiene tarjeta vinculada
+        verificarTarjetaCredito(usuario.getUid());
+    }
+
+    private void verificarTarjetaCredito(String userId) {
+        if (tarjetaRepository == null) {
+            tarjetaRepository = new TarjetaCreditoRepository();
+        }
+
+        // Verificar si tiene tarjeta real en Firebase
+        tarjetaRepository.obtenerTarjetaUsuario(
+                tarjeta -> {
+                    // SUCCESS: Tiene tarjeta activa
+                    Log.d(TAG, "Tarjeta encontrada: " + tarjeta.getNumeroEnmascarado());
+                    runOnUiThread(() -> {
+                        binding.tvTarjetaUser.setText(tarjeta.getNumeroEnmascarado());
+                        binding.tvTarjetaUser.setTextColor(ContextCompat.getColor(this, R.color.md_theme_primary));
+                    });
+                },
+                error -> {
+                    // ERROR: No tiene tarjeta o está inactiva
+                    Log.d(TAG, "No hay tarjeta o está inactiva: " + error.getMessage());
+                    runOnUiThread(() -> {
+                        binding.tvTarjetaUser.setText("No activado");
+                        binding.tvTarjetaUser.setTextColor(ContextCompat.getColor(this, R.color.md_theme_error));
+                    });
+                }
+        );
+    }
+
+    private void manejarErrorCargaPerfil(Exception exception) {
+        String mensaje = exception.getMessage();
+
+        // Mostrar imagen por defecto
+        binding.ivProfilePicture.setImageResource(R.drawable.taxista);
+
+        // Configurar información básica con valores por defecto
+        binding.tvNombreTaxista.setText("Usuario");
+        binding.tvRol.setText("Taxista");
+        binding.tvCorreoUser.setText("No disponible");
+
+        // Valores por defecto para vehículo
+        binding.tvModeloVehiculo.setText("Toyota Corolla");
+        binding.tvMarcaAnio.setText("Modelo 2019 • Sedán");
+        binding.tvCapacidadNumero.setText("4 personas");
+
+        // Valor por defecto para tarjeta
+        binding.tvTarjetaUser.setText("Visa **** 4567");
+
+        if (mensaje != null && mensaje.contains("no autenticado")) {
+            redirigirALogin();
+        } else {
+            Toast.makeText(this, "Error al cargar perfil: " + mensaje, Toast.LENGTH_SHORT).show();
+        }
+    }
+    private void redirigirALogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     private void configurarBottomNavigationFluido() {
-        if (bottomNavigation == null) {
-            Log.e("DriverPerfilActivity", "❌ bottomNavigation es null, no se puede configurar");
+        // Verificar que el menú se cargó
+        if (binding.bottomNavigation.getMenu() == null || binding.bottomNavigation.getMenu().size() == 0) {
+            Log.e(TAG, "❌ ERROR: El menú no se cargó correctamente");
             return;
         }
 
-        // ✅ DEBUG: Verificar que el menú se cargó
-        if (bottomNavigation.getMenu() == null || bottomNavigation.getMenu().size() == 0) {
-            Log.e("DriverPerfilActivity", "❌ ERROR: El menú no se cargó correctamente");
-            return;
-        }
+        // Establecer perfil como seleccionado
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_perfil);
 
-        // ✅ ESTABLECER PERFIL COMO SELECCIONADO
-        bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-        Log.d("DriverPerfilActivity", "✅ Intentando seleccionar nav_perfil");
-
-        // ✅ FORZAR SELECCIÓN CON POST PARA ASEGURAR QUE SE APLIQUE
-        bottomNavigation.post(() -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-            Log.d("DriverPerfilActivity", "✅ Selección aplicada con post()");
-        });
-
-        // Configurar listener con navegación sin animación
-        bottomNavigation.setOnItemSelectedListener(item -> {
+        // Configurar listener
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            Log.d("DriverPerfilActivity", "🔄 Ítem seleccionado: " + itemId);
+            Log.d(TAG, "🔄 Ítem seleccionado: " + itemId);
 
-            // Evitar acción si ya estamos en la actividad actual
             if (itemId == R.id.nav_perfil) {
-                Log.d("DriverPerfilActivity", "✅ Ya en Perfil");
-                return true;
-            }
-
-            // Navegación según el ítem seleccionado
-            if (itemId == R.id.nav_inicio) {
-                Log.d("DriverPerfilActivity", "🏠 Navegando a Inicio");
+                return true; // Ya estamos aquí
+            } else if (itemId == R.id.nav_inicio) {
                 navegarSinAnimacion(DriverInicioActivity.class);
                 return true;
             } else if (itemId == R.id.nav_reservas) {
-                Log.d("DriverPerfilActivity", "📋 Navegando a Reservas");
                 navegarSinAnimacion(DriverReservaActivity.class);
                 return true;
             } else if (itemId == R.id.nav_mapa) {
-                Log.d("DriverPerfilActivity", "🗺️ Navegando a Mapa");
                 navegarSinAnimacion(DriverMapaActivity.class);
                 return true;
             }
@@ -114,50 +268,51 @@ public class DriverPerfilActivity extends AppCompatActivity {
             return false;
         });
     }
-
-    // ✅ CONFIGURAR OPCIONES DEL PERFIL
     private void configurarOpcionesPerfil() {
-        // Tarjeta de crédito
-        ConstraintLayout layoutTarjetaCredit = findViewById(R.id.layout_tarjetaCredit);
-        if (layoutTarjetaCredit != null) {
-            layoutTarjetaCredit.setOnClickListener(v -> {
-                Intent intent = new Intent(DriverPerfilActivity.this, DriverTarjetaCreditoActivity.class);
-                startActivity(intent);
-                // ✅ APLICAR NAVEGACIÓN SIN ANIMACIÓN
-                overridePendingTransition(0, 0);
-            });
-        } else {
-            Log.e("DriverPerfilActivity", "layout_tarjetaCredit no encontrado");
-        }
-
         // Vehículo
-        ConstraintLayout layoutVehiculo = findViewById(R.id.layout_vehicle_model);
-        if (layoutVehiculo != null) {
-            layoutVehiculo.setOnClickListener(v -> {
-                Intent intent = new Intent(DriverPerfilActivity.this, DriverVehiculoActivity.class);
-                startActivity(intent);
-                // ✅ APLICAR NAVEGACIÓN SIN ANIMACIÓN
-                overridePendingTransition(0, 0);
-            });
-        } else {
-            Log.e("DriverPerfilActivity", "layout_vehicle_model no encontrado");
-        }
+        binding.layoutVehicleModel.setOnClickListener(v -> {
+            Toast.makeText(this, "Configuración de vehículo próximamente", Toast.LENGTH_SHORT).show();
+        });
 
         // Correo
-        ConstraintLayout layoutCorreo = findViewById(R.id.layout_correo);
-        if (layoutCorreo != null) {
-            layoutCorreo.setOnClickListener(v -> {
-                Intent intent = new Intent(DriverPerfilActivity.this, DriverCorreoActivity.class);
-                startActivity(intent);
-                // ✅ APLICAR NAVEGACIÓN SIN ANIMACIÓN
-                overridePendingTransition(0, 0);
-            });
-        } else {
-            Log.e("DriverPerfilActivity", "layout_correo no encontrado");
-        }
+        binding.layoutCorreo.setOnClickListener(v -> {
+            String email = binding.tvCorreoUser.getText().toString();
+            if (!email.equals("No disponible")) {
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto:" + email));
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            } else {
+                Toast.makeText(this, "Email no disponible", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Tarjeta de crédito - NAVEGACIÓN A NUEVA ACTIVIDAD
+        binding.layoutTelefono.setOnClickListener(v -> {
+            Log.d(TAG, "Click en tarjeta de crédito - navegando a DriverTarjetaCreditoActivity");
+            Intent intent = new Intent(this, DriverTarjetaCreditoActivity.class);
+
+            // Opcional: Pasar datos del usuario
+            intent.putExtra("user_id", taxistaRepository.obtenerUidActual());
+            intent.putExtra("user_name", binding.tvNombreTaxista.getText().toString());
+
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        // Capacidad del vehículo
+        binding.layoutCapacidad.setOnClickListener(v -> {
+            Toast.makeText(this, "Configuración de capacidad próximamente", Toast.LENGTH_SHORT).show();
+        });
     }
 
-    // ✅ MÉTODO PARA NAVEGAR SIN ANIMACIÓN
+    // Método para refrescar información del perfil
+    public void refrescarPerfil() {
+        Log.d(TAG, "Refrescando información del perfil...");
+        cargarInformacionPerfil();
+    }
+
     private void navegarSinAnimacion(Class<?> activityClass) {
         Intent intent = new Intent(this, activityClass);
         startActivity(intent);
@@ -165,25 +320,23 @@ public class DriverPerfilActivity extends AppCompatActivity {
         finish();
     }
 
-    // ✅ MANEJAR BOTÓN DE RETROCESO CORRECTAMENTE
     @Override
     public void onBackPressed() {
-        // Redirigir a MainActivity cuando se presiona el botón atrás
         super.onBackPressed();
         navegarSinAnimacion(DriverInicioActivity.class);
-        // ✅ NO LLAMAR super.onBackPressed() después de navegar
     }
 
-    // ✅ VERIFICAR SELECCIÓN EN onResume
     @Override
     protected void onResume() {
         super.onResume();
-        // Asegurar que el ítem correcto esté seleccionado cuando se regresa a la actividad
-        if (bottomNavigation != null) {
-            bottomNavigation.post(() -> {
-                bottomNavigation.setSelectedItemId(R.id.nav_perfil);
-                Log.d("DriverPerfilActivity", "✅ Selección verificada en onResume()");
-            });
+        // Asegurar selección correcta y refrescar datos
+        binding.bottomNavigation.post(() -> {
+            binding.bottomNavigation.setSelectedItemId(R.id.nav_perfil);
+        });
+
+        // Opcional: Refrescar información si el usuario pudo haber actualizado datos
+        if (taxistaRepository.usuarioEstaAutenticado()) {
+            refrescarPerfil();
         }
     }
 
@@ -193,25 +346,22 @@ public class DriverPerfilActivity extends AppCompatActivity {
         return true;
     }
 
-    // Inflar el menú
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.profile_menu, menu);
         return true;
     }
 
-    // Manejar eventos del menú
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            Log.d("DriverPerfilActivity", "Botón de logout presionado");
+            Log.d(TAG, "Botón de logout presionado");
             cerrarSesion();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    // Método para cerrar sesión
     private void cerrarSesion() {
         // 1. Obtener el ID del usuario actual antes de cerrar sesión
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -231,11 +381,11 @@ public class DriverPerfilActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
                             UserSessionManager.getInstance().setUserDisconnected(userId);
-                            Log.d("DriverPerfilActivity", "Usuario " + userId + " marcado como desconectado");
+                            Log.d(TAG, "Usuario " + userId + " marcado como desconectado");
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Log.w("DriverPerfilActivity", "Error al marcar usuario como desconectado: " + e.getMessage());
+                        Log.w(TAG, "Error al marcar usuario como desconectado: " + e.getMessage());
                     });
         }
 
@@ -251,10 +401,15 @@ public class DriverPerfilActivity extends AppCompatActivity {
 
         // 6. Redirigir al login
         Intent intent = new Intent(this, com.iot.stayflowdev.LoginFireBaseActivity.class);
-        // Flags para limpiar la pila de actividades
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
 }

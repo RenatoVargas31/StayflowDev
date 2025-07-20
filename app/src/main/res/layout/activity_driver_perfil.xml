@@ -14,7 +14,8 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/md_theme_primary"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,8 +25,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            app:title="Perfil"
             app:titleCentered="true"
-            app:titleTextColor="@color/md_theme_primary"
+            app:titleTextColor="@color/white"
             app:menu="@menu/profile_menu"
             app:layout_scrollFlags="scroll|enterAlways|snap" />
 
@@ -51,196 +53,92 @@
             android:padding="16dp">
 
             <!-- ==================== HEADER DEL PERFIL ==================== -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_profile_header"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/md_theme_outlineVariant"
-                android:layout_marginHorizontal="1dp"
-                android:layout_marginBottom="20dp">
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <!-- Foto de perfil con forma circular -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_profile_picture"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/taxista"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="@color/green_500" />
+
+                <!-- Información de perfil -->
+                <TextView
+                    android:id="@+id/tv_nombre_taxista"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="24dp">
+                    android:text="Juan Perez"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="16dp" />
 
-                    <!-- Foto de perfil con forma circular -->
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/iv_profile_picture"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/user_icon"
-                        app:shapeAppearanceOverlay="@style/CircleImageView"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="#EEEEEE" />
+                <TextView
+                    android:id="@+id/tv_rol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Taxista"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="#757575"
+                    android:layout_marginTop="2dp" />
 
-                    <!-- Información de perfil -->
-                    <TextView
-                        android:id="@+id/tv_nombre_taxista"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Juan Perez"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textColor="@android:color/black"
-                        android:layout_marginTop="16dp" />
-
-                    <TextView
-                        android:id="@+id/tv_label_taxista"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Taxista"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="#757575"
-                        android:layout_marginTop="2dp" />
-
-                    <!-- Performance Metrics -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="24dp">
-
-                        <!-- Métrica de distancia -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-
-                                <ImageView
-                                    android:id="@+id/iv_distancia"
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:src="@drawable/ic_distancia" />
-
-                                <TextView
-                                    android:id="@+id/tv_distancia_total"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="23.5 Km"
-                                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                                    android:textStyle="bold"
-                                    android:textColor="@android:color/black"
-                                    android:layout_marginStart="8dp" />
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Distancia total"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:textColor="#757575"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
-
-                        <!-- Separador vertical -->
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="40dp"
-                            android:background="#E0E0E0"
-                            android:layout_gravity="center_vertical" />
-
-                        <!-- Métrica de calificación -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-
-                                <ImageView
-                                    android:id="@+id/iv_calificacion"
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:src="@drawable/ic_star"/>
-
-                                <TextView
-                                    android:id="@+id/tv_calificacion"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="4.8/5.0"
-                                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                                    android:textStyle="bold"
-                                    android:textColor="@android:color/black"
-                                    android:layout_marginStart="8dp" />
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Calificación"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:textColor="#757575"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <!-- ==================== INFORMACIÓN DEL VEHÍCULO ==================== -->
             <TextView
                 android:id="@+id/tv_label_vehiculo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Detalles del vehículo"
-                android:textSize="16sp"
+                android:text="Mi Vehículo"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_vehicle_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
                 app:cardBackgroundColor="@color/white"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Vehicle Model -->
+                    <!-- Modelo y Marca del Vehículo -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_vehicle_model"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:padding="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
                             android:id="@+id/iv_coche_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:src="@drawable/ic_carro"
-                            android:padding="8dp"
+                            android:padding="12dp"
                             android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
+                            android:backgroundTint="@color/md_theme_primaryContainer"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:tint="@color/md_theme_primary" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -250,14 +148,14 @@
                             app:layout_constraintStart_toEndOf="@id/iv_coche_icon"
                             app:layout_constraintTop_toTopOf="@id/iv_coche_icon"
                             app:layout_constraintBottom_toBottomOf="@id/iv_coche_icon"
-                            app:layout_constraintEnd_toStartOf="@id/tv_placa">
+                            app:layout_constraintEnd_toStartOf="@id/layout_placa">
 
                             <TextView
                                 android:id="@+id/tv_modelo_vehiculo"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Vehículo"
-                                android:textSize="16sp"
+                                android:text="Toyota Corolla"
+                                android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@android:color/black" />
 
@@ -265,91 +163,113 @@
                                 android:id="@+id/tv_marca_anio"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Toyota 2019"
+                                android:text="Modelo 2019 • Sedán"
                                 android:textSize="14sp"
-                                android:textColor="#757575" />
+                                android:textColor="#757575"
+                                android:layout_marginTop="2dp" />
                         </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/tv_placa"
+                        <LinearLayout
+                            android:id="@+id/layout_placa"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="ABC-123"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:textColor="@android:color/black"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:gravity="center"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                            app:layout_constraintBottom_toBottomOf="parent">
+
+                            <TextView
+                                android:id="@+id/tv_placa_texto"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ABC-123"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@android:color/black"
+                                android:fontFamily="monospace" />
+                        </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#F0F0F0" />
+                        android:background="#F0F0F0"
+                        android:layout_marginHorizontal="20dp" />
 
-                    <!-- SOAT Information -->
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F0F0F0"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <!-- Capacidad de Pasajeros -->
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_soat"
+                        android:id="@+id/layout_capacidad"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:padding="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:id="@+id/iv_soat_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_estado"
-                            android:padding="8dp"
+                            android:id="@+id/iv_capacidad_icon"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_pasajero"
+                            android:padding="12dp"
                             android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
+                            android:backgroundTint="@color/md_theme_primaryContainer"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:tint="@color/md_theme_primary"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginStart="16dp"
-                            app:layout_constraintStart_toEndOf="@id/iv_soat_icon"
-                            app:layout_constraintTop_toTopOf="@id/iv_soat_icon"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_soat_icon"
-                            app:layout_constraintEnd_toStartOf="@id/tv_soat_exp">
+                            app:layout_constraintStart_toEndOf="@id/iv_capacidad_icon"
+                            app:layout_constraintTop_toTopOf="@id/iv_capacidad_icon"
+                            app:layout_constraintBottom_toBottomOf="@id/iv_capacidad_icon"
+                            app:layout_constraintEnd_toStartOf="@id/tv_capacidad_numero">
 
                             <TextView
-                                android:id="@+id/tv_soat_label"
+                                android:id="@+id/tv_capacidad_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="SOAT"
+                                android:text="Capacidad"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@android:color/black" />
 
                             <TextView
-                                android:id="@+id/tv_soat_numero"
+                                android:id="@+id/tv_capacidad_detalle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="SOAT-8457321"
+                                android:text="Incluye conductor"
                                 android:textSize="14sp"
-                                android:textColor="#757575" />
+                                android:textColor="#757575"
+                                android:layout_marginTop="2dp" />
                         </LinearLayout>
 
                         <TextView
-                            android:id="@+id/tv_soat_exp"
+                            android:id="@+id/tv_capacidad_numero"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Exp. 12/11/2025"
-                            android:textSize="14sp"
+                            android:text="4 personas"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_tertiaryFixed_mediumContrast"
+                            android:textColor="@color/md_theme_primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -359,17 +279,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Detalles de la cuenta"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_account_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
                 app:cardBackgroundColor="@color/white"
                 android:layout_marginBottom="20dp">
 
@@ -383,22 +303,23 @@
                         android:id="@+id/layout_correo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:padding="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
                             android:id="@+id/iv_correo_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:src="@drawable/ic_correo"
-                            android:padding="8dp"
+                            android:padding="12dp"
                             android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
+                            android:backgroundTint="@color/md_theme_primaryContainer"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:tint="@color/md_theme_primary"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -425,65 +346,70 @@
                                 android:layout_height="wrap_content"
                                 android:text="jperez@gmail.com"
                                 android:textSize="14sp"
-                                android:textColor="#757575" />
+                                android:textColor="#757575"
+                                android:layout_marginTop="2dp" />
                         </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#F0F0F0" />
+                        android:background="#F0F0F0"
+                        android:layout_marginHorizontal="20dp" />
 
-                    <!-- Tarjeta de crédito -->
+                    <!-- Teléfono -->
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_tarjetaCredit"
+                        android:id="@+id/layout_telefono"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:padding="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:id="@+id/iv_tarjetaCredit"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:id="@+id/iv_credicard_icon"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:src="@drawable/ic_credit_card"
-                            android:padding="8dp"
+                            android:padding="12dp"
                             android:background="@drawable/circle_background"
-                            android:backgroundTint="#F5F5F5"
+                            android:backgroundTint="@color/md_theme_secondaryContainer"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:tint="@color/md_theme_secondary"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginStart="16dp"
-                            app:layout_constraintStart_toEndOf="@id/iv_tarjetaCredit"
-                            app:layout_constraintTop_toTopOf="@id/iv_tarjetaCredit"
-                            app:layout_constraintBottom_toBottomOf="@id/iv_tarjetaCredit"
+                            app:layout_constraintStart_toEndOf="@id/iv_credicard_icon"
+                            app:layout_constraintTop_toTopOf="@id/iv_credicard_icon"
+                            app:layout_constraintBottom_toBottomOf="@id/iv_credicard_icon"
                             app:layout_constraintEnd_toEndOf="parent">
 
                             <TextView
-                                android:id="@+id/tv_tarejta"
+                                android:id="@+id/tv_tarjeta"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Tarjeta de crédito"
+                                android:text="Tarjeta de credito"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@android:color/black" />
 
                             <TextView
-                                android:id="@+id/tv_tarejta_User"
+                                android:id="@+id/tv_tarjeta_user"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Visa **** 4567"
                                 android:textSize="14sp"
-                                android:textColor="#757575" />
+                                android:textColor="#757575"
+                                android:layout_marginTop="2dp" />
                         </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

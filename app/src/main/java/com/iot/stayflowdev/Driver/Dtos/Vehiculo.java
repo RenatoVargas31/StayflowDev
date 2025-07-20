@@ -3,44 +3,34 @@ package com.iot.stayflowdev.Driver.Dtos;
 import java.security.Timestamp;
 import java.util.Calendar;
 import java.util.Calendar;
-
 public class Vehiculo {
     private String id; // ID del documento de Firebase
-    private String licensePlate;
-    private String brand;
-    private String model;
-    private String color;
-    private int year;
-    private boolean isPrimary;
-    private int photoId;
-    private int driverId;
+    private String placa;
+    private String modelo;
+    private String driverId;
+    private String fotoVehiculo;
+    private boolean activo;
 
     // Constructor vacío requerido por Firebase
     public Vehiculo() {}
 
-    // Constructor with parameters
-    public Vehiculo(String licensePlate, String brand, String model, String color,
-                    int year, boolean isPrimary) {
-        this.licensePlate = licensePlate;
-        this.brand = brand;
-        this.model = model;
-        this.color = color;
-        this.year = year;
-        this.isPrimary = isPrimary;
+    // Constructor básico
+    public Vehiculo(String placa, String modelo, String driverId) {
+        this.placa = placa;
+        this.modelo = modelo;
+        this.driverId = driverId;
+        this.activo = true; // Por defecto activo
     }
 
     // Constructor completo
-    public Vehiculo(String id, String licensePlate, String brand, String model, String color,
-                    int year, boolean isPrimary, int photoId, int driverId) {
+    public Vehiculo(String id, String placa, String modelo, String driverId,
+                    String fotoVehiculo, boolean activo) {
         this.id = id;
-        this.licensePlate = licensePlate;
-        this.brand = brand;
-        this.model = model;
-        this.color = color;
-        this.year = year;
-        this.isPrimary = isPrimary;
-        this.photoId = photoId;
+        this.placa = placa;
+        this.modelo = modelo;
         this.driverId = driverId;
+        this.fotoVehiculo = fotoVehiculo;
+        this.activo = activo;
     }
 
     // Getters and Setters
@@ -52,90 +42,84 @@ public class Vehiculo {
         this.id = id;
     }
 
-    public String getLicensePlate() {
-        return licensePlate;
+    public String getPlaca() {
+        return placa;
     }
 
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
+    public void setPlaca(String placa) {
+        this.placa = placa;
     }
 
-    public String getBrand() {
-        return brand;
+    public String getModelo() {
+        return modelo;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
     }
 
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public boolean isPrimary() {
-        return isPrimary;
-    }
-
-    public void setIsPrimary(boolean isPrimary) {
-        this.isPrimary = isPrimary;
-    }
-
-    public int getPhotoId() {
-        return photoId;
-    }
-
-    public void setPhotoId(int photoId) {
-        this.photoId = photoId;
-    }
-
-    public int getDriverId() {
+    public String getDriverId() {
         return driverId;
     }
 
-    public void setDriverId(int driverId) {
+    public void setDriverId(String driverId) {
         this.driverId = driverId;
     }
 
-    // Métodos adicionales para el RecyclerView
-    public String getFullName() {
-        return brand + " " + model + " " + year;
+    public String getFotoVehiculo() {
+        return fotoVehiculo;
     }
 
-    public String getDetails() {
-        return "Sedán • " + color; // Puedes agregar más lógica aquí
+    public void setFotoVehiculo(String fotoVehiculo) {
+        this.fotoVehiculo = fotoVehiculo;
     }
 
-    public String getFormattedPlate() {
-        return "Placa: " + licensePlate;
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    // Métodos de utilidad
+    public boolean tieneFoto() {
+        return fotoVehiculo != null && !fotoVehiculo.isEmpty();
+    }
+
+    public String getMarcaYModelo() {
+        if (modelo != null && modelo.contains(" ")) {
+            return modelo; // "Toyota Yaris"
+        }
+        return modelo != null ? modelo : "Vehículo";
+    }
+
+    public String getMarca() {
+        if (modelo != null && modelo.contains(" ")) {
+            return modelo.split(" ")[0]; // "Toyota"
+        }
+        return "Marca";
+    }
+
+    public String getModeloSolo() {
+        if (modelo != null && modelo.contains(" ")) {
+            String[] partes = modelo.split(" ");
+            if (partes.length > 1) {
+                return partes[1]; // "Yaris"
+            }
+        }
+        return modelo != null ? modelo : "Modelo";
+    }
+
+    public String getPlacaFormateada() {
+        return placa != null ? placa : "XXX-000";
     }
 
     // Validation method
     public boolean isValid() {
-        return licensePlate != null && !licensePlate.trim().isEmpty() &&
-                brand != null && !brand.trim().isEmpty() &&
-                model != null && !model.trim().isEmpty() &&
-                color != null && !color.trim().isEmpty() &&
-                year >= 1950 && year <= Calendar.getInstance().get(Calendar.YEAR) + 1;
+        return placa != null && !placa.trim().isEmpty() &&
+                modelo != null && !modelo.trim().isEmpty() &&
+                driverId != null && !driverId.trim().isEmpty();
     }
 
     // toString method for debugging
@@ -143,11 +127,11 @@ public class Vehiculo {
     public String toString() {
         return "Vehiculo{" +
                 "id='" + id + '\'' +
-                ", licensePlate='" + licensePlate + '\'' +
-                ", brand='" + brand + '\'' +
-                ", model='" + model + '\'' +
-                ", year=" + year +
-                ", isPrimary=" + isPrimary +
+                ", placa='" + placa + '\'' +
+                ", modelo='" + modelo + '\'' +
+                ", driverId='" + driverId + '\'' +
+                ", fotoVehiculo='" + fotoVehiculo + '\'' +
+                ", activo=" + activo +
                 '}';
     }
 }
