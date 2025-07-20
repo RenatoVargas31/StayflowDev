@@ -211,7 +211,56 @@ public class LoginFireBaseActivity extends AppCompatActivity {
                         // Obtener los datos del usuario
                         DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
                         String rol = document.getString("rol");
-                        irAActividadSegunRol(rol);
+
+                        // Verificar si el usuario está activo según su rol
+                        if (rol != null) {
+                            if (rol.equalsIgnoreCase("usuario")) {
+                                // Para usuarios regulares, verificar estado
+                                Boolean estado = document.getBoolean("estado");
+                                if (estado != null && !estado) {
+                                    // Usuario desactivado
+                                    Toast.makeText(this, "Tu cuenta ha sido desactivada. Contacta a soporte.", Toast.LENGTH_LONG).show();
+                                    mAuth.signOut();
+                                    // Habilitar botones nuevamente
+                                    btnEmailLogin.setEnabled(true);
+                                    btnGoogleLogin.setEnabled(true);
+                                    return;
+                                }
+                                // Usuario activo, continuar
+                                irAActividadSegunRol(rol);
+                            } else if (rol.equalsIgnoreCase("driver")) {
+                                // Para conductores, verificar estado y verificación
+                                Boolean estado = document.getBoolean("estado");
+                                Boolean verificado = document.getBoolean("verificado");
+
+                                if ((estado != null && !estado) || (verificado != null && !verificado)) {
+                                    // Personalizar mensaje según el caso
+                                    String mensaje;
+                                    if (verificado != null && !verificado) {
+                                        mensaje = "Tu cuenta aún no ha sido verificada. Por favor, espera la verificación.";
+                                    } else {
+                                        mensaje = "Tu cuenta ha sido desactivada. Contacta a soporte.";
+                                    }
+                                    Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
+                                    mAuth.signOut();
+                                    // Habilitar botones nuevamente
+                                    btnEmailLogin.setEnabled(true);
+                                    btnGoogleLogin.setEnabled(true);
+                                    return;
+                                }
+                                // Driver activo y verificado, continuar
+                                irAActividadSegunRol(rol);
+                            } else {
+                                // Para otros roles (admin, superadmin), solo verificamos que el rol exista
+                                irAActividadSegunRol(rol);
+                            }
+                        } else {
+                            // Si el rol es nulo, redirigimos al usuario a la pantalla de registro
+                            Log.d(TAG, "Rol es nulo - Navegando a LoginRegisterActivity");
+                            Intent intent = new Intent(this, LoginRegisterActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     } else {
                         Log.w(TAG, "No se encontró información del usuario en Firestore");
                         // Si no se encuentra el rol en la base de datos, redirigir a una actividad por defecto
