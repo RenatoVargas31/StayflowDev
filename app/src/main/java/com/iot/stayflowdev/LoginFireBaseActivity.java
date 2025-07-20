@@ -148,34 +148,50 @@ public class LoginFireBaseActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             Log.d(TAG, "signInWithCredential:success");
 
-            // Registrar usuario en Firestore con rol "usuario" usando el mismo UID
             if (user != null) {
                 String email = user.getEmail();
                 String uid = user.getUid();
 
-                // Log para depuración
-                Log.d(TAG, "Creando usuario en Firestore con UID: " + uid);
+                Log.d(TAG, "Verificando si el usuario existe en Firestore con UID: " + uid);
 
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                // Crea el objeto de usuario
-                java.util.Map<String, Object> usuario = new java.util.HashMap<>();
-                usuario.put("correo", email);
-                // Eliminamos la asignación de rol aquí, se asignará en LoginCargarFotoActivity
-
-                // Guarda en la colección "usuarios" usando el UID como ID del documento
+                // PRIMERO verificar si el usuario ya existe en Firestore
                 db.collection("usuarios")
-                  .document(uid)  // Usar el UID como ID del documento
-                  .set(usuario)
-                  .addOnSuccessListener(aVoid -> {
-                      Log.d(TAG, "Usuario registrado en Firestore con ID: " + uid);
-                  })
-                  .addOnFailureListener(e -> {
-                      Log.e(TAG, "Error al registrar usuario en Firestore", e);
-                  });
-            }
+                        .document(uid)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                // El usuario YA EXISTE - Solo hacer login sin sobrescribir datos
+                                Log.d(TAG, "Usuario existente encontrado, no se sobrescriben datos");
+                                verificarRolYRedirigir();
+                            } else {
+                                // El usuario NO EXISTE - Crear nuevo registro
+                                Log.d(TAG, "Usuario nuevo, creando registro en Firestore");
 
-            verificarRolYRedirigir();
+                                java.util.Map<String, Object> usuario = new java.util.HashMap<>();
+                                usuario.put("correo", email);
+                                // NO asignar rol aquí, se asignará en LoginRegisterActivity
+
+                                db.collection("usuarios")
+                                        .document(uid)
+                                        .set(usuario)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "Usuario nuevo registrado en Firestore con ID: " + uid);
+                                            verificarRolYRedirigir();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e(TAG, "Error al registrar usuario en Firestore", e);
+                                            verificarRolYRedirigir(); // Continuar aunque falle el registro
+                                        });
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error al verificar usuario existente", e);
+                            // En caso de error, intentar crear el usuario (comportamiento conservador)
+                            verificarRolYRedirigir();
+                        });
+            }
         } else {
             // Si el inicio de sesión falla, muestra un mensaje al usuario
             if (response == null) {
