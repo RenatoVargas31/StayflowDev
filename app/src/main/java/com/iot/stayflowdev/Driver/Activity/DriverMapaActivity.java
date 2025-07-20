@@ -44,6 +44,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.iot.stayflowdev.LoginActivity;
 import com.iot.stayflowdev.R;
 import com.journeyapps.barcodescanner.CaptureActivity;
 import com.journeyapps.barcodescanner.ScanContract;
@@ -185,7 +186,10 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         collapsedContent.setOnClickListener(v -> toggleCardExpansion());
         btnCloseDestination.setOnClickListener(v -> clearDestination());
         btnStartTrip.setOnClickListener(v -> startTrip());
-        btnContactPassenger.setOnClickListener(v -> openChat());
+        btnContactPassenger.setOnClickListener(v -> {
+            Intent intent = new Intent(DriverMapaActivity.this, DriverChatActivity.class);
+            startActivity(intent);
+        });
 
         // ==================== NAVIGATION CARD LISTENERS ====================
         btnFinalizeTrip.setOnClickListener(v -> showFinalizeTripCard());
@@ -615,14 +619,6 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
                 runOnUiThread(() -> showToast("Error de conexión"));
             }
         }).start();
-    }
-
-    private void openChat() {
-        showToast("Abriendo chat...");
-    }
-
-    private void callPassenger() {
-        showToast("Llamando al pasajero...");
     }
 
     private void showToast(String msg) {

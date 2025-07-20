@@ -8,371 +8,472 @@
     android:layout_height="match_parent"
     tools:context=".Driver.Activity.DriverTarjetaCreditoActivity">
 
-    <!-- Barra superior -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- Barra superior mejorada -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="#e0d9cc"
+        android:layout_height="wrap_content"
+        android:background="@color/md_theme_primary"
         android:elevation="4dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="?attr/actionBarSize"
+            app:title="Métodos de Pago"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/white" />
 
-            <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Información de la tarjeta"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.appbar.MaterialToolbar>
-
-
+    </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Contenido principal -->
-    <ScrollView
-        android:layout_width="0dp"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#FAFAFA"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/appbar"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="16dp">
 
-            <!-- Card: Título de la sección -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- ==================== ESTADO SIN TARJETA ==================== -->
+            <LinearLayout
+                android:id="@+id/layout_sin_tarjeta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/md_theme_outline"
-                app:cardBackgroundColor="@color/white">
+                android:orientation="vertical"
+                android:visibility="visible">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- Card informativa -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/white">
 
-                    <!-- Icono para la sección -->
-                    <ImageView
-                        android:id="@+id/iv_viaje_icon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_exclamation"
-                        app:tint="@color/md_theme_primary"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <!-- Título de la sección -->
-                    <TextView
-                        android:id="@+id/tv_viaje_titulo"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="Métodos de Pago"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/md_theme_primary"
-                        app:layout_constraintStart_toEndOf="@id/iv_viaje_icon"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/iv_viaje_icon"
-                        app:layout_constraintBottom_toBottomOf="@id/iv_viaje_icon" />
-
-                    <!-- Línea divisoria -->
-                    <View
-                        android:id="@+id/divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="12dp"
-                        android:background="@color/md_theme_outlineVariant"
-                        app:layout_constraintTop_toBottomOf="@id/iv_viaje_icon"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
-                    <!-- Información sobre las tarjetas -->
-                    <TextView
-                        android:id="@+id/tv_info_tarjetas"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Gestiona tus tarjetas para recibir los pagos seguros a través de la aplicación."
-                        android:textSize="14sp"
-                        android:textColor="#757575"
-                        app:layout_constraintTop_toBottomOf="@id/divider"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_credit_card"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="#384E7B">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="24dp">
-
-                    <!-- Logo del banco o tipo de tarjeta -->
-                    <ImageView
-                        android:id="@+id/iv_card_logo"
-                        android:layout_width="60dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_visa_logo"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        android:contentDescription="Logo de tarjeta" />
-
-                    <!-- Chip de la tarjeta -->
-                    <ImageView
-                        android:id="@+id/iv_card_chip"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_chip_card"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:contentDescription="Chip de tarjeta" />
-
-                    <!-- Número de tarjeta -->
-                    <TextView
-                        android:id="@+id/tv_card_number"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="**** **** **** 4567"
-                        android:textSize="20sp"
-                        android:textColor="#FFFFFF"
-                        android:letterSpacing="0.1"
-                        android:fontFamily="sans-serif-medium"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/iv_card_chip"
-                        android:layout_marginTop="32dp"/>
-
-                    <!-- Nombre del titular -->
-                    <TextView
-                        android:id="@+id/tv_card_holder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="JUAN PEREZ"
-                        android:textSize="16sp"
-                        android:textColor="#FFFFFF"
-                        android:letterSpacing="0.05"
-                        android:fontFamily="sans-serif-medium"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginBottom="24dp"/>
-
-                    <!-- Fecha de expiración -->
-                    <TextView
-                        android:id="@+id/tv_card_expiry_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="VÁLIDA\nHASTA"
-                        android:textSize="8sp"
-                        android:textColor="#CCFFFFFF"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/tv_card_expiry"
-                        android:layout_marginBottom="2dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_card_expiry"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="12/26"
-                        android:textSize="14sp"
-                        android:textColor="#FFFFFF"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintBottom_toBottomOf="@id/tv_card_holder"
-                        app:layout_constraintBaseline_toBaselineOf="@id/tv_card_holder"/>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Información de la tarjeta -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <!-- Encabezado con certificado -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Detalles de la tarjeta"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@android:color/black" />
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:background="@color/md_theme_tertiaryFixedDim"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp">
+                            android:layout_marginBottom="12dp">
 
                             <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:src="@drawable/ic_estado"
-                                app:tint="@color/md_theme_tertiaryFixed_highContrast"
-                                android:layout_marginEnd="4dp" />
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_exclamation"
+                                app:tint="@color/md_theme_primary"
+                                android:layout_marginEnd="12dp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Información de Pago"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/md_theme_primary" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/md_theme_outlineVariant"
+                            android:layout_marginBottom="16dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Agrega una tarjeta de crédito o débito para recibir pagos de tus viajes de forma segura y automática."
+                            android:textSize="14sp"
+                            android:textColor="#757575"
+                            android:lineSpacingExtra="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Estado sin tarjeta -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="32dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:src="@drawable/ic_credit_card"
+                            android:layout_marginBottom="16dp"
+                            app:tint="@color/md_theme_surfaceVariant" />
+
+                        <TextView
+                            android:id="@+id/tv_estado_tarjeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No hay tarjeta registrada"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:gravity="center"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_descripcion_estado"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Agrega tu primera tarjeta para comenzar a recibir pagos"
+                            android:textSize="14sp"
+                            android:textColor="#757575"
+                            android:gravity="center"
+                            android:layout_marginBottom="24dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_agregar_tarjeta"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:text="Agregar Tarjeta"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="8dp"
+                            app:icon="@drawable/ic_add"
+                            app:iconGravity="textStart" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- ==================== ESTADO CON TARJETA ==================== -->
+            <LinearLayout
+                android:id="@+id/layout_con_tarjeta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Tarjeta visual -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_credit_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginBottom="20dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="12dp"
+                    app:cardBackgroundColor="#384E7B">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="24dp">
+
+                        <!-- Logo del banco o tipo de tarjeta -->
+                        <ImageView
+                            android:id="@+id/iv_card_logo"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_visa_logo"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                        <!-- Chip de la tarjeta -->
+                        <ImageView
+                            android:id="@+id/iv_card_chip"
+                            android:layout_width="40dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_chip_card"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <!-- Número de tarjeta -->
+                        <TextView
+                            android:id="@+id/tv_card_number"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="**** **** **** 4567"
+                            android:textSize="22sp"
+                            android:textColor="#FFFFFF"
+                            android:letterSpacing="0.1"
+                            android:fontFamily="monospace"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/iv_card_chip"
+                            android:layout_marginTop="24dp"/>
+
+                        <!-- Nombre del titular -->
+                        <TextView
+                            android:id="@+id/tv_card_holder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="JUAN PEREZ"
+                            android:textSize="16sp"
+                            android:textColor="#FFFFFF"
+                            android:letterSpacing="0.05"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <!-- Fecha de expiración -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="end"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Seleccionado"
-                                android:textSize="12sp"
-                                app:tint="@color/md_theme_tertiaryFixed_highContrast" />
+                                android:text="VÁLIDA HASTA"
+                                android:textSize="8sp"
+                                android:textColor="#CCFFFFFF"
+                                android:layout_marginBottom="2dp"/>
+
+                            <TextView
+                                android:id="@+id/tv_card_expiry"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12/26"
+                                android:textSize="14sp"
+                                android:textColor="#FFFFFF"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Detalles de la tarjeta -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <!-- Encabezado -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Detalles de la tarjeta"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@android:color/black" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:background="@drawable/ic_check"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp">
+
+                                <ImageView
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:src="@drawable/ic_check_circle"
+                                    app:tint="@color/green_500"
+                                    android:layout_marginEnd="4dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Activa"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/green_500" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Información de la tarjeta -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- Tipo -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="80dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tipo:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_card_type"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Visa"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Número -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="80dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Número:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_card_number_detail"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="**** **** **** 4567"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black"
+                                    android:fontFamily="monospace"/>
+                            </LinearLayout>
+
+                            <!-- Titular -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+
+                                <TextView
+                                    android:layout_width="80dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Titular:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_card_holder_detail"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Juan Perez"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Expiración -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="80dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Expira:"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575"/>
+
+                                <TextView
+                                    android:id="@+id/tv_card_expiry_detail"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="12/2026"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Tipo de tarjeta -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                <!-- Botones de acción -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
 
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="Tipo:"
-                            android:textSize="14sp"
-                            android:textColor="#757575"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_editar_tarjeta"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Editar"
+                        android:textSize="14sp"
+                        app:cornerRadius="8dp"
+                        app:icon="@drawable/ic_edit"
+                        app:iconGravity="textStart" />
 
-                        <TextView
-                            android:id="@+id/tv_card_type"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Visa"
-                            android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
-                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_eliminar_tarjeta"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Eliminar"
+                        android:textSize="14sp"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/md_theme_error"
+                        android:textColor="@color/md_theme_error"
+                        app:icon="@drawable/ic_delete"
+                        app:iconTint="@color/md_theme_error"
+                        app:iconGravity="textStart" />
 
-                    <!-- Número de tarjeta -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="Número:"
-                            android:textSize="14sp"
-                            android:textColor="#757575"/>
-
-                        <TextView
-                            android:id="@+id/tv_card_number_detail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="**** **** **** 4567"
-                            android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
-                    </LinearLayout>
-
-                    <!-- Titular -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="Titular:"
-                            android:textSize="14sp"
-                            android:textColor="#757575"/>
-
-                        <TextView
-                            android:id="@+id/tv_card_holder_detail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Juan Perez"
-                            android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
-                    </LinearLayout>
-
-                    <!-- Fecha de expiración -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="Expiración:"
-                            android:textSize="14sp"
-                            android:textColor="#757575"/>
-
-                        <TextView
-                            android:id="@+id/tv_card_expiry_detail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="12/2026"
-                            android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
-                    </LinearLayout>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-
+            </LinearLayout>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

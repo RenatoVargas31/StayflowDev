@@ -56,10 +56,10 @@ public class DriverChatActivity extends AppCompatActivity {
         initViews();
 
         // Recibir datos del Intent
-        recibirDatosIntent();
+        //recibirDatosIntent();
 
         // Configurar listeners
-        setupListeners();
+       // setupListeners();
     }
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -74,18 +74,11 @@ public class DriverChatActivity extends AppCompatActivity {
     private void initViews() {
         // Toolbar
         toolbar_title = findViewById(R.id.toolbar_title);
-
-        // Card del cliente
-        iv_cliente_foto = findViewById(R.id.iv_cliente_foto);
-        tv_cliente_nombre = findViewById(R.id.tv_cliente_nombre);
-        tv_cliente_tipo = findViewById(R.id.tv_cliente_tipo);
-
         // Barra de mensaje
         et_mensaje = findViewById(R.id.et_mensaje);
-        btn_emoji = findViewById(R.id.btn_emoji);
         btn_send = findViewById(R.id.btn_send);
     }
-
+/*
     private void recibirDatosIntent() {
         Intent intent = getIntent();
         if (intent != null) {
@@ -188,7 +181,7 @@ public class DriverChatActivity extends AppCompatActivity {
 
     private void enviarMensajeAFirebase(String mensaje) {
         // TODO: Implementar envío a Firebase o tu backend de chat
-        /*
+
         if (solicitudId != null) {
             Map<String, Object> mensajeData = new HashMap<>();
             mensajeData.put("mensaje", mensaje);
@@ -208,7 +201,6 @@ public class DriverChatActivity extends AppCompatActivity {
                     Log.e("DriverChat", "Error al guardar mensaje: " + e.getMessage());
                 });
         }
-        */
     }
 
     @Override
@@ -238,5 +230,5 @@ public class DriverChatActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(0, 0);
         finish();
-    }
+    } */
 }

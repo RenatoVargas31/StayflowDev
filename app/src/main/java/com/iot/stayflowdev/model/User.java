@@ -21,6 +21,23 @@ public class User {
     private String numeroDocumento;
     private String domicilio;
     private Map<String, Object> datosEspecificos;
+    private String placa;
+    private String modelo;
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+    // En la clase User, asegúrate de tener:
+    public String getPlaca() {
+        return placa;
+    }
+
+    public void setPlaca(String placa) {
+        this.placa = placa;
+    }
 
     // Nuevos campos para manejo de sesiones
     private boolean conectado; // Usuario actualmente conectado
