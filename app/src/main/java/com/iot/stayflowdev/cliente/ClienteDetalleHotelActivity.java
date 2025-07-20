@@ -30,6 +30,18 @@ import com.iot.stayflowdev.model.Habitacion;
 import com.iot.stayflowdev.viewmodels.HabitacionViewModel;
 import com.iot.stayflowdev.cliente.adapter.ClienteHabitacionAdapter;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointForward;
+import android.text.Editable;
+import android.text.TextWatcher;
+import com.google.firebase.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +65,12 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
     private RecyclerView rvHabitaciones;
     private Map<String, Integer> habitacionesSeleccionadas = new HashMap<>();
     private double totalHabitaciones = 0.0;
+
+    // NUEVAS VARIABLES PARA EL FORMULARIO
+    private Timestamp fechaInicio;
+    private Timestamp fechaFin;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
     // Objeto hotel
     private Hotel hotel;
 
@@ -77,6 +95,9 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
 
         // Configurar RecyclerView de habitaciones
         configurarRecyclerViewHabitaciones();
+
+        // Configurar el formulario de reserva
+        configurarFormularioReserva();
 
         // Configurar el botón de retroceso
         binding.btnBack.setOnClickListener(v -> onBackPressed());
@@ -124,6 +145,110 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
             Log.e(TAG, "No se encontró RecyclerView rvHabitacionesDinamicas");
         }
     }
+    private void configurarFormularioReserva() {
+        configurarCamposFecha();
+        configurarCamposHuespedes();
+        //configurarValidacionesFormulario();
+
+        Log.d(TAG, "Formulario de reserva configurado");
+    }
+    private void configurarCamposFecha() {
+        // Configurar campo fecha de inicio
+        binding.etFechaInicio.setOnClickListener(v -> mostrarDatePicker(true));
+
+        // Configurar campo fecha de fin
+        binding.etFechaFin.setOnClickListener(v -> mostrarDatePicker(false));
+
+        // Evitar que aparezca teclado
+        binding.etFechaInicio.setKeyListener(null);
+        binding.etFechaFin.setKeyListener(null);
+    }
+    private void mostrarDatePicker(boolean esFechaInicio) {
+        // Configurar restricciones de calendario
+        Calendar today = Calendar.getInstance();
+
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.now()); // Solo fechas futuras
+
+        // Si es fecha de fin y ya hay fecha de inicio, restringir desde fecha inicio + 1
+        if (!esFechaInicio && fechaInicio != null) {
+            Calendar minDate = Calendar.getInstance();
+            minDate.setTime(fechaInicio.toDate());
+            minDate.add(Calendar.DAY_OF_MONTH, 1); // Mínimo 1 día después
+            constraintsBuilder.setStart(minDate.getTimeInMillis());
+        }
+
+        // Crear DatePicker
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(esFechaInicio ? "Fecha de entrada" : "Fecha de salida")
+                .setSelection(esFechaInicio ?
+                        MaterialDatePicker.todayInUtcMilliseconds() :
+                        (fechaInicio != null ? fechaInicio.toDate().getTime() + TimeUnit.DAYS.toMillis(1) :
+                                MaterialDatePicker.todayInUtcMilliseconds() + TimeUnit.DAYS.toMillis(1)))
+                .setCalendarConstraints(constraintsBuilder.build())
+                .build();
+
+        // Configurar listener de selección
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            Date fechaSeleccionada = new Date(selection);
+            String fechaFormateada = dateFormat.format(fechaSeleccionada);
+
+            if (esFechaInicio) {
+                fechaInicio = new Timestamp(fechaSeleccionada);
+                binding.etFechaInicio.setText(fechaFormateada);
+
+                // Si ya hay fecha fin y es anterior a la nueva fecha inicio, limpiarla
+                if (fechaFin != null && fechaFin.toDate().before(fechaSeleccionada)) {
+                    fechaFin = null;
+                    binding.etFechaFin.setText("");
+                    binding.tilFechaFin.setError(null);
+                }
+
+                binding.tilFechaInicio.setError(null);
+                Log.d(TAG, "Fecha de inicio seleccionada: " + fechaFormateada);
+            } else {
+                fechaFin = new Timestamp(fechaSeleccionada);
+                binding.etFechaFin.setText(fechaFormateada);
+                binding.tilFechaFin.setError(null);
+                Log.d(TAG, "Fecha de fin seleccionada: " + fechaFormateada);
+            }
+
+            // Validar fechas después de selección
+            //validarFechas();
+            //actualizarEstadoBoton();
+        });
+
+        // Mostrar DatePicker
+        datePicker.show(getSupportFragmentManager(), esFechaInicio ? "DATE_PICKER_INICIO" : "DATE_PICKER_FIN");
+    }
+    private void configurarCamposHuespedes() {
+        // TextWatcher para adultos
+        binding.etAdultos.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        // TextWatcher para niños
+        binding.etNinos.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
     private void cargarHabitacionesDisponibles(String hotelId) {
         mostrarEstadoCargaHabitaciones(true);
 

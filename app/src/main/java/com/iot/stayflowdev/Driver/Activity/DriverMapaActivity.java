@@ -1,4 +1,6 @@
 package com.iot.stayflowdev.Driver.Activity;
+import static androidx.activity.result.ActivityResultCallerKt.registerForActivityResult;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;

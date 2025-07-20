@@ -1,32 +1,52 @@
 package com.iot.stayflowdev.adminHotel;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
 import com.iot.stayflowdev.databinding.ActivityUbicacionAdminBinding;
 import com.iot.stayflowdev.model.LugaresCercanos;
 import com.iot.stayflowdev.viewmodels.LugaresCercanosViewModel;
 
-public class UbicacionAdminActivity extends AppCompatActivity {
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+public class UbicacionAdminActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private ActivityUbicacionAdminBinding binding;
     private AdminHotelViewModel adminHotelViewModel;
     private LugaresCercanosViewModel lugaresViewModel;
     private String hotelIdGlobal = null;
+
+    //PARA UBICACION
+    private GoogleMap mMap;
+    private LatLng ubicacionHotel = null;
+    private String direccionExactaFinal = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +69,14 @@ public class UbicacionAdminActivity extends AppCompatActivity {
         });
 
         // Configura Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(true); // si quieres mostrar "Ubicación"
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 
@@ -88,6 +109,12 @@ public class UbicacionAdminActivity extends AppCompatActivity {
             return true;
         });
 
+        // Inicializar el mapa
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapFragment);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
 
         setupListeners();
     }
@@ -102,7 +129,26 @@ public class UbicacionAdminActivity extends AppCompatActivity {
                 binding.chipDireccion.setVisibility(View.VISIBLE);
             }
         });
+
+        // Obtener también coordenadas desde Firestore y mostrarlas en el mapa
+        FirebaseFirestore.getInstance().collection("hoteles")
+                .document(idHotel)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists() && documentSnapshot.contains("geoposicion")) {
+                        GeoPoint geo = documentSnapshot.getGeoPoint("geoposicion");
+                        if (geo != null && mMap != null) {
+                            ubicacionHotel = new LatLng(geo.getLatitude(), geo.getLongitude());
+                            mMap.clear();
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(ubicacionHotel)
+                                    .title("Ubicación del hotel"));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionHotel, 17f));
+                        }
+                    }
+                });
     }
+
 
     private void observarLugares() {
         lugaresViewModel.getLugares().observe(this, lista -> {
@@ -116,20 +162,15 @@ public class UbicacionAdminActivity extends AppCompatActivity {
     private void setupListeners() {
         binding.btnAgregarLugar.setOnClickListener(v -> showFormDialog());
         binding.btnActualizarDireccion.setOnClickListener(v -> {
-            String nuevaUbicacion = binding.etDireccionHotel.getText().toString().trim();
-            if (!nuevaUbicacion.isEmpty() && hotelIdGlobal != null) {
-                adminHotelViewModel.actualizarUbicacion(hotelIdGlobal, nuevaUbicacion,
-                        () -> {
-                            showMessage("Dirección actualizada");
-                            binding.chipDireccion.setText(nuevaUbicacion);
-                            binding.chipDireccion.setVisibility(View.VISIBLE);
-                        },
-                        () -> showMessage("Error al actualizar dirección")
-                );
+            String direccionEscrita = binding.etDireccionHotel.getText().toString().trim();
+
+            if (!direccionEscrita.isEmpty() && hotelIdGlobal != null) {
+                buscarYMostrarEnMapaYGuardar(direccionEscrita);
             } else {
                 showMessage("Completa la dirección");
             }
         });
+
 
     }
 
@@ -212,10 +253,59 @@ public class UbicacionAdminActivity extends AppCompatActivity {
 
         binding.layoutListaLugares.addView(card);
     }
-
-
-
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+    }
+
+    private void buscarYMostrarEnMapaYGuardar(String direccion) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> resultados = geocoder.getFromLocationName(direccion, 1);
+            if (!resultados.isEmpty()) {
+                Address address = resultados.get(0);
+                ubicacionHotel = new LatLng(address.getLatitude(), address.getLongitude());
+                direccionExactaFinal = address.getAddressLine(0);
+
+                // Mostrar en el mapa
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(ubicacionHotel).title("Ubicación del hotel"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ubicacionHotel, 17f));
+
+                // Mostrar visualmente
+                binding.chipDireccion.setText(direccionExactaFinal);
+                binding.chipDireccion.setVisibility(View.VISIBLE);
+
+                // Guardar en Firestore
+                adminHotelViewModel.actualizarUbicacionConCoordenadas(hotelIdGlobal, direccionExactaFinal, ubicacionHotel,
+                        () -> showMessage("Dirección y coordenadas actualizadas"),
+                        () -> showMessage("Error al actualizar ubicación")
+                );
+
+            } else {
+                showMessage("Dirección no encontrada");
+            }
+        } catch (IOException e) {
+            showMessage("Error al buscar dirección");
+        }
+    }
+
+    private void guardarUbicacionGeografica() {
+        if (ubicacionHotel != null && hotelIdGlobal != null) {
+            FirebaseFirestore.getInstance().collection("hoteles")
+                    .document(hotelIdGlobal)
+                    .update("geoposicion", new GeoPoint(ubicacionHotel.latitude, ubicacionHotel.longitude))
+                    .addOnSuccessListener(aVoid -> showMessage("Ubicación guardada"))
+                    .addOnFailureListener(e -> showMessage("Error al guardar la ubicación"));
+        }
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
     }
 }

@@ -27,6 +27,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
+import com.iot.stayflowdev.databinding.ActivityGaleriaAdminBinding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,8 @@ public class GaleriaAdminActivity extends AppCompatActivity {
     private final Set<Uri> imagenesSeleccionadas = new LinkedHashSet<>();
     private final List<String[]> urlsExistentes = new ArrayList<>();
     private int imagenesSubidasExistentes = 0;
+    private ActivityGaleriaAdminBinding binding;
+
 
     private final ActivityResultLauncher<String> pickImages = registerForActivityResult(
             new ActivityResultContracts.GetMultipleContents(),
@@ -65,15 +68,16 @@ public class GaleriaAdminActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_galeria_admin);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        binding = ActivityGaleriaAdminBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(true); // si quieres mostrar "Ubicación"
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 

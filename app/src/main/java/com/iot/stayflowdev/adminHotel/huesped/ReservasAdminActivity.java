@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,9 +23,11 @@ import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.AdminInicioActivity;
 import com.iot.stayflowdev.adminHotel.HuespedAdminActivity;
 import com.iot.stayflowdev.adminHotel.MensajeriaAdminActivity;
+import com.iot.stayflowdev.adminHotel.NotificacionesAdminActivity;
 import com.iot.stayflowdev.adminHotel.PerfilAdminActivity;
 import com.iot.stayflowdev.adminHotel.ReportesAdminActivity;
 import com.iot.stayflowdev.adminHotel.adapter.ReservaAdapter;
+import com.iot.stayflowdev.adminHotel.service.NotificacionService;
 import com.iot.stayflowdev.model.Reserva;
 import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
 import com.iot.stayflowdev.databinding.ActivityReservasAdminBinding;
@@ -47,12 +52,20 @@ public class ReservasAdminActivity extends AppCompatActivity {
     private Date fechaFinFiltro = null;
     private String textoBusqueda = "";
     private boolean ordenarPorRecientes = true; // true = recientes, false = antiguas
+    private ImageView notificationIcon;
+    private TextView badgeText;
+    private AdminHotelViewModel viewModel;
+    private NotificacionService notificacionService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityReservasAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        inicializarVistas();
+        configurarViewModel();
+        configurarToolbar();
 
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setTitle("Reservas");
@@ -270,5 +283,64 @@ public class ReservasAdminActivity extends AppCompatActivity {
                     Log.e("ReservasAdmin", "Error al obtener reservas", e);
                     Toast.makeText(this, "Error al cargar reservas", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void inicializarVistas() {
+        // Vistas existentes
+
+        // Nuevas vistas para notificaciones
+        notificationIcon = findViewById(R.id.notification_icon);
+        badgeText = findViewById(R.id.badge_text);
+
+        // Inicializar servicio de notificaciones
+        notificacionService = new NotificacionService(this);
+    }
+
+    private void configurarViewModel() {
+        // ViewModel
+        viewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+
+        // Observar notificaciones de checkout
+        viewModel.getContadorNotificaciones().observe(this, contador -> {
+            actualizarBadgeNotificaciones(contador);
+        });
+
+        // Cargar notificaciones al iniciar
+        viewModel.cargarNotificacionesCheckout();
+
+        // Iniciar actualizaciones automáticas cada 5 minutos
+        viewModel.iniciarActualizacionAutomatica();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Detener actualizaciones automáticas
+        if (viewModel != null) {
+            viewModel.detenerActualizacionAutomatica();
+        }
+    }
+    private void configurarToolbar() {
+        // Configurar click del icono de notificaciones
+        notificationIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(this, NotificacionesAdminActivity.class);
+            startActivity(intent);
+        });
+    }
+    private void actualizarBadgeNotificaciones(Integer contador) {
+        if (contador != null && contador > 0) {
+            badgeText.setVisibility(View.VISIBLE);
+            badgeText.setText(contador > 99 ? "99+" : String.valueOf(contador));
+        } else {
+            badgeText.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Actualizar notificaciones cuando regresamos a esta activity
+        if (viewModel != null) {
+            viewModel.cargarNotificacionesCheckout();
+        }
     }
 }

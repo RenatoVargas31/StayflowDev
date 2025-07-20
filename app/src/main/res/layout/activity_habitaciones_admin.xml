@@ -13,15 +13,24 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:background="@color/md_theme_primary"
         android:elevation="4dp"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Habitaciones"
-        app:titleTextColor="@color/white"
+        app:navigationIcon="@drawable/ic_arrowback"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Habitaciones"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- Contenido principal con padding respetando toolbar y menú -->
     <androidx.core.widget.NestedScrollView
