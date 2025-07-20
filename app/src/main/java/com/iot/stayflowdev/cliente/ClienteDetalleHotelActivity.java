@@ -1,6 +1,7 @@
 package com.iot.stayflowdev.cliente;
 
 import android.content.Intent;
+import java.util.TimeZone;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,10 +18,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.databinding.ActivityClienteDetalleHotelBinding;
 import com.iot.stayflowdev.model.Hotel;
 import com.iot.stayflowdev.model.LugaresCercanos;
+import com.iot.stayflowdev.model.Reserva;
 import com.iot.stayflowdev.model.Servicio;
 import com.iot.stayflowdev.viewmodels.HotelViewModel;
 
@@ -69,7 +74,7 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
     // NUEVAS VARIABLES PARA EL FORMULARIO
     private Timestamp fechaInicio;
     private Timestamp fechaFin;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private SimpleDateFormat dateFormat;
 
     // Objeto hotel
     private Hotel hotel;
@@ -79,6 +84,8 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
+        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         // Inicializar ViewBinding
         binding = ActivityClienteDetalleHotelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -111,6 +118,16 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
             Toast.makeText(this, "Error: No se pudo obtener información del hotel", Toast.LENGTH_SHORT).show();
             finish();
         }
+        binding.btnContinuarReserva.setOnClickListener(v -> {
+            Reserva reserva = generarReserva();
+            Gson gson = new Gson();
+            String reservaJson = gson.toJson(reserva);
+
+            Intent intent = new Intent(this, ReservaResumenActivity.class);
+            intent.putExtra("reserva_data", reservaJson);
+            Log.d(TAG, "Reserva JSON: " + reservaJson);
+            startActivity(intent);
+        });
     }
 
     private void cargarDatosHotel(String hotelId) {
@@ -534,4 +551,106 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
             binding.layoutLugaresHistoricos.addView(textView);
         }
     }
+    private String obtenerIdUsuarioActual(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+           String userId = user.getUid();
+           Log.d(TAG, "ID de usuario actual: " + userId);
+        } else {
+           Log.e(TAG, "No hay usuario autenticado");
+        }
+        assert user != null;
+        return user.getUid();
+    }
+    private List<Reserva.Servicio> obtenerServiciosParaReserva(String hotelId){
+        //Obtener los servicios del viewmodel
+        List<Servicio> servicios = hotelViewModel.getServiciosPorHotel(hotelId).getValue();
+        //Nuestra lista de servicios para la reserva
+        List<Reserva.Servicio> serviciosReserva = new ArrayList<>();
+        if (servicios != null) {
+            for (Servicio servicio : servicios) {
+                // Crear un objeto Servicio para la reserva
+                Reserva.Servicio servicioReserva = new Reserva.Servicio();
+                servicioReserva.setNombre(servicio.getNombre());
+                servicioReserva.setDescripcion(servicio.getDescripcion());
+                servicioReserva.setPrecio(servicio.getPrecio());
+                serviciosReserva.add(servicioReserva);
+            }
+        } else {
+            Log.e(TAG, "No se encontraron servicios para el hotel con ID: " + hotelId);
+        }
+        return serviciosReserva;
+    }
+    // Metodo para convertir las habitaciones seleccionadas a una lista de Reserva.Habitacion
+    private List<Reserva.Habitacion> obtenerHabitacionesParaReserva() {
+        List<Reserva.Habitacion> habitacionesReserva = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : habitacionesSeleccionadas.entrySet()) {
+            String habitacionId = entry.getKey();
+            int cantidad = entry.getValue();
+
+            // Buscar la habitación por ID en el adapter
+            Habitacion habitacion = habitacionAdapter.encontrarHabitacionPorId(habitacionId);
+            if (habitacion != null) {
+                // Crear objeto Reserva.Habitacion
+                Reserva.Habitacion habitacionReserva = new Reserva.Habitacion();
+                habitacionReserva.setTipo(habitacion.getTipo());
+                habitacionReserva.setCantidad(cantidad);
+                habitacionReserva.setPrecio(habitacion.getPrecio());
+                habitacionesReserva.add(habitacionReserva);
+            } else {
+                Log.e(TAG, "Habitación no encontrada con ID: " + habitacionId);
+            }
+        }
+        return habitacionesReserva;
+    }
+    //Metodo para crear Reserva.CantHuespedes
+    private Reserva.CantHuespedes obtenerCantHuespedes() {
+        Reserva.CantHuespedes cantHuespedes = new Reserva.CantHuespedes();
+        String adultos = binding.etAdultos.getText().toString().trim();
+        String ninos = binding.etNinos.getText().toString().trim();
+
+        // Validar y asignar valores
+        cantHuespedes.setAdultos(adultos.isEmpty() ? "0" : adultos);
+        cantHuespedes.setNinos(ninos.isEmpty() ? "0" : ninos);
+
+        return cantHuespedes;
+    }
+    //Metodo para obtener el estado del checkbox de taxi
+    private boolean obtenerQuieroTaxi() {
+        return binding.checkBoxTaxi.isChecked();
+    }
+    //Metodo para generar el costo total de la reserva consirando solo las habitaciones y las fechas (caalcular noches)
+    private String calcularCostoTotalFinal() {
+        if (fechaInicio == null || fechaFin == null) {
+            return "0.00"; // Si no hay fechas, el costo es 0
+        }
+
+        long diferenciaMillis = fechaFin.toDate().getTime() - fechaInicio.toDate().getTime();
+        long noches = TimeUnit.DAYS.convert(diferenciaMillis, TimeUnit.MILLISECONDS);
+
+        if (noches <= 0) {
+            return "0.00"; // Si las fechas son inválidas, el costo es 0
+        }
+
+        double costoTotal = totalHabitaciones * noches;
+        return String.format(Locale.getDefault(), "%.2f", costoTotal);
+    }
+    // Metodo para generar el objeto Reserva
+    private Reserva generarReserva() {
+        Reserva reserva = new Reserva();
+        reserva.setIdUsuario(obtenerIdUsuarioActual());
+        reserva.setIdHotel(hotelId);
+        reserva.setFechaCreacion(Timestamp.now());
+        reserva.setFechaInicio(fechaInicio);
+        reserva.setFechaFin(fechaFin);
+        reserva.setServicios(obtenerServiciosParaReserva(hotelId));
+        reserva.setCantHuespedes(obtenerCantHuespedes());
+        reserva.setHabitaciones(obtenerHabitacionesParaReserva());
+        reserva.setCostoTotal(calcularCostoTotalFinal());
+        reserva.setEstado("pendiente"); // Estado inicial
+        reserva.setQuieroTaxi(obtenerQuieroTaxi());
+        return reserva;
+    }
+
+
 }

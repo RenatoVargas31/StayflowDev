@@ -105,7 +105,7 @@ public class ClienteHabitacionAdapter extends RecyclerView.Adapter<ClienteHabita
     /**
      * Busca una habitación por ID
      */
-    private Habitacion encontrarHabitacionPorId(String id) {
+    public Habitacion encontrarHabitacionPorId(String id) {
         for (Habitacion hab : habitaciones) {
             if (id.equals(hab.getId())) {
                 return hab;
