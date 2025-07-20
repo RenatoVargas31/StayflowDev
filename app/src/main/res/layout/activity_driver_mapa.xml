@@ -43,7 +43,7 @@
         app:layout_constraintTop_toBottomOf="@+id/search_input_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/destination_card_container">
+        app:layout_constraintBottom_toTopOf="@+id/card_container">
 
         <!-- GOOGLE MAPS FRAGMENT -->
         <fragment
@@ -92,9 +92,9 @@
 
     </FrameLayout>
 
-    <!-- ==================== CONTENEDOR PARA CARD DE DESTINO ==================== -->
+    <!-- ==================== CONTENEDOR PRINCIPAL DE CARDS ==================== -->
     <LinearLayout
-        android:id="@+id/destination_card_container"
+        android:id="@+id/card_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -102,7 +102,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigation">
 
-        <!-- ==================== CARD DE DESTINO FIJO ==================== -->
+        <!-- ==================== CARD DE DESTINO (INICIAL) ==================== -->
         <androidx.cardview.widget.CardView
             android:id="@+id/destination_card"
             android:layout_width="match_parent"
@@ -110,7 +110,7 @@
             android:layout_margin="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp"
-            android:visibility="visible"
+            android:visibility="gone"
             android:animateLayoutChanges="true">
 
             <LinearLayout
@@ -359,6 +359,28 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
+                        <!-- Botones secundarios (Chat) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <!-- Botón Contactar Pasajero -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_contact_passenger"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:drawableStart="@drawable/ic_chat"
+                                android:drawablePadding="8dp"
+                                android:text="Chat"
+                                android:textAllCaps="false"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                app:strokeColor="?attr/colorOutline" />
+                        </LinearLayout>
+
                         <!-- Botón principal - Iniciar Viaje -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_start_trip"
@@ -372,45 +394,190 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
-                        <!-- Botones secundarios -->
-                        <LinearLayout
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== CARD DE NAVEGACIÓN (DURANTE EL VIAJE) ==================== -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/navigation_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:visibility="gone"
+            android:animateLayoutChanges="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Fila superior: Instrucción y tiempo restante -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:id="@+id/navigation_icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_navigation_arrow"
+                        android:layout_marginEnd="12dp"
+                        app:tint="?attr/colorPrimary" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/navigation_instruction"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:text="Continúa recto"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black" />
 
-                            <!-- Botón Contactar Pasajero -->
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_contact_passenger"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="48dp"
-                                android:layout_weight="1"
-                                android:layout_marginEnd="6dp"
-                                android:drawableStart="@drawable/ic_chat"
-                                android:drawablePadding="8dp"
-                                android:text="Chat"
-                                android:textAllCaps="false"
-                                android:textColor="?attr/colorOnSurfaceVariant"
-                                app:strokeColor="?attr/colorOutline" />
-
-                            <!-- Botón Llamar -->
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_call_passenger"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="48dp"
-                                android:layout_weight="1"
-                                android:layout_marginStart="6dp"
-                                android:drawableStart="@android:drawable/ic_menu_call"
-                                android:drawablePadding="8dp"
-                                android:text="Llamar"
-                                android:textAllCaps="false"
-                                android:textColor="?attr/colorOnSurfaceVariant"
-                                app:strokeColor="?attr/colorOutline" />
-
-                        </LinearLayout>
-
+                        <TextView
+                            android:id="@+id/navigation_distance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="en 500 m"
+                            android:textSize="14sp"
+                            android:textColor="#757575" />
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/navigation_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5 min"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary" />
+
+                </LinearLayout>
+
+                <!-- Fila inferior: Progreso y botón finalizar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/navigation_progress"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="75% completado"
+                        android:textSize="12sp"
+                        android:textColor="#757575" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_finalize_trip"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Finalizar viaje"
+                        android:textSize="12sp"
+                        android:textAllCaps="false" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== CARD DE FINALIZACIÓN (ESCANEAR QR) ==================== -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/finalize_trip_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:animateLayoutChanges="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center_horizontal">
+
+                <!-- Icono de QR -->
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_qr_code"
+                    android:layout_marginBottom="16dp"
+                    app:tint="?attr/colorPrimary" />
+
+                <!-- Título -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Finalizar viaje"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Mensaje -->
+                <TextView
+                    android:id="@+id/finalize_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Escanea el código QR del pasajero para confirmar la finalización del viaje"
+                    android:textSize="14sp"
+                    android:textColor="#757575"
+                    android:textAlignment="center"
+                    android:gravity="center"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- Botones -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_scan_qr"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Escanear QR"
+                        android:drawableStart="@drawable/ic_qr_code"
+                        android:drawablePadding="8dp"
+                        android:textAllCaps="false"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_cancel_finalize"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Cancelar"
+                        android:textAllCaps="false" />
 
                 </LinearLayout>
 
