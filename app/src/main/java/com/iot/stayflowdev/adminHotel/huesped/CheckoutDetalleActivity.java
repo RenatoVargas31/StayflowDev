@@ -24,12 +24,14 @@ import com.iot.stayflowdev.adminHotel.HuespedAdminActivity;
 import com.iot.stayflowdev.adminHotel.MensajeriaAdminActivity;
 import com.iot.stayflowdev.adminHotel.PerfilAdminActivity;
 import com.iot.stayflowdev.adminHotel.ReportesAdminActivity;
+import com.iot.stayflowdev.databinding.ActivityCheckoutDetalleBinding;
 import com.iot.stayflowdev.model.Reserva;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CheckoutDetalleActivity extends AppCompatActivity {
+    private ActivityCheckoutDetalleBinding binding;
 
     private String codigoReserva;
     private double montoTotalReserva = 0;
@@ -54,18 +56,19 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_checkout_detalle);
+        binding = ActivityCheckoutDetalleBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // Configurar toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
-            getSupportActionBar().setTitle("Checkout");
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         // Configurar bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
@@ -124,9 +127,30 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
     private void cargarDatosIntent() {
         Intent intent = getIntent();
         String nombre = intent.getStringExtra("nombre");
+        String idUsuario = intent.getStringExtra("idUsuario");
+
         codigoReserva = intent.getStringExtra("codigoReserva");
         String costoTotal = intent.getStringExtra("costoTotal");
         String tarjeta = intent.getStringExtra("tarjeta");
+
+        // Log para debugging
+        android.util.Log.d("CheckoutDetalle", "Nombre recibido: '" + nombre + "'");
+        android.util.Log.d("CheckoutDetalle", "Código reserva: " + codigoReserva);
+        android.util.Log.d("CheckoutDetalle", "ID Usuario recibido: " + idUsuario);
+
+
+        // Validar y usar nombre por defecto si es necesario
+        if (nombre == null || nombre.trim().isEmpty() || nombre.equalsIgnoreCase("Usuario") || nombre.equalsIgnoreCase("null")) {
+            if (idUsuario != null && !idUsuario.trim().isEmpty()) {
+                obtenerNombreUsuario(idUsuario); // Usar directamente
+            } else if (codigoReserva != null) {
+                obtenerNombreDesdeReserva(codigoReserva); // Fallback
+            } else {
+                establecerTituloCheckout("Huésped");
+            }
+        } else {
+            establecerTituloCheckout(nombre); // Nombre válido
+        }
 
         // Parsear costo total de la reserva
         try {
@@ -166,8 +190,10 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
             }
         }
 
-        // Mostrar en las vistas
-        ((TextView) findViewById(R.id.tvTituloCheckout)).setText("Checkout de " + nombre);
+        // Mostrar en las vistas solo si tenemos un nombre válido
+        if (nombre != null && !nombre.equals("Huésped")) {
+            establecerTituloCheckout(nombre);
+        }
 
         // Buscar tvTarjetaNumero con verificación de null
         TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
@@ -176,7 +202,88 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
         }
 
         // Actualizar subtotal
-        tvSubtotalHospedaje.setText(String.format("S/. %.2f", montoTotalReserva));
+        if (tvSubtotalHospedaje != null) {
+            tvSubtotalHospedaje.setText(String.format("S/. %.2f", montoTotalReserva));
+        }
+    }
+
+    private void obtenerNombreDesdeReserva(String reservaId) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("reservas")
+                .document(reservaId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String idUsuario = doc.getString("idUsuario");
+                        if (idUsuario != null) {
+                            android.util.Log.d("CheckoutDetalle", "Obteniendo nombre del usuario: " + idUsuario);
+                            obtenerNombreUsuario(idUsuario);
+                        } else {
+                            establecerTituloCheckout("Huésped");
+                        }
+                    } else {
+                        establecerTituloCheckout("Huésped");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CheckoutDetalle", "Error obteniendo reserva", e);
+                    establecerTituloCheckout("Huésped");
+                });
+    }
+
+    private void obtenerNombreUsuario(String idUsuario) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("usuarios")
+                .document(idUsuario)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String nombreReal = "Huésped";
+                    if (userDoc.exists()) {
+                        // Intentar varios campos
+                        String nombre = userDoc.getString("nombre");
+                        String firstName = userDoc.getString("firstName");
+                        String apellidos = userDoc.getString("apellidos");
+                        String email = userDoc.getString("email");
+                        String displayName = userDoc.getString("displayName");
+
+                        android.util.Log.d("CheckoutDetalle", "Campos del usuario:");
+                        android.util.Log.d("CheckoutDetalle", "- nombre: " + nombre);
+                        android.util.Log.d("CheckoutDetalle", "- firstName: " + firstName);
+                        android.util.Log.d("CheckoutDetalle", "- apellidos: " + apellidos);
+                        android.util.Log.d("CheckoutDetalle", "- email: " + email);
+                        android.util.Log.d("CheckoutDetalle", "- displayName: " + displayName);
+
+                        if (nombre != null && !nombre.trim().isEmpty()) {
+                            nombreReal = nombre;
+                        } else if (firstName != null && !firstName.trim().isEmpty()) {
+                            nombreReal = firstName;
+                            if (apellidos != null && !apellidos.trim().isEmpty()) {
+                                nombreReal += " " + apellidos;
+                            }
+                        } else if (apellidos != null && !apellidos.trim().isEmpty()) {
+                            nombreReal = apellidos; // ✅ usar apellidos si no hay nada más
+                        } else if (email != null && !email.trim().isEmpty()) {
+                            nombreReal = email.split("@")[0];
+                        } else if (displayName != null && !displayName.trim().isEmpty()) {
+                            nombreReal = displayName;
+                        }
+
+                    }
+                    android.util.Log.d("CheckoutDetalle", "Nombre final obtenido: " + nombreReal);
+                    establecerTituloCheckout(nombreReal);
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CheckoutDetalle", "Error obteniendo usuario", e);
+                    establecerTituloCheckout("Huésped");
+                });
+    }
+
+    private void establecerTituloCheckout(String nombre) {
+        TextView tvTituloCheckout = findViewById(R.id.tvTituloCheckout);
+        if (tvTituloCheckout != null) {
+            tvTituloCheckout.setText("Checkout de " + nombre);
+            android.util.Log.d("CheckoutDetalle", "Título establecido: Checkout de " + nombre);
+        }
     }
 
     private void cargarHabitaciones(String[] tipos, int[] cantidades, String[] precios) {

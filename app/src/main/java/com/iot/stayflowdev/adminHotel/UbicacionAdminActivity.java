@@ -49,13 +49,14 @@ public class UbicacionAdminActivity extends AppCompatActivity {
         });
 
         // Configura Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(true); // si quieres mostrar "Ubicación"
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 

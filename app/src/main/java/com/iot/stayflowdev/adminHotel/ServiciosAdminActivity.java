@@ -41,12 +41,14 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         binding = ActivityServiciosAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(binding.toolbar);
+        Toolbar toolbar = binding.toolbar;
+        setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(true); // si quieres mostrar "Ubicación"
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);

@@ -2,9 +2,16 @@ package com.iot.stayflowdev.adminHotel;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,19 +22,26 @@ import com.iot.stayflowdev.adminHotel.adapter.ServicioAdapter;
 import com.iot.stayflowdev.adminHotel.adapter.UsuarioAdapter;
 import com.iot.stayflowdev.adminHotel.model.Servicio;
 import com.iot.stayflowdev.adminHotel.model.Usuario;
+import com.iot.stayflowdev.adminHotel.repository.AdminHotelViewModel;
+import com.iot.stayflowdev.adminHotel.service.NotificacionService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReportesAdminActivity extends AppCompatActivity {
-
-    private ServicioAdapter servicioAdapter;
-    private UsuarioAdapter usuarioAdapter;
+    private ImageView notificationIcon;
+    private TextView badgeText;
+    private AdminHotelViewModel viewModel;
+    private NotificacionService notificacionService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reportes_admin);
+
+        inicializarVistas();
+        configurarViewModel();
+        configurarToolbar();
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -68,72 +82,67 @@ public class ReportesAdminActivity extends AppCompatActivity {
         recyclerServicios.setLayoutManager(new LinearLayoutManager(this));
         recyclerUsuarios.setLayoutManager(new LinearLayoutManager(this));
 
-        /*
-        servicioAdapter = new ServicioAdapter(new ArrayList<>());
-        usuarioAdapter = new UsuarioAdapter(new ArrayList<>());
 
-        recyclerServicios.setAdapter(servicioAdapter);
-        recyclerUsuarios.setAdapter(usuarioAdapter);
+    }
 
-        cargarDatosDiarios();
+    private void inicializarVistas() {
+        // Vistas existentes
 
-        chipGroupFiltros.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.chipDiario) {
-                cargarDatosDiarios();
-            } else if (checkedId == R.id.chipMensual) {
-                cargarDatosMensuales();
-            } else if (checkedId == R.id.chipAnual) {
-                cargarDatosAnuales();
-            }
+        // Nuevas vistas para notificaciones
+        notificationIcon = findViewById(R.id.notification_icon);
+        badgeText = findViewById(R.id.badge_text);
+
+        // Inicializar servicio de notificaciones
+        notificacionService = new NotificacionService(this);
+    }
+
+    private void configurarViewModel() {
+        // ViewModel
+        viewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+
+        // Observar notificaciones de checkout
+        viewModel.getContadorNotificaciones().observe(this, contador -> {
+            actualizarBadgeNotificaciones(contador);
+        });
+
+        // Cargar notificaciones al iniciar
+        viewModel.cargarNotificacionesCheckout();
+
+        // Iniciar actualizaciones automáticas cada 5 minutos
+        viewModel.iniciarActualizacionAutomatica();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Detener actualizaciones automáticas
+        if (viewModel != null) {
+            viewModel.detenerActualizacionAutomatica();
+        }
+    }
+    private void configurarToolbar() {
+        // Configurar click del icono de notificaciones
+        notificationIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(this, NotificacionesAdminActivity.class);
+            startActivity(intent);
         });
     }
-
-    private void cargarDatosDiarios() {
-        List<Servicio> servicios = new ArrayList<>();
-        servicios.add(new Servicio("Lavandería", 30, "S/.300"));
-        servicios.add(new Servicio("Desayuno", 55, "S/.550"));
-        servicios.add(new Servicio("Spa", 70, "S/.700"));
-
-        List<Usuario> usuarios = new ArrayList<>();
-        usuarios.add(new Usuario("Juan Pérez", 80, "S/.1000"));
-        usuarios.add(new Usuario("Ana Torres", 65, "S/.800"));
-        usuarios.add(new Usuario("Luis Gómez", 20, "S/.200"));
-        usuarios.add(new Usuario("Luisa Paverti", 20, "S/.100"));
-
-
-        servicioAdapter.updateData(servicios);
-        usuarioAdapter.updateData(usuarios);
+    private void actualizarBadgeNotificaciones(Integer contador) {
+        if (contador != null && contador > 0) {
+            badgeText.setVisibility(View.VISIBLE);
+            badgeText.setText(contador > 99 ? "99+" : String.valueOf(contador));
+        } else {
+            badgeText.setVisibility(View.GONE);
+        }
     }
 
-    private void cargarDatosMensuales() {
-        List<Servicio> servicios = new ArrayList<>();
-        servicios.add(new Servicio("Lavandería", 45, "S/.450"));
-        servicios.add(new Servicio("Desayuno", 60, "S/.600"));
-        servicios.add(new Servicio("Spa", 75, "S/.750"));
-
-        List<Usuario> usuarios = new ArrayList<>();
-        usuarios.add(new Usuario("Juan Pérez", 70, "S/.900"));
-        usuarios.add(new Usuario("Ana Torres", 85, "S/.1100"));
-        usuarios.add(new Usuario("Luis Gómez", 40, "S/.400"));
-
-        servicioAdapter.updateData(servicios);
-        usuarioAdapter.updateData(usuarios);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Actualizar notificaciones cuando regresamos a esta activity
+        if (viewModel != null) {
+            viewModel.cargarNotificacionesCheckout();
+        }
     }
 
-    private void cargarDatosAnuales() {
-        List<Servicio> servicios = new ArrayList<>();
-        servicios.add(new Servicio("Lavandería", 60, "S/.600"));
-        servicios.add(new Servicio("Desayuno", 80, "S/.800"));
-        servicios.add(new Servicio("Spa", 90, "S/.900"));
 
-        List<Usuario> usuarios = new ArrayList<>();
-        usuarios.add(new Usuario("Juan Pérez", 85, "S/.1200"));
-        usuarios.add(new Usuario("Ana Torres", 75, "S/.1000"));
-        usuarios.add(new Usuario("Luis Gómez", 65, "S/.700"));
-
-        servicioAdapter.updateData(servicios);
-        usuarioAdapter.updateData(usuarios);
-
-         */
-    }
 }
