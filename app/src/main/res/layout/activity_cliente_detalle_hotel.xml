@@ -566,17 +566,160 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Botón movido aquí desde dentro del scroll -->
+        <!-- Sección de fechas y huéspedes - INICIALMENTE OCULTA -->
+        <LinearLayout
+            android:id="@+id/layoutFormularioReserva"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+
+            <!-- Título del formulario -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Completa tu reserva"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Fila de fechas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <!-- Fecha de entrada -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilFechaInicio"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Fecha de entrada"
+                    app:startIconDrawable="@drawable/ic_calendar"
+                    app:startIconTint="@color/md_theme_primary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFechaInicio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:textSize="14sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Fecha de salida -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilFechaFin"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="Fecha de salida"
+                    app:startIconDrawable="@drawable/ic_calendar"
+                    app:startIconTint="@color/md_theme_primary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFechaFin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:textSize="14sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <!-- Fila de huéspedes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Adultos -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilAdultos"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Adultos"
+                    app:startIconDrawable="@drawable/ic_perfil"
+                    app:startIconTint="@color/md_theme_primary"
+                    app:helperText="Mínimo 1">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAdultos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:text="1"
+                        android:selectAllOnFocus="true"
+                        android:textSize="14sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Niños -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilNinos"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="Niños"
+                    app:startIconDrawable="@drawable/ic_perfil"
+                    app:startIconTint="@color/md_theme_primary"
+                    app:helperText="Opcional">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNinos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:text="0"
+                        android:selectAllOnFocus="true"
+                        android:textSize="14sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <!-- Divider visual opcional -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:background="@color/md_theme_outlineVariant" />
+
+        </LinearLayout>
+
+        <!-- Botón continuar - SIEMPRE VISIBLE -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContinuarReserva"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
+            android:minHeight="48dp"
             android:padding="12dp"
-            android:text="Continuar con la reserva"
+            android:text="Selecciona habitaciones"
             android:textAllCaps="false"
             android:textSize="16sp"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="8dp"
+            app:iconGravity="end" />
 
     </LinearLayout>
 
