@@ -269,15 +269,24 @@ public class ClientePerfilActivity extends AppCompatActivity {
             mostrarDialogoTarjetaCredito();
         });
 
-        // Configurar otros botones de edición si es necesario
+        // Configurar botón para editar domicilio
         binding.btnEditarDomicilio.setOnClickListener(v -> {
-            // TODO: Implementar diálogo para editar domicilio
-            Toast.makeText(this, "Función para editar domicilio no implementada", Toast.LENGTH_SHORT).show();
+            mostrarDialogoActualizarDomicilio();
         });
 
+        // También permitir hacer clic en toda la fila de domicilio
+        binding.layoutDomicilio.setOnClickListener(v -> {
+            mostrarDialogoActualizarDomicilio();
+        });
+
+        // Configurar botón para editar teléfono
         binding.btnEditarTelefono.setOnClickListener(v -> {
-            // TODO: Implementar diálogo para editar teléfono
-            Toast.makeText(this, "Función para editar teléfono no implementada", Toast.LENGTH_SHORT).show();
+            mostrarDialogoActualizarTelefono();
+        });
+
+        // También permitir hacer clic en toda la fila de teléfono
+        binding.layoutTelefono.setOnClickListener(v -> {
+            mostrarDialogoActualizarTelefono();
         });
 
         // Botón para cambiar foto de perfil
@@ -615,6 +624,164 @@ public class ClientePerfilActivity extends AppCompatActivity {
                     Toast.makeText(ClientePerfilActivity.this, "Error al actualizar foto de perfil", Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error al actualizar URL de imagen en Firestore", e);
                 });
+    }
+
+    /**
+     * Muestra un diálogo para actualizar el domicilio del usuario
+     */
+    private void mostrarDialogoActualizarDomicilio() {
+        try {
+            // Crear diálogo usando AlertDialog.Builder para mayor compatibilidad
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_actualizar_domicilio, null);
+            builder.setView(dialogView);
+
+            // Crear el diálogo
+            androidx.appcompat.app.AlertDialog domicilioDialog = builder.create();
+            domicilioDialog.setCancelable(true);
+
+            // Obtener referencias a las vistas del diálogo
+            TextInputLayout tilDomicilio = dialogView.findViewById(R.id.til_domicilio);
+            TextInputEditText etDomicilio = dialogView.findViewById(R.id.et_domicilio);
+            MaterialButton btnCancelar = dialogView.findViewById(R.id.btn_cancelar);
+            MaterialButton btnGuardar = dialogView.findViewById(R.id.btn_guardar);
+
+            // Obtener el domicilio actual del usuario
+            User currentUser = userViewModel.getUserData().getValue();
+            if (currentUser != null && currentUser.getDomicilio() != null) {
+                etDomicilio.setText(currentUser.getDomicilio());
+            }
+
+            // Configurar botones
+            btnCancelar.setOnClickListener(v -> domicilioDialog.dismiss());
+
+            btnGuardar.setOnClickListener(v -> {
+                // Obtener el nuevo domicilio
+                String nuevoDomicilio = etDomicilio.getText().toString().trim();
+
+                // Validar que no esté vacío
+                if (nuevoDomicilio.isEmpty()) {
+                    tilDomicilio.setError("El domicilio no puede estar vacío");
+                    return;
+                }
+
+                // Obtener ID del usuario actual
+                String userId = userViewModel.getCurrentUserId();
+                if (userId != null) {
+                    // Mostrar indicador de carga
+                    mostrarCargando(true);
+
+                    // Actualizar domicilio en Firestore
+                    userViewModel.updateUserAddress(userId, nuevoDomicilio);
+
+                    // Observar resultado de la operación
+                    userViewModel.getOperationSuccessful().observe(this, success -> {
+                        if (success != null && success) {
+                            // La operación fue exitosa
+                            domicilioDialog.dismiss();
+                            Toast.makeText(this, "Domicilio actualizado correctamente", Toast.LENGTH_SHORT).show();
+                        }
+                        // Ocultar indicador de carga
+                        mostrarCargando(false);
+                    });
+                } else {
+                    Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Mostrar diálogo
+            domicilioDialog.show();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error al mostrar diálogo de domicilio", e);
+            Toast.makeText(this, "Error al abrir diálogo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Muestra un diálogo para actualizar el teléfono del usuario
+     */
+    private void mostrarDialogoActualizarTelefono() {
+        try {
+            // Crear diálogo usando AlertDialog.Builder para mayor compatibilidad
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_actualizar_telefono, null);
+            builder.setView(dialogView);
+
+            // Crear el diálogo
+            androidx.appcompat.app.AlertDialog telefonoDialog = builder.create();
+            telefonoDialog.setCancelable(true);
+
+            // Obtener referencias a las vistas del diálogo
+            TextInputLayout tilTelefono = dialogView.findViewById(R.id.til_telefono);
+            TextInputEditText etTelefono = dialogView.findViewById(R.id.et_telefono);
+            MaterialButton btnCancelar = dialogView.findViewById(R.id.btn_cancelar);
+            MaterialButton btnGuardar = dialogView.findViewById(R.id.btn_guardar);
+
+            // Obtener el teléfono actual del usuario
+            User currentUser = userViewModel.getUserData().getValue();
+            if (currentUser != null && currentUser.getTelefono() != null) {
+                // Quitar el prefijo +51 si existe
+                String telefono = currentUser.getTelefono();
+                if (telefono.startsWith("+51 ")) {
+                    telefono = telefono.substring(4);
+                }
+                etTelefono.setText(telefono);
+            }
+
+            // Configurar botones
+            btnCancelar.setOnClickListener(v -> telefonoDialog.dismiss());
+
+            btnGuardar.setOnClickListener(v -> {
+                // Obtener el nuevo teléfono
+                String nuevoTelefono = etTelefono.getText().toString().trim();
+
+                // Validar que no esté vacío
+                if (nuevoTelefono.isEmpty()) {
+                    tilTelefono.setError("El teléfono no puede estar vacío");
+                    return;
+                }
+
+                // Validar formato de teléfono (9 dígitos para Perú)
+                if (nuevoTelefono.length() != 9 || !nuevoTelefono.matches("\\d+")) {
+                    tilTelefono.setError("Ingrese un número de teléfono válido de 9 dígitos");
+                    return;
+                }
+
+                // Agregar prefijo +51 (Perú)
+                String telefonoCompleto = "+51 " + nuevoTelefono;
+
+                // Obtener ID del usuario actual
+                String userId = userViewModel.getCurrentUserId();
+                if (userId != null) {
+                    // Mostrar indicador de carga
+                    mostrarCargando(true);
+
+                    // Actualizar teléfono en Firestore
+                    userViewModel.updateUserPhone(userId, telefonoCompleto);
+
+                    // Observar resultado de la operación
+                    userViewModel.getOperationSuccessful().observe(this, success -> {
+                        if (success != null && success) {
+                            // La operación fue exitosa
+                            telefonoDialog.dismiss();
+                            Toast.makeText(this, "Teléfono actualizado correctamente", Toast.LENGTH_SHORT).show();
+                        }
+                        // Ocultar indicador de carga
+                        mostrarCargando(false);
+                    });
+                } else {
+                    Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Mostrar diálogo
+            telefonoDialog.show();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error al mostrar diálogo de teléfono", e);
+            Toast.makeText(this, "Error al abrir diálogo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Método para mostrar/ocultar estado de carga y bloquear interacciones
