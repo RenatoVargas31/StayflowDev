@@ -62,12 +62,45 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/buttonChat"
             app:layout_constraintStart_toEndOf="@+id/imageViewCalendar"
             app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
             tools:text="10 Jun 2025 - 15 Jun 2025" />
+
+        <!-- Botón de Chat -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonChat"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            app:icon="@drawable/ic_chat"
+            app:iconTint="@color/md_theme_primary"
+            app:layout_constraintEnd_toStartOf="@+id/buttonVerDetalles"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar"
+            android:contentDescription="Chat con administrador del hotel" />
+
+        <!-- Botón de Ver Detalles -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonVerDetalles"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Detalles"
+            android:textSize="12sp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar" />
 
         <!-- Divider -->
         <View
@@ -117,8 +150,8 @@
             android:paddingBottom="4dp"
             android:textColor="@color/md_theme_primary"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewTaxi"
             tools:text="Confirmada" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
