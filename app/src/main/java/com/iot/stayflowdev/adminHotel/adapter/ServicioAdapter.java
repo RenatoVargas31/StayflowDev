@@ -61,7 +61,6 @@ public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.Servic
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombreServicio);
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionServicio);
-            tvPrecio = itemView.findViewById(R.id.tvPrecioServicio);
             btnEditar = itemView.findViewById(R.id.btnEditarServicio);
             btnEliminar = itemView.findViewById(R.id.btnEliminarServicio);
         }

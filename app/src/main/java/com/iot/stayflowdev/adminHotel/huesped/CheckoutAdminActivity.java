@@ -2,8 +2,11 @@ package com.iot.stayflowdev.adminHotel.huesped;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +41,16 @@ public class CheckoutAdminActivity extends AppCompatActivity {
 
     private ActivityCheckoutAdminBinding binding;
     private List<Checkout> checkouts = new ArrayList<>();
+    private List<Checkout> checkoutsOriginales = new ArrayList<>(); // Lista completa sin filtrar
     private CheckoutAdapter adapter;
     private ImageView notificationIcon;
     private TextView badgeText;
     private AdminHotelViewModel viewModel;
     private NotificacionService notificacionService;
+
+    // Variables para filtros
+    private String busquedaActual = "";
+    private String filtroMontoActual = "Todos los montos";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +63,26 @@ public class CheckoutAdminActivity extends AppCompatActivity {
         configurarToolbar();
 
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("Checkout");
+        getSupportActionBar().setTitle("Checkout Pendientes");
 
         // Inicializar el adapter primero
         adapter = new CheckoutAdapter(checkouts, this);
         binding.recyclerCheckout.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerCheckout.setAdapter(adapter);
 
+        configurarBottomNavigation();
+        configurarFiltros();
+
+        // Cargar checkouts pendientes
+        AdminHotelViewModel viewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
+        viewModel.getHotelId().observe(this, hotelId -> {
+            if (hotelId != null && !hotelId.isEmpty()) {
+                cargarCheckoutsPendientes(hotelId);
+            }
+        });
+    }
+
+    private void configurarBottomNavigation() {
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.setSelectedItemId(R.id.menu_huesped);
         bottomNav.setOnItemSelectedListener(item -> {
@@ -89,56 +110,186 @@ public class CheckoutAdminActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
 
-        AdminHotelViewModel viewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
-        viewModel.getHotelId().observe(this, hotelId -> {
-            if (hotelId != null && !hotelId.isEmpty()) {
-                cargarCheckoutsDeHoy(hotelId);
+    private void configurarFiltros() {
+        // Configurar filtro por monto
+        String[] opcionesMontos = {
+                "Todos los montos",
+                "Menos de S/. 200",
+                "S/. 200 - S/. 500",
+                "S/. 500 - S/. 1000",
+                "Más de S/. 1000"
+        };
+
+        ArrayAdapter<String> adapterMonto = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                opcionesMontos
+        );
+
+        binding.inputFilter.setAdapter(adapterMonto);
+        binding.inputFilter.setText(filtroMontoActual, false);
+
+        // Listener para filtro de monto
+        binding.inputFilter.setOnItemClickListener((parent, view, position, id) -> {
+            filtroMontoActual = opcionesMontos[position];
+            aplicarFiltros();
+        });
+
+        // Buscador en tiempo real
+        binding.inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                busquedaActual = s.toString().trim();
+                aplicarFiltros();
             }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
     }
 
-    private void cargarCheckoutsDeHoy(String hotelId) {
+    private void aplicarFiltros() {
+        List<Checkout> checkoutsFiltrados = new ArrayList<>();
+
+        for (Checkout checkout : checkoutsOriginales) {
+            boolean pasaFiltros = true;
+
+            // Filtro de búsqueda: código de reserva O nombre de cliente
+            if (!busquedaActual.isEmpty()) {
+                String busquedaLower = busquedaActual.toLowerCase();
+                String nombreLower = checkout.getNombre().toLowerCase();
+                String codigoReserva = checkout.getCodigoReserva().toLowerCase();
+
+                if (!nombreLower.contains(busquedaLower) &&
+                        !codigoReserva.contains(busquedaLower)) {
+                    pasaFiltros = false;
+                }
+            }
+
+            // Filtro por monto
+            if (pasaFiltros && !filtroMontoActual.equals("Todos los montos")) {
+                pasaFiltros = aplicarFiltroMonto(checkout, filtroMontoActual);
+            }
+
+            if (pasaFiltros) {
+                checkoutsFiltrados.add(checkout);
+            }
+        }
+
+        // Actualizar adapter
+        adapter.updateItems(checkoutsFiltrados);
+
+        // Mostrar estadísticas y estado vacío
+        mostrarEstadisticasFiltros(checkoutsFiltrados.size(), checkoutsOriginales.size());
+        mostrarEstadoVacio(checkoutsFiltrados.isEmpty());
+    }
+
+    private boolean aplicarFiltroMonto(Checkout checkout, String filtro) {
+        double monto = obtenerMontoNumerico(checkout.getMontoHospedaje());
+
+        switch (filtro) {
+            case "Menos de S/. 200":
+                return monto < 200;
+            case "S/. 200 - S/. 500":
+                return monto >= 200 && monto <= 500;
+            case "S/. 500 - S/. 1000":
+                return monto > 500 && monto <= 1000;
+            case "Más de S/. 1000":
+                return monto > 1000;
+            default:
+                return true;
+        }
+    }
+
+    private double obtenerMontoNumerico(String montoTexto) {
+        try {
+            String numeroLimpio = montoTexto.replaceAll("[^0-9.]", "");
+            return numeroLimpio.isEmpty() ? 0.0 : Double.parseDouble(numeroLimpio);
+        } catch (NumberFormatException e) {
+            Log.w("CheckoutAdmin", "Error al parsear monto: " + montoTexto, e);
+            return 0.0;
+        }
+    }
+
+    private void mostrarEstadisticasFiltros(int resultados, int total) {
+        TextView tvEstadisticas = binding.tvEstadisticas;
+
+        if (total == 0) {
+            tvEstadisticas.setVisibility(View.GONE);
+            return;
+        }
+
+        if (!busquedaActual.isEmpty() || !filtroMontoActual.equals("Todos los montos")) {
+            // Solo mostrar si hay filtros activos
+            String mensaje = resultados + " de " + total + " checkouts encontrados";
+            tvEstadisticas.setText(mensaje);
+            tvEstadisticas.setVisibility(View.VISIBLE);
+        } else {
+            tvEstadisticas.setText(total + " checkouts pendientes");
+            tvEstadisticas.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void mostrarEstadoVacio(boolean mostrar) {
+        if (mostrar) {
+            binding.emptyStateLayout.setVisibility(View.VISIBLE);
+            binding.recyclerCheckout.setVisibility(View.GONE);
+
+            // Personalizar mensaje según el estado
+            TextView tvEmptyMessage = binding.tvEmptyMessage;
+            if (checkoutsOriginales.isEmpty()) {
+                tvEmptyMessage.setText("No hay checkouts pendientes");
+            } else {
+                tvEmptyMessage.setText("No se encontraron resultados");
+            }
+        } else {
+            binding.emptyStateLayout.setVisibility(View.GONE);
+            binding.recyclerCheckout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void cargarCheckoutsPendientes(String hotelId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Date hoy = obtenerSoloFecha(new Date()); // fecha actual sin hora
-        Date manana = obtenerSoloFecha(new Date(hoy.getTime() + 24 * 60 * 60 * 1000)); // día siguiente
+        Date hoy = obtenerSoloFecha(new Date());
 
-        Log.d("CheckoutAdmin", "Buscando checkouts para fecha: " + hoy);
+        Log.d("CheckoutAdmin", "Cargando checkouts pendientes para hotel: " + hotelId);
 
-        // Limpiar la lista antes de cargar nuevos datos
+        // Limpiar listas
         checkouts.clear();
+        checkoutsOriginales.clear();
         adapter.notifyDataSetChanged();
 
         db.collection("reservas")
                 .whereEqualTo("idHotel", hotelId)
-                .whereEqualTo("estado", "sin checkout") // Solo reservas sin checkout
+                .whereEqualTo("estado", "sin checkout")
                 .get()
                 .addOnSuccessListener(querySnapshots -> {
-                    Log.d("CheckoutAdmin", "Total reservas encontradas: " + querySnapshots.size());
+                    Log.d("CheckoutAdmin", "Total reservas sin checkout: " + querySnapshots.size());
 
                     if (querySnapshots.isEmpty()) {
-                        Toast.makeText(this, "No hay checkouts para hoy", Toast.LENGTH_SHORT).show();
+                        mostrarEstadoVacio(true);
+                        mostrarEstadisticasFiltros(0, 0);
                         return;
                     }
 
-                    int reservasCheckoutHoy = 0;
+                    int checkoutsProcesados = 0;
 
                     for (QueryDocumentSnapshot doc : querySnapshots) {
                         try {
                             Reserva reserva = doc.toObject(Reserva.class);
-                            reserva.setId(doc.getId()); // Asegurar que el ID esté establecido
+                            reserva.setId(doc.getId());
 
                             if (reserva.getFechaFin() != null) {
                                 Date fechaSalida = obtenerSoloFecha(reserva.getFechaFin().toDate());
 
-                                Log.d("CheckoutAdmin", "Reserva " + reserva.getId() +
-                                        " - Fecha salida: " + fechaSalida +
-                                        " - Fecha hoy: " + hoy +
-                                        " - Son iguales: " + fechaSalida.equals(hoy));
-
-                                // Verificar si la fecha de salida es hoy
-                                if (fechaSalida.equals(hoy)) {
-                                    reservasCheckoutHoy++;
+                                // Incluir checkouts de hoy y días anteriores (pendientes)
+                                if (fechaSalida.equals(hoy) || fechaSalida.before(hoy)) {
+                                    checkoutsProcesados++;
                                     cargarDatosUsuarioYCrearCheckout(db, reserva);
                                 }
                             }
@@ -147,15 +298,17 @@ public class CheckoutAdminActivity extends AppCompatActivity {
                         }
                     }
 
-                    Log.d("CheckoutAdmin", "Reservas con checkout hoy: " + reservasCheckoutHoy);
+                    Log.d("CheckoutAdmin", "Checkouts pendientes procesados: " + checkoutsProcesados);
 
-                    if (reservasCheckoutHoy == 0) {
-                        Toast.makeText(this, "No hay checkouts programados para hoy", Toast.LENGTH_SHORT).show();
+                    if (checkoutsProcesados == 0) {
+                        mostrarEstadoVacio(true);
+                        mostrarEstadisticasFiltros(0, 0);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error al cargar checkouts: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e("CheckoutAdmin", "Error Firestore", e);
+                    mostrarEstadoVacio(true);
                 });
     }
 
@@ -200,10 +353,11 @@ public class CheckoutAdminActivity extends AppCompatActivity {
     }
 
     private void crearYAgregarCheckout(String nombreCompleto, Reserva reserva) {
-        // Calcular daños totales
-        String costoTotal = reserva.getCostoTotal() != null ? reserva.getCostoTotal() : "0";
+        // Usar directamente el costoTotal de la reserva (ya está bien calculado)
+        String costoReserva = reserva.getCostoTotal() != null ? reserva.getCostoTotal() : "0";
         String daniosTotales = "0";
 
+        // Calcular solo los daños adicionales
         if (reserva.getDanios() != null && !reserva.getDanios().isEmpty()) {
             double totalDanios = 0;
             for (Reserva.Danio danio : reserva.getDanios()) {
@@ -219,36 +373,34 @@ public class CheckoutAdminActivity extends AppCompatActivity {
                     Log.w("CheckoutAdmin", "Error al parsear precio de daño", e);
                 }
             }
-            daniosTotales = String.valueOf(totalDanios);
+            daniosTotales = String.format("%.2f", totalDanios);
         }
 
-        // Calcular total final
-        double costoNumerico = 0;
-        double daniosNumerico = 0;
-
-        try {
-            costoNumerico = Double.parseDouble(costoTotal.replaceAll("[^0-9.]", ""));
-            daniosNumerico = Double.parseDouble(daniosTotales);
-        } catch (NumberFormatException e) {
-            Log.w("CheckoutAdmin", "Error al parsear costos", e);
-        }
-
-        double totalFinal = costoNumerico + daniosNumerico;
+        // El total final es simplemente el costo de la reserva (por ahora)
+        // Más adelante, cuando implementes la actualización por daños, será: costoReserva + daños
+        String totalFinal = costoReserva;
 
         Checkout checkout = new Checkout(
                 nombreCompleto,
                 reserva.getId(),
-                "S/. " + costoTotal,
+                costoReserva, // Costo original de la reserva
                 "•••• 1234", // dato simulado por ahora
-                "S/. " + daniosTotales,
-                "S/. " + String.valueOf(totalFinal),
+                "S/. " + daniosTotales, // Daños adicionales
+                totalFinal, // Por ahora igual al costo de reserva
                 R.drawable.img_guest_placeholder,
                 reserva // Pasamos la reserva completa
         );
 
-        // Agregar al adapter usando el método personalizado
-        adapter.addItem(checkout);
-        Log.d("CheckoutAdmin", "Checkout agregado: " + nombreCompleto + " - Reserva: " + reserva.getId());
+        // Agregar a lista original
+        checkoutsOriginales.add(checkout);
+
+        // Aplicar filtros
+        aplicarFiltros();
+
+        Log.d("CheckoutAdmin", "Checkout agregado: " + nombreCompleto +
+                " - Reserva: " + reserva.getId() +
+                " - Costo: " + costoReserva +
+                " - Daños: S/. " + daniosTotales);
     }
 
     private Date obtenerSoloFecha(Date dateTime) {
@@ -262,8 +414,6 @@ public class CheckoutAdminActivity extends AppCompatActivity {
     }
 
     private void inicializarVistas() {
-        // Vistas existentes
-
         // Nuevas vistas para notificaciones
         notificationIcon = findViewById(R.id.notification_icon);
         badgeText = findViewById(R.id.badge_text);
@@ -287,6 +437,7 @@ public class CheckoutAdminActivity extends AppCompatActivity {
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -295,6 +446,7 @@ public class CheckoutAdminActivity extends AppCompatActivity {
             viewModel.detenerActualizacionAutomatica();
         }
     }
+
     private void configurarToolbar() {
         // Configurar click del icono de notificaciones
         notificationIcon.setOnClickListener(v -> {
@@ -302,6 +454,7 @@ public class CheckoutAdminActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+
     private void actualizarBadgeNotificaciones(Integer contador) {
         if (contador != null && contador > 0) {
             badgeText.setVisibility(View.VISIBLE);
@@ -318,5 +471,14 @@ public class CheckoutAdminActivity extends AppCompatActivity {
         if (viewModel != null) {
             viewModel.cargarNotificacionesCheckout();
         }
+    }
+
+    // Método opcional para limpiar filtros
+    private void limpiarFiltros() {
+        binding.inputSearch.setText("");
+        binding.inputFilter.setText("Todos los montos", false);
+        busquedaActual = "";
+        filtroMontoActual = "Todos los montos";
+        aplicarFiltros();
     }
 }

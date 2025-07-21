@@ -63,9 +63,9 @@ public class TaxiAdapter extends RecyclerView.Adapter<TaxiAdapter.TaxiViewHolder
         // Mostrar detalles del viaje
         String detalleViaje = taxi.getDetalleViaje();
         if (detalleViaje != null && !detalleViaje.isEmpty()) {
-            holder.detalleViaje.setText("Llegada: " + detalleViaje);
+            holder.detalleViaje.setText("Salida: " + detalleViaje);
         } else {
-            holder.detalleViaje.setText("Llegada: No especificada");
+            holder.detalleViaje.setText("Salida: No especificada");
         }
 
         // Mostrar ruta
@@ -88,6 +88,8 @@ public class TaxiAdapter extends RecyclerView.Adapter<TaxiAdapter.TaxiViewHolder
             intent.putExtra("detalleViaje", taxi.getDetalleViaje());
             intent.putExtra("ruta", taxi.getRuta());
             intent.putExtra("imagenResId", taxi.getImagenResId());
+            intent.putExtra("idTaxista", taxi.getIdTaxista());
+
             context.startActivity(intent);
         });
 

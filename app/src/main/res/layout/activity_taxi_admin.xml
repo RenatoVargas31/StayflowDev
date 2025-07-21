@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/md_theme_surface">
 
     <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -61,112 +62,121 @@
                 android:translationY="-6dp"
                 app:layout_constraintTop_toTopOf="@id/notification_icon"
                 app:layout_constraintEnd_toEndOf="@id/notification_icon" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Contenedor de búsqueda y filtros separados -->
-    <LinearLayout
-        android:id="@+id/searchFilterContainer"
+    <!-- CARD UNIFICADO PARA BUSCADOR Y FILTROS -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/searchFilterCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:orientation="vertical"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
+        app:strokeWidth="0dp"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Buscador -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <!-- BUSCADOR PRINCIPAL -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inputLayoutSearch"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
                 app:startIconDrawable="@drawable/ic_search"
+                app:startIconTint="@color/md_theme_primary"
                 app:endIconMode="clear_text"
                 android:hint="Buscar por nombre o código de reserva"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="2dp">
+                app:hintTextColor="@color/md_theme_onSurfaceVariant"
+                app:boxStrokeColor="@color/md_theme_primary"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSearch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:textSize="14sp" />
+
             </com.google.android.material.textfield.TextInputLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Filtros -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
-
+            <!-- CONTENEDOR DE FILTROS -->
             <LinearLayout
+                android:id="@+id/filtersContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="12dp">
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
 
-                <!-- Filtro por estado -->
+                <!-- FILTRO 1: Estado -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutFilter"
+                    android:id="@+id/inputLayoutFilter1"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    app:startIconDrawable="@drawable/ic_filter"
-                    android:hint="Filtrar por estado"
-                    app:boxStrokeWidth="0dp"
-                    app:boxStrokeWidthFocused="2dp">
+                    android:hint="Estado"
+                    app:hintTextColor="@color/md_theme_onSurfaceVariant"
+                    app:boxStrokeColor="@color/md_theme_primary"
+                    app:boxStrokeWidth="1dp"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusBottomEnd="8dp">
 
-                    <AutoCompleteTextView
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/inputFilter"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:focusable="false"
-                        android:focusableInTouchMode="false" />
+                        android:textSize="14sp" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Botón de limpiar filtros -->
+                <!-- BOTÓN LIMPIAR -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnClearFilters"
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="Limpiar"
-                    app:iconSize="18dp"
                     android:textSize="12sp"
                     android:minWidth="0dp"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </LinearLayout>
 
-    <!-- Chips para ordenar con mejor diseño -->
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- CHIPS PARA ORDENAR (fuera del card principal) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/sortCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         app:cardCornerRadius="12dp"
-        app:cardElevation="1dp"
-        app:layout_constraintTop_toBottomOf="@id/searchFilterContainer"
+        app:cardElevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/searchFilterCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -184,7 +194,7 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:layout_marginEnd="12dp"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/md_theme_onSurface" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupOrdenTaxi"
@@ -213,41 +223,42 @@
                     app:chipIcon="@drawable/ic_trending_down"
                     app:chipIconVisible="true"
                     app:chipIconSize="16dp" />
+
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Contador de resultados -->
+    <!-- ESTADÍSTICAS (fuera del card) -->
     <TextView
-        android:id="@+id/tvResultCount"
-        android:layout_width="0dp"
+        android:id="@+id/tvEstadisticas"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="12dp"
-        android:text="Mostrando 0 solicitudes"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="8dp"
+        android:text=""
         android:textSize="12sp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        app:layout_constraintTop_toBottomOf="@id/sortCard"
+        android:textColor="@color/md_theme_onSurfaceVariant"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/sortCard" />
 
-    <!-- RecyclerView -->
+    <!-- RECYCLERVIEW ESTÁNDAR -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerTaxi"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="16dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tvResultCount"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvEstadisticas"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Estado vacío -->
+    <!-- ESTADO VACÍO ESTÁNDAR -->
     <LinearLayout
-        android:id="@+id/emptyState"
+        android:id="@+id/emptyStateLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -259,28 +270,30 @@
         app:layout_constraintEnd_toEndOf="@id/recyclerTaxi">
 
         <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:src="@drawable/ic_search"
-            android:alpha="0.3"
-            app:tint="?attr/colorOnSurfaceVariant" />
+            app:tint="@color/md_theme_outline"
+            android:layout_marginBottom="16dp" />
 
         <TextView
+            android:id="@+id/tvEmptyMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No se encontraron solicitudes"
             android:textSize="16sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginTop="16dp" />
+            android:textColor="@color/md_theme_onSurfaceVariant"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Intenta cambiar los filtros de búsqueda"
+            android:layout_marginTop="8dp"
+            android:text="Intenta ajustar los filtros de búsqueda"
             android:textSize="14sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:alpha="0.7"
-            android:layout_marginTop="4dp" />
+            android:textColor="@color/md_theme_outline"
+            android:gravity="center" />
+
     </LinearLayout>
 
     <!-- Menú inferior -->

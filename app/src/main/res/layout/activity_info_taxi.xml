@@ -11,21 +11,23 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="64dp"
+        android:background="@color/md_theme_primary"
         android:elevation="4dp"
-        app:title="Stayflow"
-        app:titleCentered="true"
+        app:navigationIcon="@drawable/ic_arrowback"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/notification_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_notifications"
-            android:layout_gravity="end|center_vertical" />
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Información del Viaje"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- ScrollView para el contenido -->
@@ -94,55 +96,56 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvNombreConductor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nombre: Pedro Villa"
+                            android:text=" "
                             android:textAppearance="?attr/textAppearanceBodyLarge"
                             android:textColor="?attr/colorOnSurface" />
 
                         <TextView
+                            android:id="@+id/tvTelefono"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Modelo: Toyota Elantra"
+                            android:text="Teléfono: "
                             android:textAppearance="?attr/textAppearanceBodySmall"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
                         <TextView
+                            android:id="@+id/tvDni"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Placa Vehicular: AYD-023"
+                            android:text="DNI: "
                             android:textAppearance="?attr/textAppearanceBodySmall"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
                         <TextView
+                            android:id="@+id/tvModelo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Llamar al conductor"
-                            android:textAppearance="?attr/textAppearanceLabelSmall"
-                            android:textColor="?attr/colorPrimary" />
+                            android:text="Modelo de auto: "
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                         <TextView
+                            android:id="@+id/tvPlaca"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ver en el mapa"
-                            android:textAppearance="?attr/textAppearanceLabelSmall"
-                            android:textColor="?attr/colorPrimary" />
+                            android:text="Placa Vehicular: "
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Ruta: Aeropuerto → Hotel"
-                            android:textAppearance="?attr/textAppearanceLabelSmall"
-                            android:textColor="?attr/colorOnSurface" />
                     </LinearLayout>
 
                     <!-- Imagen del auto -->
                     <ImageView
+                        android:id="@+id/imgVehiculo"
                         android:layout_width="64dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_taxi"
                         android:layout_marginStart="12dp"
                         android:contentDescription="Foto del auto" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

@@ -125,22 +125,14 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
         MaterialAutoCompleteTextView dropdown = view.findViewById(R.id.dropdownTipoServicio);
         TextInputEditText etDescripcion = view.findViewById(R.id.inputDescription);
-        TextInputEditText etPrecio = view.findViewById(R.id.inputPrice);
-        RadioButton radioFree = view.findViewById(R.id.radioFree);
-        RadioButton radioWithPrice = view.findViewById(R.id.radioWithPrice);
 
-        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas"};
+
+        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas", "Gimnasio", "Spa"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, servicios);
         dropdown.setAdapter(adapter);
         dropdown.setKeyListener(null); // evita que escriban
         dropdown.setOnClickListener(v -> dropdown.showDropDown());
 
-        etPrecio.setEnabled(false);
-        radioFree.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            etPrecio.setEnabled(!isChecked);
-            if (isChecked) etPrecio.setText("");
-        });
-        radioWithPrice.setOnCheckedChangeListener((buttonView, isChecked) -> etPrecio.setEnabled(isChecked));
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Agregar Servicio")
@@ -148,10 +140,9 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                 .setPositiveButton("Guardar", (dialog, which) -> {
                     String nombre = dropdown.getText().toString().trim();
                     String descripcion = etDescripcion.getText().toString().trim();
-                    String precio = etPrecio.getText().toString().trim();
-                    boolean esGratis = radioFree.isChecked();
 
-                    if (nombre.isEmpty() || descripcion.isEmpty() || (!esGratis && precio.isEmpty())) {
+
+                    if (nombre.isEmpty() || descripcion.isEmpty()) {
                         mostrarError("Error", "Completa todos los campos antes de guardar.");
                         return;
                     }
@@ -159,8 +150,6 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                     Servicio s = new Servicio();
                     s.setNombre(nombre);
                     s.setDescripcion(descripcion);
-                    s.setPrecio(esGratis ? "Gratis" : precio);
-                    s.setEsGratis(esGratis);
 
                     servicioViewModel.agregar(hotelId, s, () -> mostrarMensaje("Servicio agregado correctamente."));
                 })
@@ -172,11 +161,8 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_agregar_servicio, null);
         MaterialAutoCompleteTextView dropdown = view.findViewById(R.id.dropdownTipoServicio);
         TextInputEditText etDescripcion = view.findViewById(R.id.inputDescription);
-        TextInputEditText etPrecio = view.findViewById(R.id.inputPrice);
-        RadioButton radioFree = view.findViewById(R.id.radioFree);
-        RadioButton radioWithPrice = view.findViewById(R.id.radioWithPrice);
 
-        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas"};
+        String[] servicios = {"Restaurante", "Piscina", "WiFi", "Estacionamiento", "Mascotas", "Gimnasio", "Spa"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, servicios);
         dropdown.setAdapter(adapter);
         dropdown.setKeyListener(null);
@@ -186,16 +172,6 @@ public class ServiciosAdminActivity extends AppCompatActivity {
         etDescripcion.setText(servicio.getDescripcion());
 
         boolean esGratis = servicio.getEsGratis() != null && servicio.getEsGratis();
-        radioFree.setChecked(esGratis);
-        radioWithPrice.setChecked(!esGratis);
-        etPrecio.setEnabled(!esGratis);
-        etPrecio.setText(esGratis ? "" : servicio.getPrecio());
-
-        radioFree.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            etPrecio.setEnabled(!isChecked);
-            if (isChecked) etPrecio.setText("");
-        });
-        radioWithPrice.setOnCheckedChangeListener((buttonView, isChecked) -> etPrecio.setEnabled(isChecked));
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Editar Servicio")
@@ -203,18 +179,14 @@ public class ServiciosAdminActivity extends AppCompatActivity {
                 .setPositiveButton("Actualizar", (dialog, which) -> {
                     String nombre = dropdown.getText().toString().trim();
                     String descripcion = etDescripcion.getText().toString().trim();
-                    String precio = etPrecio.getText().toString().trim();
-                    boolean esGratis2 = radioFree.isChecked();
 
-                    if (nombre.isEmpty() || descripcion.isEmpty() || (!esGratis2 && precio.isEmpty())) {
+                    if (nombre.isEmpty() || descripcion.isEmpty()) {
                         mostrarError("Error", "Completa todos los campos antes de guardar.");
                         return;
                     }
 
                     servicio.setNombre(nombre);
                     servicio.setDescripcion(descripcion);
-                    servicio.setPrecio(esGratis2 ? "Gratis" : precio);
-                    servicio.setEsGratis(esGratis2);
 
                     servicioViewModel.actualizar(hotelId, servicio, () -> mostrarMensaje("Servicio actualizado."));
                 })

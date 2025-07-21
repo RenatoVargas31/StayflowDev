@@ -235,6 +235,11 @@
         <activity
             android:name=".adminHotel.ChatSuperAdminActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".adminHotel.MensajeDetalleActivity"
+            android:exported="false" />
+
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
             android:exported="false" /> <!-- Receivers para notificaciones periódicas -->
