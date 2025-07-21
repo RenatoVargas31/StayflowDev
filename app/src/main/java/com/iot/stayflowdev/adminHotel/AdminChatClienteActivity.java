@@ -23,11 +23,13 @@ import com.google.firebase.Timestamp;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.adminHotel.model.ChatMessage;
 import com.iot.stayflowdev.adminHotel.adapter.ChatAdapter;
+import com.iot.stayflowdev.databinding.ActivityAdminChatClienteBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AdminChatClienteActivity extends AppCompatActivity {
+    private ActivityAdminChatClienteBinding binding;
 
     private static final String TAG = "AdminChatClienteActivity";
 
@@ -80,12 +82,15 @@ public class AdminChatClienteActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         messagesRecyclerView = findViewById(R.id.recyclerViewMessages);
         messageInput = findViewById(R.id.editTextMessage);
