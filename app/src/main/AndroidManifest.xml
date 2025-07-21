@@ -244,15 +244,8 @@
             android:exported="false" />
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
-            android:exported="false" /> <!-- Receivers para notificaciones periódicas -->
-        <receiver
-            android:name=".superAdmin.utils.ReportsCheckReceiver"
-            android:enabled="true"
             android:exported="false" />
-        <receiver
-            android:name=".superAdmin.utils.LogsCheckReceiver"
-            android:enabled="true"
-            android:exported="false" />
+        <!-- Receiver para reinicio del sistema -->
         <receiver
             android:name=".superAdmin.utils.BootReceiver"
             android:enabled="true"
@@ -260,7 +253,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver> <!-- FileProvider para compartir archivos generados -->
+        </receiver>
+        <!-- FileProvider para compartir archivos generados -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.iot.stayflowdev.fileprovider"

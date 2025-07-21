@@ -387,6 +387,16 @@
                         android:textColor="@color/md_theme_primary"
                         android:gravity="center"/>
 
+                    <!-- Botón Guardar Logs -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonGuardarLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Guardar Configuración de Logs"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
                     <!-- Botón Marcar Logs como Leídos -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonResetLogs"
