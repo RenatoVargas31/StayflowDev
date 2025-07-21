@@ -8,6 +8,166 @@
     android:layout_height="match_parent"
     tools:context=".cliente.ClienteReservasActivity">
 
+    <!-- ==================== BARRA SUPERIOR ==================== -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:liftOnScroll="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:titleCentered="true"
+            app:titleTextColor="@color/md_theme_primary"
+            app:title="Mis Reservas"
+            app:layout_scrollFlags="scroll|enterAlways|snap"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Sección de filtro por fecha -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Filtrar por fecha de creación"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Fecha desde -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/textInputFechaDesde"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:hint="Fecha desde"
+                        app:startIconDrawable="@drawable/ic_calendar">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextFechaDesde"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:inputType="none"
+                            android:clickable="true"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Fecha hasta -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/textInputFechaHasta"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Fecha hasta"
+                        app:startIconDrawable="@drawable/ic_calendar">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextFechaHasta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:inputType="none"
+                            android:clickable="true"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Botón de búsqueda -->
+                    <Button
+                        android:id="@+id/buttonBuscarReservas"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cornerRadius="4dp"
+                        android:text="Buscar reservas" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Resultados de la búsqueda -->
+            <TextView
+                android:id="@+id/textViewResultadosTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resultados"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"/>
+
+            <!-- RecyclerView para mostrar las reservas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewReservas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <!-- Estado de carga -->
+            <ProgressBar
+                android:id="@+id/progressBarReservas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
+            <!-- Estado vacío -->
+            <TextView
+                android:id="@+id/textViewNoReservas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No se encontraron reservas en el rango de fechas seleccionado"
+                android:textAlignment="center"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
+            <!-- Estado de error -->
+            <TextView
+                android:id="@+id/textViewError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ocurrió un error al cargar las reservas"
+                android:textAlignment="center"
+                android:textColor="?attr/colorError"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
     <!-- ==================== NAVEGACIÓN INFERIOR ==================== -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

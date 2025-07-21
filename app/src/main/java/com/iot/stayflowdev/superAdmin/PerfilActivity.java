@@ -22,7 +22,6 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -39,6 +38,7 @@ import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.User;
 import com.iot.stayflowdev.superAdmin.utils.NotificationPreferences;
 import com.iot.stayflowdev.superAdmin.utils.NotificationWorker;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -240,12 +240,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
                 Toast.makeText(PerfilActivity.this, "Imagen de perfil actualizada", Toast.LENGTH_SHORT).show();
 
                 // Actualizar la imagen en la interfaz
-                Glide.with(PerfilActivity.this)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_person)
-                    .error(R.drawable.ic_person)
-                    .circleCrop()
-                    .into(imageViewProfile);
+                ImageLoadingUtils.loadImageWithGlide(PerfilActivity.this, imageUrl, imageViewProfile, R.drawable.ic_person);
 
                 // Actualizar el objeto usuario
                 if (currentUser != null) {
@@ -360,12 +355,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
             imageViewProfile.setImageTintList(null);
             imageViewProfile.setPadding(0, 0, 0, 0);
 
-            Glide.with(this)
-                .load(currentUser.getFotoPerfilUrl())
-                .placeholder(R.drawable.ic_person)
-                .error(R.drawable.ic_person)
-                .circleCrop()
-                .into(imageViewProfile);
+            ImageLoadingUtils.loadImageWithGlide(this, currentUser.getFotoPerfilUrl(), imageViewProfile, R.drawable.ic_person);
         }
     }
 
@@ -818,4 +808,3 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         return "Perfil";
     }
 }
-

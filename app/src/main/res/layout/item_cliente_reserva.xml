@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/md_theme_primary"
+    app:strokeWidth="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Código de Reserva -->
+        <TextView
+            android:id="@+id/textViewCodigoReserva"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Reserva #R123456" />
+
+        <!-- Nombre del Hotel -->
+        <TextView
+            android:id="@+id/textViewNombreHotel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCodigoReserva"
+            tools:text="Grand Hotel Luxury" />
+
+        <!-- Icono de Calendario -->
+        <ImageView
+            android:id="@+id/imageViewCalendar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/ic_calendar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewNombreHotel"
+            app:tint="@color/md_theme_primary" />
+
+        <!-- Fechas de la Reserva -->
+        <TextView
+            android:id="@+id/textViewFechasReserva"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar"
+            app:layout_constraintEnd_toStartOf="@+id/buttonChat"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCalendar"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
+            tools:text="10 Jun 2025 - 15 Jun 2025" />
+
+        <!-- Botón de Chat -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonChat"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            app:icon="@drawable/ic_chat"
+            app:iconTint="@color/md_theme_primary"
+            app:layout_constraintEnd_toStartOf="@+id/buttonVerDetalles"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar"
+            android:contentDescription="Chat con administrador del hotel" />
+
+        <!-- Botón de Ver Detalles -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonVerDetalles"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Detalles"
+            android:textSize="12sp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCalendar"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCalendar" />
+
+        <!-- Divider -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/md_theme_surfaceVariant"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewCalendar" />
+
+        <!-- Icono de Taxi (si aplica) -->
+        <ImageView
+            android:id="@+id/imageViewTaxi"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/ic_taxi"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider"
+            app:tint="@color/md_theme_primary"
+            tools:visibility="visible" />
+
+        <!-- Texto Taxi -->
+        <TextView
+            android:id="@+id/textViewTaxi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Incluye servicio de taxi"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewTaxi"
+            app:layout_constraintStart_toEndOf="@+id/imageViewTaxi"
+            app:layout_constraintTop_toTopOf="@+id/imageViewTaxi"
+            tools:visibility="visible" />
+
+        <!-- Estado de la Reserva -->
+        <TextView
+            android:id="@+id/textViewEstado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/md_theme_primary"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewTaxi"
+            tools:text="Confirmada" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

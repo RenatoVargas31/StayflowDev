@@ -1,10 +1,14 @@
 package com.iot.stayflowdev.cliente;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -16,6 +20,8 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -30,15 +36,21 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.iot.stayflowdev.LoginFireBaseActivity;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.databinding.ActivityClientePerfilBinding;
 import com.iot.stayflowdev.model.TarjetaCredito;
 import com.iot.stayflowdev.model.User;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 import com.iot.stayflowdev.utils.UserSessionManager;
 import com.iot.stayflowdev.viewmodels.TarjetaCreditoViewModel;
 import com.iot.stayflowdev.viewmodels.UserViewModel;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 
 public class ClientePerfilActivity extends AppCompatActivity {
@@ -48,6 +60,9 @@ public class ClientePerfilActivity extends AppCompatActivity {
     private TarjetaCreditoViewModel tarjetaCreditoViewModel;
     private static final String TAG = "ClientePerfilActivity";
     private Dialog tarjetaDialog;
+
+    // ActivityResultLauncher para el resultado de la selección de imagen
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +81,22 @@ public class ClientePerfilActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0); // Sin padding inferior
             return insets;
         });
+
+        // Inicializar el ActivityResultLauncher para la selección de imágenes
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            Uri imageUri = data.getData();
+                            if (imageUri != null) {
+                                // Subir la imagen seleccionada a Firebase Storage
+                                subirImagenPerfil(imageUri);
+                            }
+                        }
+                    }
+                });
 
         // Inicializar ViewModels
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -134,7 +165,7 @@ public class ClientePerfilActivity extends AppCompatActivity {
                 Toast.makeText(ClientePerfilActivity.this, message, Toast.LENGTH_SHORT).show();
                 tarjetaCreditoViewModel.limpiarMensajes();
 
-                // Cerrar diálogo si está abierto
+                // Cerrar diálogo si est�� abierto
                 if (tarjetaDialog != null && tarjetaDialog.isShowing()) {
                     tarjetaDialog.dismiss();
                 }
@@ -247,6 +278,22 @@ public class ClientePerfilActivity extends AppCompatActivity {
         binding.btnEditarTelefono.setOnClickListener(v -> {
             // TODO: Implementar diálogo para editar teléfono
             Toast.makeText(this, "Función para editar teléfono no implementada", Toast.LENGTH_SHORT).show();
+        });
+
+        // Botón para cambiar foto de perfil
+        binding.buttonChangePicture.setOnClickListener(v -> {
+            // Abrir selector de imágenes
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
+        });
+
+        // Imagen de perfil clickeable para cambiar foto
+        binding.ivProfilePicture.setOnClickListener(v -> {
+            // Abrir selector de imágenes
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
         });
     }
 
@@ -451,7 +498,7 @@ public class ClientePerfilActivity extends AppCompatActivity {
 
     // Método para cerrar sesión
     private void cerrarSesion() {
-        // 1. Obtener el ID del usuario actual antes de cerrar sesión
+        // 1. Obtener el ID del usuario actual antes de cerrar sesi��n
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String currentUserEmail = null;
         if (auth.getCurrentUser() != null) {
@@ -506,4 +553,158 @@ public class ClientePerfilActivity extends AppCompatActivity {
         navigateToActivity(ClienteBuscarActivity.class);
         return true;
     }
+
+    private void abrirSelectorImagen() {
+        // Crear un intent para abrir el selector de imágenes
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        // Iniciar la actividad con el launcher
+        imagePickerLauncher.launch(intent);
+    }
+
+    private void subirImagenPerfil(Uri imageUri) {
+        // Mostrar indicador de carga y bloquear interacciones
+        mostrarCargando(true);
+
+        // Obtener referencia a Firebase Storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        // Crear referencia para la imagen del perfil del usuario
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            StorageReference profileImageRef = storageRef.child("fotos_perfil/" + userId + ".jpg");
+
+            // Subir la imagen
+            UploadTask uploadTask = profileImageRef.putFile(imageUri);
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // Obtener URL de la imagen subida
+                profileImageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
+                    // Actualizar URL de la imagen en Firestore
+                    actualizarURLImagenEnFirestore(userId, imageUrl);
+                });
+            }).addOnFailureListener(e -> {
+                // Ocultar indicador de carga y restaurar interacciones
+                mostrarCargando(false);
+                Toast.makeText(ClientePerfilActivity.this, "Error al subir la imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error al subir imagen de perfil", e);
+            });
+        } else {
+            mostrarCargando(false);
+            Toast.makeText(this, "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void actualizarURLImagenEnFirestore(String userId, String imageUrl) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("usuarios")
+                .document(userId)
+                .update("fotoPerfilUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    // Ocultar indicador de carga y restaurar interacciones
+                    mostrarCargando(false);
+                    Toast.makeText(ClientePerfilActivity.this, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show();
+
+                    // Recargar datos del usuario para mostrar la nueva imagen
+                    cargarDatosUsuario();
+                })
+                .addOnFailureListener(e -> {
+                    // Ocultar indicador de carga y restaurar interacciones
+                    mostrarCargando(false);
+                    Toast.makeText(ClientePerfilActivity.this, "Error al actualizar foto de perfil", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error al actualizar URL de imagen en Firestore", e);
+                });
+    }
+
+    // Método para mostrar/ocultar estado de carga y bloquear interacciones
+    private void mostrarCargando(boolean mostrar) {
+        if (mostrar) {
+            // Mostrar indicador de progreso
+            binding.progressIndicator.setVisibility(View.VISIBLE);
+
+            // Deshabilitar navegación inferior
+            binding.bottomNavigation.setEnabled(false);
+            for (int i = 0; i < binding.bottomNavigation.getMenu().size(); i++) {
+                binding.bottomNavigation.getMenu().getItem(i).setEnabled(false);
+            }
+
+            // Deshabilitar botón de cambiar foto
+            binding.buttonChangePicture.setEnabled(false);
+
+            // Deshabilitar imagen de perfil clickeable
+            binding.ivProfilePicture.setEnabled(false);
+            binding.ivProfilePicture.setClickable(false);
+
+            // Deshabilitar todas las opciones editables
+            binding.layoutFechaNacimiento.setEnabled(false);
+            binding.layoutFechaNacimiento.setClickable(false);
+            binding.layoutDomicilio.setEnabled(false);
+            binding.layoutDomicilio.setClickable(false);
+            binding.layoutDocumento.setEnabled(false);
+            binding.layoutDocumento.setClickable(false);
+            binding.layoutCorreo.setEnabled(false);
+            binding.layoutCorreo.setClickable(false);
+            binding.layoutTelefono.setEnabled(false);
+            binding.layoutTelefono.setClickable(false);
+            binding.layoutTarjeta.setEnabled(false);
+            binding.layoutTarjeta.setClickable(false);
+
+            // Deshabilitar botones de edición
+            binding.btnEditarDomicilio.setEnabled(false);
+            binding.btnEditarTelefono.setEnabled(false);
+            binding.btnEditarTarjeta.setEnabled(false);
+
+            // Deshabilitar scroll
+            binding.scrollView.setEnabled(false);
+
+            // Opcional: Cambiar alpha para indicar visualmente que está deshabilitado
+            binding.bottomNavigation.setAlpha(0.5f);
+            binding.buttonChangePicture.setAlpha(0.5f);
+
+        } else {
+            // Ocultar indicador de progreso
+            binding.progressIndicator.setVisibility(View.GONE);
+
+            // Habilitar navegación inferior
+            binding.bottomNavigation.setEnabled(true);
+            for (int i = 0; i < binding.bottomNavigation.getMenu().size(); i++) {
+                binding.bottomNavigation.getMenu().getItem(i).setEnabled(true);
+            }
+
+            // Habilitar botón de cambiar foto
+            binding.buttonChangePicture.setEnabled(true);
+
+            // Habilitar imagen de perfil clickeable
+            binding.ivProfilePicture.setEnabled(true);
+            binding.ivProfilePicture.setClickable(true);
+
+            // Habilitar todas las opciones editables
+            binding.layoutFechaNacimiento.setEnabled(true);
+            binding.layoutFechaNacimiento.setClickable(true);
+            binding.layoutDomicilio.setEnabled(true);
+            binding.layoutDomicilio.setClickable(true);
+            binding.layoutDocumento.setEnabled(true);
+            binding.layoutDocumento.setClickable(true);
+            binding.layoutCorreo.setEnabled(true);
+            binding.layoutCorreo.setClickable(true);
+            binding.layoutTelefono.setEnabled(true);
+            binding.layoutTelefono.setClickable(true);
+            binding.layoutTarjeta.setEnabled(true);
+            binding.layoutTarjeta.setClickable(true);
+
+            // Habilitar botones de edición
+            binding.btnEditarDomicilio.setEnabled(true);
+            binding.btnEditarTelefono.setEnabled(true);
+            binding.btnEditarTarjeta.setEnabled(true);
+
+            // Habilitar scroll
+            binding.scrollView.setEnabled(true);
+
+            // Restaurar alpha normal
+            binding.bottomNavigation.setAlpha(1.0f);
+            binding.buttonChangePicture.setAlpha(1.0f);
+        }
+    }
 }
+

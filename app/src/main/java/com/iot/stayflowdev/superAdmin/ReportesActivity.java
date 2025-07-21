@@ -232,9 +232,9 @@ public class ReportesActivity extends BaseSuperAdminActivity {
     }
 
     private void navigateToFilterView(Hotel hotel) {
-        Log.d(TAG, "Navegando a filtros para hotel: " + hotel.getNombre() + " (ID: " + hotel.getId() + ")");
+        Log.d(TAG, "Navegando a detalles para hotel: " + hotel.getNombre() + " (ID: " + hotel.getId() + ")");
 
-        // Usar el nuevo método estático que pasa tanto el nombre como el ID
-        FilterReportActivity.start(this, hotel.getNombre(), hotel.getId());
+        // Navegar a la nueva vista de detalles del hotel
+        HotelDetailActivity.start(this, hotel.getId(), hotel.getNombre());
     }
 }
