@@ -53,14 +53,16 @@ public class ClienteReservasActivity extends AppCompatActivity {
             if (itemId == R.id.nav_buscar) {
                 navigateToActivity(ClienteBuscarActivity.class);
                 return true;
-            } else if (itemId == R.id.nav_favoritos) {
-                navigateToActivity(ClienteFavoritosActivity.class);
-                return true;
             } else if (itemId == R.id.nav_perfil) {
                 navigateToActivity(ClientePerfilActivity.class);
                 return true;
             }
-
+            /*
+            else if (itemId == R.id.nav_favoritos) {
+                navigateToActivity(ClienteFavoritosActivity.class);
+                return true;
+            }
+            */
             return false;
         });
     }
