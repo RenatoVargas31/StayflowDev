@@ -247,7 +247,14 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         String contraseña = password.getText().toString();
         boolean habilitado = switchHabilitado.isChecked();
 
-        // GUARDAR LA SESIÓN ACTUAL DEL SUPER ADMIN antes de crear el nuevo usuario
+        // GUARDAR LA INFORMACIÓN DEL SUPER ADMIN ACTUAL
+        if (mAuth.getCurrentUser() == null) {
+            setLoadingState(false);
+            Snackbar.make(findViewById(android.R.id.content),
+                         "Error: No hay usuario autenticado", Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
         String superAdminEmail = mAuth.getCurrentUser().getEmail();
         String superAdminUid = mAuth.getCurrentUser().getUid();
 
@@ -256,11 +263,11 @@ public class AddHotelAdminActivity extends AppCompatActivity {
             .addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     // El usuario se creó correctamente en Auth
-                    String uid = task.getResult().getUser().getUid();
-                    Log.d(TAG, "Usuario creado con UID: " + uid);
+                    String newAdminUid = task.getResult().getUser().getUid();
+                    Log.d(TAG, "Nuevo administrador creado con UID: " + newAdminUid);
 
                     // Ahora, guardar los datos en Firestore
-                    guardarUsuarioEnFirestore(uid, nombres, apellidos, email, telefono,
+                    guardarUsuarioEnFirestore(newAdminUid, nombres, apellidos, email, telefono,
                                              tipoDocumento, numeroDocumento, habilitado,
                                              superAdminEmail, superAdminUid);
                 } else {
@@ -282,70 +289,33 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         Map<String, Object> userData = new HashMap<>();
         userData.put("nombres", nombres);
         userData.put("apellidos", apellidos);
-        userData.put("correo", email);  // Cambiado de "email" a "correo"
+        userData.put("correo", email);
         userData.put("telefono", telefono);
         userData.put("rol", "adminhotel");
-        userData.put("estado", habilitado); // Ahora guardamos el valor booleano directamente
+        userData.put("estado", habilitado);
         userData.put("tipoDocumento", tipoDocumento);
         userData.put("numeroDocumento", numeroDocumento);
         userData.put("fotoPerfilUrl", "");
-        userData.put("fechaNacimiento", "");  // Campo requerido pero vacío por ahora
-        userData.put("domicilio", "");  // Campo requerido pero vacío por ahora
+        userData.put("fechaNacimiento", "");
+        userData.put("domicilio", "");
 
         // Datos específicos para admin_hotel
         Map<String, Object> datosEspecificos = new HashMap<>();
-        datosEspecificos.put("hotel", "");  // Se actualizará después en otra pantalla
+        datosEspecificos.put("hotel", "");
         userData.put("datosEspecificos", datosEspecificos);
 
-        // IMPORTANTE: Usamos .document(uid).set() para asegurarnos de que el documento
-        // tenga el mismo ID que el usuario en Firebase Auth, evitando así documentos duplicados
+        // Guardar en Firestore
         db.collection("usuarios").document(uid)
             .set(userData)
             .addOnSuccessListener(aVoid -> {
                 Log.d(TAG, "Documento guardado correctamente con UID: " + uid);
 
-                // IMPORTANTE: Cerrar sesión del usuario recién creado y restaurar la sesión del super admin
+                // CERRAR SESIÓN DEL NUEVO ADMIN Y RECUPERAR DATOS DEL SUPERADMIN
                 mAuth.signOut();
 
-                // Restaurar la sesión del super admin usando signInWithEmailAndPassword
-                // Nota: Esto requiere que tengamos la contraseña del super admin, lo cual no es seguro
-                // Una mejor alternativa es usar Firebase Admin SDK en el backend
-
-                // Por ahora, simplemente cerramos sesión del nuevo usuario
-                // El super admin tendrá que volver a iniciar sesión
-                Log.d(TAG, "Sesión del nuevo admin cerrada. Super admin debe volver a iniciar sesión.");
-
-                // Registrar en el servicio de logs
-                registrarCreacionAdministrador(uid, nombres, apellidos, email, telefono, tipoDocumento, numeroDocumento, habilitado);
-
-                setLoadingState(false);
-
-                // Mostrar mensaje explicativo al usuario
-                Snackbar.make(findViewById(android.R.id.content),
-                            "Administrador creado exitosamente. Por seguridad, debe volver a iniciar sesión.",
-                            Snackbar.LENGTH_LONG).show();
-
-                // Crear un Intent con los datos completos para actualizar la UI
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra(EXTRA_ADMIN_NAME, nombres);
-                resultIntent.putExtra(EXTRA_ADMIN_APELLIDOS, apellidos);
-                resultIntent.putExtra(EXTRA_ADMIN_EMAIL, email);
-                resultIntent.putExtra(EXTRA_ADMIN_ROLE, "adminhotel");
-                resultIntent.putExtra(EXTRA_ADMIN_ROLE_DESC, "Administrador de Hotel");
-                resultIntent.putExtra(EXTRA_ADMIN_ENABLED, habilitado);
-                resultIntent.putExtra("REQUIRE_REAUTH", true); // Indicar que se requiere re-autenticación
-
-                // Establecer el resultado y finalizar
-                setResult(RESULT_OK, resultIntent);
-
-                // Redirigir al login después de un breve delay
-                new android.os.Handler().postDelayed(() -> {
-                    // Ir a la pantalla de login
-                    Intent loginIntent = new Intent(this, com.iot.stayflowdev.LoginActivity.class);
-                    loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(loginIntent);
-                    finish();
-                }, 2000); // 2 segundos de delay para que el usuario lea el mensaje
+                // Recuperar datos del superadmin desde Firestore para re-autenticarlo
+                recuperarSesionSuperAdmin(superAdminUid, uid, nombres, apellidos,
+                                        email, telefono, tipoDocumento, numeroDocumento, habilitado);
             })
             .addOnFailureListener(e -> {
                 Log.w(TAG, "Error al guardar documento", e);
@@ -356,33 +326,208 @@ public class AddHotelAdminActivity extends AppCompatActivity {
             });
     }
 
-    private void registrarCreacionAdministrador(String uid, String nombres, String apellidos,
-                                               String email, String telefono, String tipoDocumento,
-                                               String numeroDocumento, boolean habilitado) {
-        // Inicializar el servicio de logs si no existe
-        if (logService == null) {
-            logService = new LogService();
-        }
+    private void recuperarSesionSuperAdmin(String superAdminUid, String newAdminUid,
+                                         String nombres, String apellidos, String email,
+                                         String telefono, String tipoDocumento,
+                                         String numeroDocumento, boolean habilitado) {
 
-        // Crear el nombre completo del administrador
-        String nombreCompleto = nombres + " " + apellidos;
+        // Obtener los datos del superadmin desde Firestore
+        db.collection("usuarios").document(superAdminUid)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String superAdminEmail = documentSnapshot.getString("correo");
 
-        // Usar el método logUserCreation del LogService para registrar la creación del administrador
-        logService.logUserCreation(
-            uid,                // ID del usuario creado
-            nombreCompleto,     // Nombre completo del admin
-            email,              // Email del admin
-            "adminhotel"        // Rol del usuario
-        );
-
-        Log.d(TAG, "Log de creación de administrador registrado para: " + nombreCompleto);
+                    if (superAdminEmail != null) {
+                        // Mostrar diálogo para que el superadmin ingrese su contraseña
+                        mostrarDialogoReautenticacion(superAdminEmail, superAdminUid, newAdminUid,
+                                                    nombres, apellidos, email, telefono,
+                                                    tipoDocumento, numeroDocumento, habilitado);
+                    } else {
+                        // No se pudo obtener el email, redirigir al login
+                        redirigirAlLogin("No se pudo recuperar la sesión automáticamente");
+                    }
+                } else {
+                    redirigirAlLogin("No se encontraron datos del superadmin");
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error al recuperar datos del superadmin", e);
+                redirigirAlLogin("Error al recuperar la sesión");
+            });
     }
 
+    private void mostrarDialogoReautenticacion(String superAdminEmail, String superAdminUid,
+                                             String newAdminUid, String nombres, String apellidos,
+                                             String email, String telefono, String tipoDocumento,
+                                             String numeroDocumento, boolean habilitado) {
+
+        // Crear un diálogo personalizado para la contraseña
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Confirmar Identidad");
+        builder.setMessage("Para mantener su sesión activa, por favor ingrese su contraseña:");
+
+        // Crear el campo de entrada para la contraseña
+        final android.widget.EditText passwordInput = new android.widget.EditText(this);
+        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT |
+                                  android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        passwordInput.setHint("Contraseña del superadmin");
+        builder.setView(passwordInput);
+
+        builder.setPositiveButton("Confirmar", (dialog, which) -> {
+            String password = passwordInput.getText().toString();
+            if (!password.isEmpty()) {
+                // Intentar re-autenticar al superadmin
+                reautenticarSuperAdmin(superAdminEmail, password, superAdminUid, newAdminUid,
+                                     nombres, apellidos, email, telefono, tipoDocumento,
+                                     numeroDocumento, habilitado);
+            } else {
+                Snackbar.make(findViewById(android.R.id.content),
+                             "Debe ingresar la contraseña", Snackbar.LENGTH_SHORT).show();
+                redirigirAlLogin("Contraseña requerida para continuar");
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> {
+            redirigirAlLogin("Sesión no restaurada");
+        });
+
+        builder.setCancelable(false);
+        builder.show();
+    }
+
+    private void reautenticarSuperAdmin(String superAdminEmail, String password, String superAdminUid,
+                                       String newAdminUid, String nombres, String apellidos,
+                                       String email, String telefono, String tipoDocumento,
+                                       String numeroDocumento, boolean habilitado) {
+
+        // Re-autenticar al superadmin
+        mAuth.signInWithEmailAndPassword(superAdminEmail, password)
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "Superadmin re-autenticado exitosamente");
+
+                    // Registrar en el servicio de logs
+                    registrarCreacionAdministrador(newAdminUid, nombres, apellidos, email,
+                                                 telefono, tipoDocumento, numeroDocumento, habilitado);
+
+                    setLoadingState(false);
+
+                    // Mostrar mensaje de éxito
+                    Snackbar.make(findViewById(android.R.id.content),
+                                "✅ Administrador creado exitosamente. Sesión mantenida.",
+                                Snackbar.LENGTH_LONG).show();
+
+                    // Crear Intent con los datos para actualizar la UI
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra(EXTRA_ADMIN_NAME, nombres);
+                    resultIntent.putExtra(EXTRA_ADMIN_APELLIDOS, apellidos);
+                    resultIntent.putExtra(EXTRA_ADMIN_EMAIL, email);
+                    resultIntent.putExtra(EXTRA_ADMIN_ROLE, "adminhotel");
+                    resultIntent.putExtra(EXTRA_ADMIN_ROLE_DESC, "Administrador de Hotel");
+                    resultIntent.putExtra(EXTRA_ADMIN_ENABLED, habilitado);
+                    resultIntent.putExtra("REQUIRE_REAUTH", false); // NO se requiere re-autenticación
+
+                    setResult(RESULT_OK, resultIntent);
+
+                    // Cerrar la actividad después de un breve delay
+                    new android.os.Handler().postDelayed(() -> {
+                        finish();
+                    }, 1500);
+
+                } else {
+                    Log.w(TAG, "Error al re-autenticar superadmin", task.getException());
+                    setLoadingState(false);
+                    redirigirAlLogin("Contraseña incorrecta. Debe iniciar sesión nuevamente.");
+                }
+            });
+    }
+
+    private void redirigirAlLogin(String mensaje) {
+        setLoadingState(false);
+
+        Snackbar.make(findViewById(android.R.id.content), mensaje, Snackbar.LENGTH_LONG).show();
+
+        // Redirigir al login después de un breve delay
+        new android.os.Handler().postDelayed(() -> {
+            Intent loginIntent = new Intent(this, com.iot.stayflowdev.LoginActivity.class);
+            loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(loginIntent);
+            finish();
+        }, 2000);
+    }
+
+    // Métodos auxiliares que faltaban
     private void setLoadingState(boolean isLoading) {
         if (progressIndicator != null) {
             progressIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
-        buttonGuardar.setEnabled(!isLoading);
+
+        // Deshabilitar/habilitar botones durante la carga
+        if (buttonGuardar != null) {
+            buttonGuardar.setEnabled(!isLoading);
+        }
+
+        MaterialButton buttonContinuar = findViewById(R.id.buttonContinuar);
+        if (buttonContinuar != null) {
+            buttonContinuar.setEnabled(!isLoading);
+        }
+
+        // Cambiar texto del botón para indicar estado de carga
+        if (buttonGuardar != null) {
+            if (isLoading) {
+                buttonGuardar.setText("Creando...");
+            } else {
+                buttonGuardar.setText("Guardar Administrador");
+            }
+        }
+    }
+
+    private void registrarCreacionAdministrador(String uid, String nombres, String apellidos,
+                                              String email, String telefono, String tipoDocumento,
+                                              String numeroDocumento, boolean habilitado) {
+        try {
+            // Inicializar el servicio de logs si no existe
+            if (logService == null) {
+                logService = new LogService();
+            }
+
+            // Crear los datos del log
+            Map<String, Object> logData = new HashMap<>();
+            logData.put("timestamp", com.google.firebase.Timestamp.now());
+            logData.put("category", "user_management");
+            logData.put("title", "Nuevo administrador de hotel creado");
+
+            String description = String.format("Se creó un nuevo administrador de hotel:\n" +
+                                              "Nombre: %s %s\n" +
+                                              "Email: %s\n" +
+                                              "Teléfono: %s\n" +
+                                              "Documento: %s - %s\n" +
+                                              "Estado: %s",
+                                              nombres, apellidos, email, telefono,
+                                              tipoDocumento, numeroDocumento,
+                                              habilitado ? "Habilitado" : "Deshabilitado");
+
+            logData.put("description", description);
+            logData.put("leido", false);
+
+            // Datos adicionales
+            logData.put("adminId", uid);
+            logData.put("adminEmail", email);
+            logData.put("actionType", "admin_creation");
+
+            // Guardar en la colección system_logs
+            db.collection("system_logs")
+                .add(logData)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "Log de creación de administrador guardado: " + documentReference.getId());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al guardar log de creación de administrador", e);
+                });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error al crear log de creación de administrador", e);
+        }
     }
 }
-

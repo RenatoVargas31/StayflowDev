@@ -6,14 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.Hotel;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +112,9 @@ public class HotelAdapter
             Log.d(TAG, "Hotel sin administrador asignado");
         }
 
+        // Cargar imagen del hotel desde la galería
+        loadHotelImage(hotel, holder.imageViewHotel);
+
         // Hacer que toda la tarjeta sea clickeable
         holder.cardHotel.setOnClickListener(v -> {
             if (listener != null) {
@@ -165,12 +171,74 @@ public class HotelAdapter
     static class HotelViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardHotel;
         TextView textViewHotelName, textViewAdminName;
+        ImageView imageViewHotel; // Agregado para la imagen del hotel
 
         public HotelViewHolder(@NonNull View itemView) {
             super(itemView);
             cardHotel = itemView.findViewById(R.id.cardHotel);
             textViewHotelName = itemView.findViewById(R.id.textViewHotelName);
             textViewAdminName = itemView.findViewById(R.id.textViewAdminName);
+            imageViewHotel = itemView.findViewById(R.id.imageViewHotel); // Inicializado aquí
         }
+    }
+
+    private void loadHotelImage(Hotel hotel, ImageView imageView) {
+        // Establecer placeholder inicial
+        imageView.setImageResource(R.drawable.ic_apartment);
+
+        if (hotel.getId() == null || hotel.getId().isEmpty()) {
+            Log.w(TAG, "Hotel sin ID, no se puede cargar imagen");
+            return;
+        }
+
+        Log.d(TAG, "Cargando imagen para hotel: " + hotel.getNombre() + " (ID: " + hotel.getId() + ")");
+
+        // Consultar la colección 'galeria' del hotel para obtener las imágenes
+        FirebaseFirestore.getInstance()
+                .collection("hoteles")
+                .document(hotel.getId())
+                .collection("galeria")
+                .limit(1) // Solo obtener la primera imagen
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Obtener la primera imagen de la galería
+                        String imageUrl = queryDocumentSnapshots.getDocuments().get(0).getString("url");
+
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            Log.d(TAG, "Imagen encontrada para hotel " + hotel.getNombre() + ": " + imageUrl);
+
+                            // Usar la nueva utilidad optimizada para cargar la imagen
+                            ImageLoadingUtils.loadImageSafely(
+                                imageView.getContext(),
+                                imageUrl,
+                                imageView,
+                                R.drawable.ic_apartment,
+                                new ImageLoadingUtils.ImageLoadCallback() {
+                                    @Override
+                                    public void onLoadSuccess() {
+                                        // Limpiar fondo cuando la imagen carga exitosamente
+                                        imageView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                                    }
+
+                                    @Override
+                                    public void onLoadFailed() {
+                                        // Mantener fondo y placeholder
+                                        imageView.setBackgroundColor(imageView.getContext().getColor(R.color.md_theme_surfaceVariant));
+                                    }
+                                }
+                            );
+                        } else {
+                            Log.w(TAG, "URL de imagen vacía para hotel: " + hotel.getNombre());
+                        }
+                    } else {
+                        Log.w(TAG, "No se encontraron imágenes en la galería para hotel: " + hotel.getNombre());
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al consultar galería del hotel " + hotel.getNombre() + ": " + e.getMessage());
+                    // Mantener ícono por defecto en caso de error
+                    imageView.setImageResource(R.drawable.ic_apartment);
+                });
     }
 }

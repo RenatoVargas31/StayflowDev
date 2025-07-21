@@ -100,6 +100,9 @@
             android:name=".superAdmin.ReportesActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.HotelDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".superAdmin.ReportDetailActivity"
             android:exported="false" />
         <activity
