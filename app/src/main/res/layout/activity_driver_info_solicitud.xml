@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -33,24 +34,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- ScrollView para contener todo el contenido -->
+    <!-- Contenido principal -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintBottom_toTopOf="@+id/buttonContainer"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Chip de Estado de la solicitud -->
+            <!-- Estado y hora -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/estadoChip"
                 android:layout_width="wrap_content"
@@ -60,47 +62,49 @@
                 app:chipIconTint="#FF9800"
                 app:chipStrokeColor="#FF9800"
                 app:chipStrokeWidth="1dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:textStartPadding="8dp"
                 app:textEndPadding="8dp"
-                app:textStartPadding="8dp" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Hora de la solicitud -->
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/horaLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:text="Hora:"
                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                 android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginEnd="100dp" />
+                app:layout_constraintStart_toEndOf="@+id/estadoChip"
+                app:layout_constraintTop_toTopOf="@+id/estadoChip"
+                app:layout_constraintBottom_toBottomOf="@+id/estadoChip" />
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/horaValor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
                 android:text="15:30"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                 android:textColor="?attr/colorOnSurface"
-                app:layout_constraintStart_toEndOf="@+id/horaLabel"
+                app:layout_constraintStart_toEndOf="@id/horaLabel"
                 app:layout_constraintTop_toTopOf="@+id/horaLabel"
                 app:layout_constraintBottom_toBottomOf="@+id/horaLabel" />
-            <!-- Tarjeta de Información del Pasajero -->
+
+            <!-- Información del Pasajero -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pasajeroCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                style="@style/Widget.Material3.CardView.Outlined"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="?attr/colorOutline"
-                style="@style/Widget.Material3.CardView.Outlined"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/estadoChip"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/estadoChip">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -114,19 +118,20 @@
                         android:text="Información del Pasajero"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
+                    <!-- Nombre del pasajero -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/pasajeroIcon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginTop="16dp"
                         android:src="@drawable/ic_person"
+                        app:tint="?attr/colorPrimary"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/pasajeroTitulo"
-                        app:tint="?attr/colorPrimary" />
+                        app:layout_constraintTop_toBottomOf="@+id/pasajeroTitulo" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/nombrePasajero"
@@ -136,20 +141,21 @@
                         android:text="Juan Pérez Gómez"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/pasajeroIcon"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/pasajeroIcon"
                         app:layout_constraintBottom_toBottomOf="@+id/pasajeroIcon" />
 
+                    <!-- Teléfono del pasajero -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/telefonoIcon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginTop="16dp"
                         android:src="@drawable/ic_phone"
+                        app:tint="?attr/colorPrimary"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/pasajeroIcon"
-                        app:tint="?attr/colorPrimary" />
+                        app:layout_constraintTop_toBottomOf="@+id/pasajeroIcon" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/telefonoPasajero"
@@ -159,30 +165,32 @@
                         android:text="+51 999 888 777"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/telefonoIcon"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/telefonoIcon"
                         app:layout_constraintBottom_toBottomOf="@+id/telefonoIcon" />
 
+                    <!-- Separador -->
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/divider1"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/telefonoPasajero"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/telefonoPasajero" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
+                    <!-- Número de pasajeros -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/pasajerosIcon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginTop="16dp"
                         android:src="@drawable/ic_group_fill"
+                        app:tint="?attr/colorPrimary"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/divider1"
-                        app:tint="?attr/colorPrimary" />
+                        app:layout_constraintTop_toBottomOf="@+id/divider1" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/numeroPasajeros"
@@ -192,20 +200,21 @@
                         android:text="3 pasajeros"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/pasajerosIcon"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/pasajerosIcon"
                         app:layout_constraintBottom_toBottomOf="@+id/pasajerosIcon" />
 
+                    <!-- Tipo de vehículo -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/vehiculoIcon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginTop="16dp"
                         android:src="@drawable/ic_carro"
+                        app:tint="?attr/colorPrimary"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/pasajerosIcon"
-                        app:tint="?attr/colorPrimary" />
+                        app:layout_constraintTop_toBottomOf="@+id/pasajerosIcon" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tipoVehiculo"
@@ -215,21 +224,23 @@
                         android:text="Sedán estándar"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/vehiculoIcon"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/vehiculoIcon"
                         app:layout_constraintBottom_toBottomOf="@+id/vehiculoIcon" />
 
+                    <!-- Segundo separador -->
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/divider2"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tipoVehiculo"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tipoVehiculo" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
+                    <!-- Notas del pasajero -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -244,46 +255,47 @@
                             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                             android:textColor="?attr/colorOnSurface"
                             android:textSize="14sp"
-                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintEnd_toEndOf="parent" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/notasContenido"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Llevo dos maletas grandes. Por favor ayuda con equipaje. Soy sordo, prefiero comunicación por mensajes."
+                            android:text="Solicitud generada automáticamente"
                             android:textColor="?attr/colorOnSurface"
-                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/notasTitulo"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/notasTitulo" />
+                            app:layout_constraintEnd_toEndOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-            <!-- Tarjeta de Información del Recorrido -->
+
+            <!-- Información del Recorrido -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/recorridoCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                style="@style/Widget.Material3.CardView.Elevated"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="?attr/colorOutline"
-                style="@style/Widget.Material3.CardView.Elevated"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/pasajeroCard"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pasajeroCard">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
-                    <!-- Título de la sección -->
+                    <!-- Título del recorrido -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/recorridoTitulo"
                         android:layout_width="match_parent"
@@ -291,20 +303,20 @@
                         android:text="Información del Recorrido"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?attr/colorOnSurface"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- ORIGEN -->
+                    <!-- Origen -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/origenDot"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:layout_marginTop="20dp"
-                        android:src="@drawable/ic_location"
+                        android:src="@drawable/ic_hotel"
+                        app:tint="#1976D2"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/recorridoTitulo"
-                        app:tint="#1976D2" />
+                        app:layout_constraintTop_toBottomOf="@+id/recorridoTitulo" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/origenLabel"
@@ -319,60 +331,58 @@
                         app:layout_constraintTop_toTopOf="@+id/origenDot"
                         app:layout_constraintBottom_toBottomOf="@+id/origenDot" />
 
-                    <!-- Nombre del lugar de origen -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionOrigenName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Hotel Hilton Lima"
+                        android:text="Hotel"
                         android:textStyle="bold"
                         android:textSize="15sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/origenLabel"
                         app:layout_constraintStart_toStartOf="@+id/origenLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/origenLabel" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- Dirección del origen -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionOrigen"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Av. Javier Prado Este 1234, San Isidro, Lima"
+                        android:text="Dirección del hotel"
                         android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:maxLines="2"
                         android:ellipsize="end"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigenName"
                         app:layout_constraintStart_toStartOf="@+id/origenLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigenName" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- Línea vertical conectora -->
+                    <!-- Línea conectora -->
                     <View
                         android:id="@+id/lineaConectora"
                         android:layout_width="2dp"
                         android:layout_height="24dp"
-                        android:background="?attr/colorOutlineVariant"
                         android:layout_marginTop="8dp"
-                        app:layout_constraintEnd_toEndOf="@+id/origenDot"
+                        android:background="?attr/colorOutlineVariant"
+                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigen"
                         app:layout_constraintStart_toStartOf="@+id/origenDot"
-                        app:layout_constraintTop_toBottomOf="@+id/direccionOrigen" />
+                        app:layout_constraintEnd_toEndOf="@+id/origenDot" />
 
-                    <!-- DESTINO -->
+                    <!-- Destino -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/destinoDot"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:layout_marginTop="8dp"
-                        android:src="@drawable/ic_location"
+                        android:src="@drawable/ic_aeropuerto"
+                        app:tint="#2E7D32"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/lineaConectora"
-                        app:tint="#2E7D32" />
+                        app:layout_constraintTop_toBottomOf="@+id/lineaConectora" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/destinoLabel"
@@ -387,38 +397,36 @@
                         app:layout_constraintTop_toTopOf="@+id/destinoDot"
                         app:layout_constraintBottom_toBottomOf="@+id/destinoDot" />
 
-                    <!-- Nombre del lugar de destino -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionDestinoName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Centro Comercial Larcomar"
+                        android:text="Aeropuerto Internacional Jorge Chávez"
                         android:textStyle="bold"
                         android:textSize="15sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="?attr/colorOnSurface"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/destinoLabel"
                         app:layout_constraintStart_toStartOf="@+id/destinoLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/destinoLabel" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- Dirección del destino -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionDestino"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Malecón de la Reserva 610, Miraflores, Lima"
+                        android:text="Av. Elmer Faucett s/n, Callao 07031, Lima, Perú"
                         android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:maxLines="2"
                         android:ellipsize="end"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/direccionDestinoName"
                         app:layout_constraintStart_toStartOf="@+id/destinoLabel"
-                        app:layout_constraintTop_toBottomOf="@+id/direccionDestinoName" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
                     <!-- Detalles del recorrido -->
                     <com.google.android.material.card.MaterialCardView
@@ -426,11 +434,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
+                        style="@style/Widget.Material3.CardView.Filled"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp"
                         app:strokeWidth="1dp"
                         app:strokeColor="?attr/colorOutlineVariant"
-                        style="@style/Widget.Material3.CardView.Filled"
                         app:layout_constraintTop_toBottomOf="@+id/direccionDestino"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
@@ -461,9 +469,10 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="8.5 km"
+                                    android:text="Calculando..."
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
+
                             </LinearLayout>
 
                             <!-- Separador vertical -->
@@ -493,49 +502,41 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="25 min"
+                                    android:text="Calculando..."
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
+
                             </LinearLayout>
+
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Mapa de la ruta -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/mapaContainer"
+                    <!-- Mapa -->
+                    <FrameLayout
+                        android:id="@+id/map_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="200dp"
                         android:layout_marginTop="16dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        style="@style/Widget.Material3.CardView.Filled"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:background="#E0E0E0"
+                        app:layout_constraintTop_toBottomOf="@+id/detallesRecorrido"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/detallesRecorrido">
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                        <FrameLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="200dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Mapa de la ruta\n(Hotel → Aeropuerto)"
+                            android:textAlignment="center"
+                            android:textColor="#666"
+                            android:textSize="14sp" />
 
-                            <fragment
-                                android:id="@+id/rutaMapa"
-                                android:name="com.google.android.gms.maps.SupportMapFragment"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
-
-                            <com.google.android.material.progressindicator.CircularProgressIndicator
-                                android:id="@+id/mapaLoading"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:indeterminate="true"
-                                android:visibility="gone" />
-                        </FrameLayout>
-                    </com.google.android.material.card.MaterialCardView>
+                    </FrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-            <!-- Espacio adicional al final del scroll -->
+
+            <!-- Espacio final -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
@@ -544,15 +545,15 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Contenedor de botones en la parte inferior -->
+    <!-- Botones inferiores -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardElevation="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -560,21 +561,6 @@
             android:orientation="horizontal"
             android:padding="16dp"
             android:background="#FFFFFF">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRechazar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:text="Cancelar"
-                android:textColor="#93000a"
-                android:backgroundTint="#ffdad6"
-                android:textAllCaps="false"
-                android:paddingVertical="12dp"
-                android:textSize="16sp"
-                style="@style/Widget.Material3.Button.ElevatedButton"
-                app:strokeColor="#93000a" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAceptar"

@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NuevaSolicitudesRepository {
-
+/*
     private final FirebaseFirestore db;
     private final FirebaseAuth auth;
 
@@ -65,5 +65,5 @@ public class NuevaSolicitudesRepository {
                     System.err.println("Error al validar solicitud: " + e.getMessage());
                 });
     }
-
+*/
 }

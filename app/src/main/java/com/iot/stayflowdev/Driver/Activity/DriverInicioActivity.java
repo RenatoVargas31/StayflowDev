@@ -58,55 +58,50 @@ import java.util.Map;
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 
-
 public class DriverInicioActivity extends AppCompatActivity {
     private ActivityDriverInicioBinding binding;
     private static final String TAG = "DriverInicioActivity";
-    // Variables para adapter y lista
+
     private SolicitudesAdapter adapter;
     private List<SolicitudTaxi> solicitudes;
-    // Variables para notificaciones
     private String channelId = "channelDefaultPri";
     private String gpsChannelId = "channelGPSAlert";
-    // Repositories
+
     private TaxistaRepository taxistaRepository;
     private SolicitudesRepository solicitudesRepository;
+    private DistanceCalculator distanceCalculator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        // Inicializar View Binding
+
         binding = ActivityDriverInicioBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        // Configurar márgenes para barras del sistema
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
-        // Inicializar Repositories
+
         taxistaRepository = new TaxistaRepository();
-        solicitudesRepository = new SolicitudesRepository();
-        // Verificar autenticación y configurar usuario
+        solicitudesRepository = new SolicitudesRepository(this);
+        distanceCalculator = new DistanceCalculator(this);
+
         verificarAutenticacion();
-        // Crear canales de notificación primero
         crearCanalesNotificacion();
-        // Configurar todas las vistas
         configurarRecyclerView();
         configurarSwitch();
         configurarBottomNavigation();
         configurarNotificaciones();
-        // Establecer estado inicial
         actualizarEstadoUI(binding.statusSwitch.isChecked());
-        // Verificar GPS al iniciar la app
         verificarEstadoGPS();
-        // Cargar solicitudes
         inicializarSolicitudes();
     }
+
     private void verificarAutenticacion() {
         if (!taxistaRepository.usuarioEstaAutenticado()) {
-            Log.d(TAG, "No hay usuario autenticado.");
             redirigirALogin();
             return;
         }
@@ -114,11 +109,8 @@ public class DriverInicioActivity extends AppCompatActivity {
         taxistaRepository.obtenerTaxistaConImagen(
                 taxistaConImagen -> {
                     User usuario = taxistaConImagen.getUsuario();
-
-                    // Configurar nombre
                     binding.title.setText(usuario.getName());
 
-                    // Mostrar imagen
                     if (taxistaConImagen.tieneImagen()) {
                         Glide.with(this)
                                 .load(taxistaConImagen.getUrlImagen())
@@ -137,106 +129,72 @@ public class DriverInicioActivity extends AppCompatActivity {
         );
     }
 
-
-    private void configurarUsuario(User usuario) {
-        Log.d(TAG, "Usuario obtenido exitosamente");
-        Log.d(TAG, "UID: " + usuario.getUid());
-        Log.d(TAG, "Nombre: " + usuario.getName());
-        Log.d(TAG, "Email: " + usuario.getEmail());
-        Log.d(TAG, "Rol: " + usuario.getRol());
-
-        // Mostrar el nombre en el título usando el método getName() de User
-        String nombreCompleto = usuario.getName();
-        binding.title.setText(nombreCompleto);
-
-        // Opcional: Guardar usuario en variable de clase si lo necesitas después
-        // this.usuarioActual = usuario;
-
-        // Opcional: Verificar si el usuario está habilitado
-        if (!usuario.isEstado()) {
-            Log.w(TAG, "Usuario deshabilitado");
-            mostrarMensajeUsuarioDeshabilitado();
-        }
-    }
-
     private void manejarErrorAutenticacion(Exception exception) {
-        Log.e(TAG, "Error al obtener información del usuario: " + exception.getMessage());
-        // AGREGAR ESTA LÍNEA:
         binding.userIcon.setImageResource(R.drawable.taxista);
-        // Manejar diferentes tipos de errores
         String mensaje = exception.getMessage();
         if (mensaje != null) {
             if (mensaje.contains("rol de taxista")) {
-                // Usuario no tiene permisos de taxista
                 mostrarMensajeRolIncorrecto();
             } else if (mensaje.contains("Usuario no encontrado")) {
-                // Usuario no existe en la base de datos
                 mostrarMensajeUsuarioNoEncontrado();
             } else {
-                // Otro tipo de error
                 mostrarMensajeErrorGeneral(mensaje);
             }
         }
-
-        // En caso de error crítico, redirigir al login
         redirigirALogin();
     }
+// EN DriverInicioActivity - SIMPLIFICAR:
+
     private void inicializarSolicitudes() {
-        // Primero generar solicitudes desde reservas con quieroTaxi=true
         generarSolicitudesDesdeReservas();
     }
+
     private void generarSolicitudesDesdeReservas() {
         solicitudesRepository.generarSolicitudesDesdeReservas(
-                cantidadGeneradas -> {
-                    Log.d(TAG, "Solicitudes generadas desde reservas: " + cantidadGeneradas);
-                    // Después de generar, cargar todas las solicitudes pendientes
-                    cargarSolicitudesPendientes();
-                },
-                exception -> {
-                    Log.e(TAG, "Error al generar solicitudes desde reservas: " + exception.getMessage());
-                    // Aunque falle la generación, intentar cargar las existentes
-                    cargarSolicitudesPendientes();
-                }
+                cantidadGeneradas -> cargarSolicitudesPendientes(), // ← Simplificado
+                exception -> cargarSolicitudesPendientes()
         );
     }
 
     private void cargarSolicitudesPendientes() {
         solicitudesRepository.obtenerSolicitudesPendientes(
-                this::configurarSolicitudes,
+                solicitudesObtenidas -> {
+                    configurarSolicitudes(solicitudesObtenidas); // ← Directo, sin cálculos
+                },
                 this::manejarErrorSolicitudes
         );
     }
 
+    private double calcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371;
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+
     private void configurarSolicitudes(List<SolicitudTaxi> solicitudesObtenidas) {
-        Log.d(TAG, "Solicitudes pendientes obtenidas: " + solicitudesObtenidas.size());
-
         this.solicitudes = solicitudesObtenidas;
-
         if (adapter != null) {
             adapter.setListaSolicitudes(new ArrayList<>(solicitudes));
         }
-
         mostrarMensajeSiCorresponde();
     }
 
     private void manejarErrorSolicitudes(Exception exception) {
-        Log.e(TAG, "Error al cargar solicitudes: " + exception.getMessage());
-
-        // Inicializar lista vacía en caso de error
         this.solicitudes = new ArrayList<>();
-
         if (adapter != null) {
             adapter.setListaSolicitudes(solicitudes);
         }
-
-        // Mostrar mensaje de error si el switch está activado
         if (binding.statusSwitch.isChecked()) {
             binding.tvSinSolicitudes.setVisibility(View.VISIBLE);
             binding.tvSinSolicitudes.setText("Error al cargar solicitudes");
         }
-
-        Toast.makeText(this, "Error al cargar solicitudes: " + exception.getMessage(),
-                Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Error al cargar solicitudes: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     private void mostrarMensajeSiCorresponde() {
@@ -248,55 +206,15 @@ public class DriverInicioActivity extends AppCompatActivity {
         }
     }
 
-    // Método para refrescar solicitudes (útil para pull-to-refresh)
     public void refrescarSolicitudes() {
-        Log.d(TAG, "Refrescando solicitudes...");
-
-        // Mostrar indicador de carga si lo tienes
-        // binding.progressBar.setVisibility(View.VISIBLE);
-
         generarSolicitudesDesdeReservas();
     }
 
-    /*// Método para aceptar una solicitud
-    public void aceptarSolicitud(String solicitudId) {
-        String taxistaId = taxistaRepository.obtenerUidActual();
-
-        solicitudesRepository.aceptarSolicitud(solicitudId, taxistaId,
-                aVoid -> {
-                    Log.d(TAG, "Solicitud aceptada exitosamente");
-                    Toast.makeText(this, "Solicitud aceptada", Toast.LENGTH_SHORT).show();
-
-                    // Refrescar la lista para quitar la solicitud aceptada
-                    cargarSolicitudesPendientes();
-
-                    // Opcional: Navegar a la actividad del mapa o viaje
-                    navegarAViaje(solicitudId);
-                },
-                exception -> {
-                    Log.e(TAG, "Error al aceptar solicitud: " + exception.getMessage());
-                    Toast.makeText(this, "Error al aceptar solicitud", Toast.LENGTH_SHORT).show();
-                }
-        );
-    } */
-
-    private void navegarAViaje(String solicitudId) {
-        Intent intent = new Intent(this, DriverMapaActivity.class);
-        intent.putExtra("solicitud_id", solicitudId);
-        intent.putExtra("en_viaje", true);
-        startActivity(intent);
-    }
-
-    // Métodos de configuración que permanecen igual...
     private void configurarRecyclerView() {
         binding.rvSolicitudesCercanas.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SolicitudesAdapter();
         adapter.setContext(this);
         adapter.setListaSolicitudes(new ArrayList<>());
-
-        // Opcional: Configurar callback para cuando se acepte una solicitud
-        //adapter.setOnSolicitudAceptadaListener(this::aceptarSolicitud);
-
         binding.rvSolicitudesCercanas.setAdapter(adapter);
     }
 
@@ -309,7 +227,6 @@ public class DriverInicioActivity extends AppCompatActivity {
                     configurarSwitch();
                     return;
                 }
-                // Cuando se active, refrescar solicitudes
                 refrescarSolicitudes();
             }
             actualizarEstadoUI(isChecked);
@@ -329,6 +246,7 @@ public class DriverInicioActivity extends AppCompatActivity {
             binding.tvNoSolicitudes.setVisibility(View.VISIBLE);
         }
     }
+
     private void redirigirALogin() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -373,21 +291,17 @@ public class DriverInicioActivity extends AppCompatActivity {
     }
 
     private void mostrarMensajeErrorGeneral(String mensaje) {
-        Toast.makeText(this, "Error al cargar información del usuario: " + mensaje,
-                Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Error al cargar información del usuario: " + mensaje, Toast.LENGTH_LONG).show();
     }
 
     private void crearCanalesNotificacion() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
-            // Canal para notificaciones generales
             NotificationChannel channelDefault = new NotificationChannel(
                     channelId,
                     "Canal notificaciones default",
                     NotificationManager.IMPORTANCE_DEFAULT);
             channelDefault.setDescription("Canal para notificaciones con prioridad default");
 
-            // Canal para alertas de GPS (alta prioridad)
             NotificationChannel channelGPS = new NotificationChannel(
                     gpsChannelId,
                     "Alertas de GPS",
@@ -406,18 +320,14 @@ public class DriverInicioActivity extends AppCompatActivity {
 
     private void askPermission() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
-                        PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(DriverInicioActivity.this,
-                    new String[]{POST_NOTIFICATIONS},
-                    101);
+                ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(DriverInicioActivity.this, new String[]{POST_NOTIFICATIONS}, 101);
         }
     }
 
     private void verificarEstadoGPS() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
         if (!isGpsEnabled) {
             mostrarNotificacionGPS();
         }
@@ -425,12 +335,10 @@ public class DriverInicioActivity extends AppCompatActivity {
 
     private void mostrarNotificacionGPS() {
         Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        PendingIntent gpsPendingIntent = PendingIntent.getActivity(
-                this, 100, gpsIntent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent gpsPendingIntent = PendingIntent.getActivity(this, 100, gpsIntent, PendingIntent.FLAG_IMMUTABLE);
 
         Intent mainIntent = new Intent(this, DriverInicioActivity.class);
-        PendingIntent mainPendingIntent = PendingIntent.getActivity(
-                this, 101, mainIntent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 101, mainIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, gpsChannelId)
                 .setSmallIcon(R.drawable.ic_location)
@@ -454,7 +362,6 @@ public class DriverInicioActivity extends AppCompatActivity {
     private boolean verificarGPSParaServicio() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
         if (!isGpsEnabled) {
             mostrarNotificacionGPS();
             Toast.makeText(this, "Activa el GPS para ponerte disponible", Toast.LENGTH_SHORT).show();
@@ -469,7 +376,6 @@ public class DriverInicioActivity extends AppCompatActivity {
         if (binding.statusSwitch.isChecked()) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
             if (!isGpsEnabled) {
                 binding.statusSwitch.setOnCheckedChangeListener(null);
                 binding.statusSwitch.setChecked(false);
@@ -479,6 +385,7 @@ public class DriverInicioActivity extends AppCompatActivity {
             }
         }
     }
+
     private void configurarNotificaciones() {
         binding.notificationIcon.setOnClickListener(v -> {
             Intent intent = new Intent(DriverInicioActivity.this, DriverNotificacionActivity.class);
@@ -487,14 +394,11 @@ public class DriverInicioActivity extends AppCompatActivity {
     }
 
     private void configurarBottomNavigation() {
-        // ESTABLECER ÍTEM SELECCIONADO
         binding.bottomNavigation.setSelectedItemId(R.id.nav_inicio);
-
-        // CONFIGURAR LISTENER
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_inicio) {
-                return true; // Ya estamos aquí
+                return true;
             } else if (itemId == R.id.nav_reservas) {
                 navegarSinAnimacion(DriverReservaActivity.class);
                 return true;
@@ -508,15 +412,17 @@ public class DriverInicioActivity extends AppCompatActivity {
             return false;
         });
     }
+
     private void navegarSinAnimacion(Class<?> activityClass) {
         Intent intent = new Intent(this, activityClass);
         startActivity(intent);
         overridePendingTransition(0, 0);
         finish();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        binding = null; // Liberar referencia del binding
+        binding = null;
     }
 }
