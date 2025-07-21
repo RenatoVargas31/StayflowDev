@@ -3,9 +3,8 @@ package com.iot.stayflowdev;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Patterns;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,24 +15,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-import java.util.regex.Pattern;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginIngCorreoActivity extends AppCompatActivity {
 
-    private MaterialButton btnMandarCodigo;
     private TextInputEditText etEmail;
-    private TextInputLayout tilEmail;
-    private TextView tvTitulo;
-    private TextView tvSubtitulo;
-
-    private boolean esRecuperacionPassword = false;
-
-    // Patrón para validar correos con dominios comunes
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "[a-zA-Z0-9._-]+@[a-z]+\\.[a-z]+(\\.[a-z]+)*"
-    );
+    private MaterialButton btnMandar;
+    private MaterialButton btnVolverLogin;
+    private ImageView btnClose;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,89 +36,107 @@ public class LoginIngCorreoActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Inicializar Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+
         // Inicializar vistas
         inicializarVistas();
 
-        // Verificar si es un flujo de recuperación de contraseña
-        verificarFlujoRecuperacion();
-
-        // Configurar listener del botón mandar código
+        // Configurar listeners
         configurarListeners();
     }
 
     private void inicializarVistas() {
-        btnMandarCodigo = findViewById(R.id.btn_mandar);
         etEmail = findViewById(R.id.et_email);
-        tvTitulo = findViewById(R.id.tv_titulo);
-        tvSubtitulo = findViewById(R.id.tv_subtitulo);
-
-        // Obtener la referencia al TextInputLayout (para mostrar errores)
-        tilEmail = (TextInputLayout) etEmail.getParent().getParent();
-    }
-
-    private void verificarFlujoRecuperacion() {
-        // Verificar si el intent tiene el extra "esRecuperacionPassword"
-        if (getIntent().hasExtra("esRecuperacionPassword")) {
-            esRecuperacionPassword = getIntent().getBooleanExtra("esRecuperacionPassword", false);
-
-            if (esRecuperacionPassword) {
-                // Cambiar textos para flujo de recuperación de contraseña
-                tvTitulo.setText("Recupera tu contraseña");
-                tvSubtitulo.setText("Ingresa tu correo electrónico para recibir un código de verificación");
-                btnMandarCodigo.setText("Recuperar contraseña");
-            }
-        }
+        btnMandar = findViewById(R.id.btn_mandar);
+        btnVolverLogin = findViewById(R.id.btn_volver_login);
+        btnClose = findViewById(R.id.btn_close);
     }
 
     private void configurarListeners() {
-        // Configurar listener del botón mandar código
-        btnMandarCodigo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validarEmail()) {
-                    // Navegar a la pantalla de verificación
-                    Intent intent = new Intent(LoginIngCorreoActivity.this, LoginVerificarActivity.class);
+        // Configurar el botón de cerrar
+        btnClose.setOnClickListener(v -> {
+            finish(); // Cierra la actividad y vuelve a la anterior
+        });
 
-                    // Pasar el flag de recuperación de contraseña si es el caso
-                    if (esRecuperacionPassword) {
-                        intent.putExtra("esRecuperacionPassword", true);
-                        intent.putExtra("email", etEmail.getText().toString().trim());
-                    }
+        // Configurar el botón de mandar correo
+        btnMandar.setOnClickListener(v -> {
+            enviarCorreoRecuperacion();
+        });
 
-                    startActivity(intent);
-                }
-            }
+        // Configurar el botón de volver a iniciar sesión
+        btnVolverLogin.setOnClickListener(v -> {
+            // Redirigir a LoginCuentaFireBase
+            Intent intent = new Intent(LoginIngCorreoActivity.this, LoginCuentaFireBase.class);
+            startActivity(intent);
+            finish(); // Cerrar esta actividad para evitar acumulación de pantallas
         });
     }
 
-    /**
-     * Valida que el correo electrónico tenga un formato válido
-     * @return true si el formato es válido, false en caso contrario
-     */
-    private boolean validarEmail() {
+    private void enviarCorreoRecuperacion() {
         String email = etEmail.getText().toString().trim();
 
-        // Validar que el campo no esté vacío
+        // Validar que el campo de correo no esté vacío
         if (TextUtils.isEmpty(email)) {
-            tilEmail.setError("El correo electrónico es obligatorio");
-            return false;
+            etEmail.setError("El correo electrónico es obligatorio");
+            etEmail.requestFocus();
+            return;
         }
 
-        // Validar formato de correo usando el patrón
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            tilEmail.setError("Ingrese un correo electrónico válido (ej: ejemplo@gmail.com)");
-            return false;
+        // Validar formato de correo básico
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Ingresa un correo electrónico válido");
+            etEmail.requestFocus();
+            return;
         }
 
-        // Validar dominios comunes
-        if (!email.contains("@gmail.com") && !email.contains("@hotmail.com") &&
-            !email.contains("@outlook.com") && !email.contains("@yahoo.com")) {
-            tilEmail.setError("Por favor ingrese un correo con dominio válido (gmail.com, hotmail.com, etc.)");
-            return false;
-        }
+        // Deshabilitar el botón mientras se procesa la solicitud
+        btnMandar.setEnabled(false);
+        btnMandar.setText("Enviando...");
 
-        // Si pasa todas las validaciones, limpiamos el error si hubiera
-        tilEmail.setError(null);
-        return true;
+        // Enviar correo de recuperación usando Firebase Auth
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    // Rehabilitar el botón
+                    btnMandar.setEnabled(true);
+                    btnMandar.setText("Mandar correo de verificación");
+
+                    if (task.isSuccessful()) {
+                        // Correo enviado exitosamente
+                        Toast.makeText(LoginIngCorreoActivity.this,
+                                "Se ha enviado un correo de recuperación a: " + email,
+                                Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(LoginIngCorreoActivity.this,
+                                "Por favor, revisa tu bandeja de entrada y sigue las instrucciones",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Limpiar el campo de correo después de enviar
+                        etEmail.setText("");
+
+                    } else {
+                        // Error al enviar el correo
+                        String errorMessage = "Error al enviar el correo de recuperación";
+
+                        // Personalizar mensaje según el tipo de error
+                        if (task.getException() != null) {
+                            String exceptionMessage = task.getException().getMessage();
+                            if (exceptionMessage != null) {
+                                if (exceptionMessage.contains("user-not-found") ||
+                                    exceptionMessage.contains("There is no user record")) {
+                                    errorMessage = "No existe una cuenta registrada con este correo electrónico";
+                                } else if (exceptionMessage.contains("invalid-email")) {
+                                    errorMessage = "El formato del correo electrónico es inválido";
+                                } else if (exceptionMessage.contains("too-many-requests")) {
+                                    errorMessage = "Demasiados intentos. Inténtalo más tarde";
+                                }
+                            }
+                        }
+
+                        Toast.makeText(LoginIngCorreoActivity.this,
+                                errorMessage,
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }

@@ -66,12 +66,11 @@ public class LoginCuentaFireBase extends AppCompatActivity {
             iniciarSesion();
         });
 
-        // Configurar el enlace de olvidé mi contraseña (para implementación futura)
+        // Configurar el enlace de olvidé mi contraseña
         forgotPasswordText.setOnClickListener(v -> {
-            Toast.makeText(LoginCuentaFireBase.this,
-                    "Función de recuperación de contraseña próximamente",
-                    Toast.LENGTH_SHORT).show();
-            // Aquí se implementaría la funcionalidad para recuperar contraseña
+            // Redirigir a la actividad de ingreso de correo
+            Intent intent = new Intent(LoginCuentaFireBase.this, LoginIngCorreoActivity.class);
+            startActivity(intent);
         });
     }
 
