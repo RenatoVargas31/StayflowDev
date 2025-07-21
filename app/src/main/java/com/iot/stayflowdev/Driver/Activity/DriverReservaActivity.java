@@ -35,34 +35,37 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.Driver.Adapter.ReservasAdapter;
+import com.iot.stayflowdev.Driver.Dtos.SolicitudReserva;
 import com.iot.stayflowdev.Driver.Model.ReservaModel;
 import com.iot.stayflowdev.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class DriverReservaActivity extends AppCompatActivity implements ReservasAdapter.OnReservaClickListener {
+    private String TAG = "DriverReservaActivity";
 
     private TabLayout tabLayout;
     private RecyclerView recyclerView;
     private ReservasAdapter adapter;
     private LinearLayout emptyView;
     private BottomNavigationView bottomNavigation;
-
-    // Cambiar de Reserva a ReservaModel
-    private List<ReservaModel> reservasEnCurso = new ArrayList<>();
-    private List<ReservaModel> reservasPasadas = new ArrayList<>();
-    private List<ReservaModel> reservasCanceladas = new ArrayList<>();
     private String channelId = "channelReservas";
-    //
-
+    private List<SolicitudReserva> reservasEnCurso = new ArrayList<>();
+    private List<SolicitudReserva> reservasPasadas = new ArrayList<>();
+    private List<SolicitudReserva> reservasCanceladas = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate iniciado");
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_driver_reserva);
+        Log.d(TAG, "Layout establecido");
 
         // Configurar márgenes para barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -70,50 +73,50 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
+        Log.d(TAG, "Window insets configurados");
 
         crearCanalNotificacion();
+        Log.d(TAG, "Canal de notificación creado");
 
         // Inicializar vistas
         inicializarVistas();
+        Log.d(TAG, "Vistas inicializadas");
 
         // Configurar BottomNavigationView con navegación fluida
         configurarBottomNavigationFluido();
+        Log.d(TAG, "Bottom navigation configurado");
+
         // Configurar RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
+        Log.d(TAG, "RecyclerView configurado");
 
         // Añadir algo de espacio entre elementos
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        Log.d(TAG, "Decoración del RecyclerView agregada");
 
-       //Cargar datos desde Firestore
+        //Cargar datos desde Firestore
         cargarSolicitudesDesdeFirestore();
-
-        // Inicializar adaptador con las reservas en curso por defecto
-        adapter = new ReservasAdapter(this, reservasEnCurso, this);
-        recyclerView.setAdapter(adapter);
-
-        actualizarVistaVacia(reservasEnCurso, 0); // 0 → corresponde a la pestaña "En curso"
-
+        Log.d(TAG, "Carga de Firestore iniciada");
         // Configurar listener del TabLayout
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "Tab seleccionado: " + tab.getPosition());
                 cambiarDatosPorTab(tab.getPosition());
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                // No necesitamos hacer nada aquí
-            }
+            public void onTabUnselected(TabLayout.Tab tab) {}
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                // No necesitamos hacer nada aquí
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
+        Log.d(TAG, "TabLayout listener configurado");
 
         // ACTIVAR NOTIFICACIÓN AL FINAL
         mostrarNotificacionReservasActivas();
+        Log.d(TAG, "onCreate completado exitosamente");
     }
 
     private void crearCanalNotificacion() {
@@ -139,18 +142,33 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         }
     }
 
-    // Este metodo ya está correcto según el PPT
     public void mostrarNotificacionReservasActivas() {
-        int reservasActivas = reservasEnCurso.size();
+        // Filtrar solo las reservas de hoy
+        List<SolicitudReserva> reservasHoy = filtrarReservasDeHoy(reservasEnCurso);
+        int reservasActivasHoy = reservasHoy.size();
+
+        // Solo mostrar notificación si hay reservas para hoy
+        if (reservasActivasHoy == 0) {
+            Log.d(TAG, "No hay reservas para hoy, no se muestra notificación");
+            return;
+        }
 
         Intent intent = new Intent(this, DriverReservaActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE);
 
+        // Texto más específico para reservas de hoy
+        String contentText;
+        if (reservasActivasHoy == 1) {
+            contentText = "Tienes 1 viaje pendiente para hoy";
+        } else {
+            contentText = "Tienes " + reservasActivasHoy + " viajes pendientes para hoy";
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_carro)
-                .setContentTitle("Reservas Activas")
-                .setContentText("Tienes " + reservasActivas + " reservas activas")
+                .setContentTitle("Viajes de Hoy")
+                .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
@@ -159,16 +177,59 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
         if (ActivityCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED) {
             notificationManager.notify(100, builder.build());
+            Log.d(TAG, "Notificación mostrada: " + reservasActivasHoy + " viajes para hoy");
         }
     }
 
+    // Método auxiliar para filtrar reservas del día actual
+    private List<SolicitudReserva> filtrarReservasDeHoy(List<SolicitudReserva> reservas) {
+        List<SolicitudReserva> reservasHoy = new ArrayList<>();
 
-    //  MeTODO PARA INICIALIZAR VISTAS
+        // Obtener la fecha de hoy
+        Calendar hoy = Calendar.getInstance();
+        hoy.set(Calendar.HOUR_OF_DAY, 0);
+        hoy.set(Calendar.MINUTE, 0);
+        hoy.set(Calendar.SECOND, 0);
+        hoy.set(Calendar.MILLISECOND, 0);
+
+        Calendar mañana = Calendar.getInstance();
+        mañana.setTime(hoy.getTime());
+        mañana.add(Calendar.DAY_OF_MONTH, 1);
+
+        for (SolicitudReserva reserva : reservas) {
+            if (reserva.getFechaSalida() != null) {
+                Date fechaSalida = reserva.getFechaSalida();
+
+                // Verificar si la fecha de salida está entre hoy y mañana (es decir, es hoy)
+                if (fechaSalida.getTime() >= hoy.getTimeInMillis() &&
+                        fechaSalida.getTime() < mañana.getTimeInMillis()) {
+                    reservasHoy.add(reserva);
+                    Log.d(TAG, "Reserva de hoy encontrada: " + reserva.getNombrePasajero() +
+                            " - Fecha: " + reserva.getFechaHora());
+                }
+            }
+        }
+
+        Log.d(TAG, "Total reservas de hoy: " + reservasHoy.size());
+        return reservasHoy;
+    }
+
     private void inicializarVistas() {
+        Log.d(TAG, "Iniciando inicializarVistas");
+
         tabLayout = findViewById(R.id.tabLayout);
+        Log.d(TAG, "tabLayout: " + (tabLayout != null ? "encontrado" : "NULL"));
+
         recyclerView = findViewById(R.id.recyclerViewReservas);
+        Log.d(TAG, "recyclerView: " + (recyclerView != null ? "encontrado" : "NULL"));
+
         emptyView = findViewById(R.id.empty_view);
+        Log.d(TAG, "emptyView: " + (emptyView != null ? "encontrado" : "NULL"));
+
         bottomNavigation = findViewById(R.id.bottomNavigation);
+        Log.d(TAG, "bottomNavigation: " + (bottomNavigation != null ? "encontrado" : "NULL"));
+
+        Log.d(TAG, "inicializarVistas completado");
     }
 
     // CONFIGURACIÓN DE BOTTOM NAVIGATION CON ANIMACIÓN FLUIDA
@@ -229,76 +290,95 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
                 break;
         }
     }
+    private void actualizarVistaVacia(List<SolicitudReserva> listaActual, int tabIndex) {
+        Log.d(TAG, "actualizarVistaVacia - Lista size: " + (listaActual != null ? listaActual.size() : "NULL"));
 
+        if (listaActual == null || listaActual.isEmpty()) {
+            Log.d(TAG, "Lista vacía, mostrando empty view");
 
-    // Método para mostrar/ocultar la vista vacía
-    private void actualizarVistaVacia(List<ReservaModel> listaActual, int tabIndex) {
-        if (listaActual.isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
+            if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+            if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
 
             TextView emptyText = findViewById(R.id.empty_text);
-            switch (tabIndex) {
-                case 0:
-                    emptyText.setText("No tienes reservas activas");
-                    break;
-                case 1:
-                    emptyText.setText("Aún no tienes reservas pasadas");
-                    break;
-                case 2:
-                    emptyText.setText("Aún no tienes reservas canceladas");
-                    break;
+            if (emptyText != null) {
+                switch (tabIndex) {
+                    case 0:
+                        emptyText.setText("No tienes reservas activas");
+                        break;
+                    case 1:
+                        emptyText.setText("Aún no tienes reservas pasadas");
+                        break;
+                    case 2:
+                        emptyText.setText("Aún no tienes reservas canceladas");
+                        break;
+                }
+                Log.d(TAG, "Texto empty actualizado para tab: " + tabIndex);
+            } else {
+                Log.e(TAG, "empty_text TextView es null!");
             }
         } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
+            Log.d(TAG, "Lista tiene datos, mostrando recycler view");
+            if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
+            if (emptyView != null) emptyView.setVisibility(View.GONE);
         }
     }
     private void cargarSolicitudesDesdeFirestore() {
+        Log.d(TAG, "Iniciando carga desde Firestore");
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            Log.e("Firestore", "Usuario no autenticado");
+            Log.e(TAG, "Usuario no autenticado");
             return;
         }
+
+        Log.d(TAG, "Usuario autenticado: " + user.getUid());
 
         db.collection("solicitudesTaxi")
                 .whereEqualTo("esAceptada", true)
                 .whereEqualTo("idTaxista", user.getUid())
                 .get()
                 .addOnSuccessListener(snapshot -> {
+                    Log.d(TAG, "Firestore success - documentos encontrados: " + snapshot.size());
+
                     reservasEnCurso.clear();
 
                     for (DocumentSnapshot doc : snapshot) {
-                        String documentId = doc.getId();
-                        String nombre = doc.getString("nombrePasajero");
-                        String origen = doc.getString("origen");
-                        String destino = doc.getString("destino");
-                        Timestamp timestamp = doc.getTimestamp("fechaCreacion");
-                        String fecha = timestamp != null
-                                ? new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(timestamp.toDate())
-                                : "Sin fecha";
-                        String hora = doc.getString("horaAceptacion");
-                        String estado = doc.getString("estado");
-
-                        ReservaModel reserva = new ReservaModel(
-                                0, nombre, origen, destino, "1.2 Km",
-                                fecha != null ? fecha : "N/A",
-                                hora != null ? hora : "N/A",
-                                R.drawable.ic_carro, estado != null ? estado : "en_curso"
-                        );
-                        reserva.setSolicitudId(documentId);
-
-                        reservasEnCurso.add(reserva);
+                        try {
+                            Log.d(TAG, "Procesando documento: " + doc.getId());
+                            SolicitudReserva solicitud = doc.toObject(SolicitudReserva.class);
+                            if (solicitud != null) {
+                                Log.d(TAG, "Solicitud creada exitosamente: " + solicitud.getNombrePasajero());
+                                reservasEnCurso.add(solicitud);
+                            } else {
+                                Log.w(TAG, "Solicitud es null para documento: " + doc.getId());
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error procesando documento " + doc.getId() + ": " + e.getMessage());
+                        }
                     }
 
-                    adapter.actualizarDatos(reservasEnCurso);
-                    actualizarVistaVacia(reservasEnCurso, 0); // En curso
-                })
-                .addOnFailureListener(e -> Log.e("Firestore", "Error cargando solicitudesTaxi", e));
-    }
+                    Log.d(TAG, "Total solicitudes agregadas: " + reservasEnCurso.size());
 
+                    // MOVER LA INICIALIZACIÓN DEL ADAPTER AQUÍ
+                    if (adapter == null) {
+                        adapter = new ReservasAdapter(this, reservasEnCurso, this);
+                        recyclerView.setAdapter(adapter);
+                        Log.d(TAG, "Adapter creado y asignado");
+                    } else {
+                        adapter.actualizarDatos(reservasEnCurso);
+                        Log.d(TAG, "Adapter actualizado");
+                    }
+
+                    actualizarVistaVacia(reservasEnCurso, 0);
+                    Log.d(TAG, "Vista vacía actualizada");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error cargando solicitudesTaxi: " + e.getMessage());
+                    e.printStackTrace();
+                });
+    }
 
 
     @Override
@@ -310,12 +390,10 @@ public class DriverReservaActivity extends AppCompatActivity implements Reservas
 
     // Implementación del listener de clic en reserva
     @Override
-    public void onReservaClick(ReservaModel reserva) {
-        // Aquí puedes manejar el clic en una reserva, como abrir detalles
+    public void onReservaClick(SolicitudReserva reserva) {
         Toast.makeText(this, "Reserva seleccionada: " + reserva.getNombrePasajero(), Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, DriverReservaInfoActivity.class);
-        intent.putExtra("SOLICITUD_ID", reserva.getSolicitudId());
+        intent.putExtra("SOLICITUD_ID", reserva.getReservaId());
         startActivity(intent);
-
     }
 }
