@@ -208,7 +208,7 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
             profileImageRef.putFile(selectedImageUri)
                     .addOnSuccessListener(taskSnapshot -> profileImageRef.getDownloadUrl()
                             .addOnSuccessListener(uri -> {
-                                userData.put("imagenPerfilURL", uri.toString());
+                                userData.put("fotoPerfilUrl", uri.toString());
                                 // Ya no necesitamos subir la foto del vehículo aquí porque se hizo en LoginDriverRegister
                                 guardarDatosEnFirestore(userId, userData, rol);
                             })
