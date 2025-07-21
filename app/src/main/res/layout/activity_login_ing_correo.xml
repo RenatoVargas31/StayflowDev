@@ -127,9 +127,22 @@
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mandar código"
+                android:layout_marginBottom="16dp"
+                android:text="Mandar correo de verificación"
                 android:textColor="@android:color/white"
                 app:backgroundTint="#3C3C7C"
+                app:cornerRadius="15dp" />
+
+            <!-- Botón para volver a iniciar sesión -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_volver_login"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Volver a iniciar sesión"
+                android:textColor="#3C3C7C"
+                app:strokeColor="#3C3C7C"
+                app:strokeWidth="2dp"
                 app:cornerRadius="15dp" />
         </LinearLayout>
 

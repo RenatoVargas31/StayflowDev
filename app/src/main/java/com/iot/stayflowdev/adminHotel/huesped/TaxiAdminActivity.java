@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.R;
@@ -60,7 +61,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
         configurarToolbar();
 
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("Estado del Taxista");
+        getSupportActionBar().setTitle("Solicitudes de Taxi");
 
         configurarBottomNavigation();
 
@@ -112,27 +113,31 @@ public class TaxiAdminActivity extends AppCompatActivity {
                         String origen = doc.getString("origen");
                         String destino = doc.getString("destino");
                         String direccionResumen = origen + " → " + destino;
-                        String hora = doc.getString("horaAceptacion");
 
-                        // Obtener el código de reserva
-                        String codigoReserva = doc.getString("codigoReserva");
+                        String codigoReserva = doc.getString("reservaId");
                         if (codigoReserva == null || codigoReserva.isEmpty()) {
                             codigoReserva = doc.getId().substring(0, 8).toUpperCase();
                         }
 
-                        String fecha = "";
-                        if (doc.getTimestamp("fechaCreacion") != null) {
-                            fecha = new SimpleDateFormat("dd-MM-yy hh:mm a", Locale.getDefault())
-                                    .format(doc.getTimestamp("fechaCreacion").toDate());
+
+                        String detalleViaje = "";
+                        if (doc.getTimestamp("fechaSalida") != null) {
+                            detalleViaje = new SimpleDateFormat("dd-MM-yy hh:mm a", Locale.getDefault())
+                                    .format(doc.getTimestamp("fechaSalida").toDate());
                         }
 
-                        // Crear taxi con código de reserva
-                        Taxi taxi = new Taxi(nombre, codigoReserva, estado, fecha + " " + hora, direccionResumen, R.drawable.img_guest_placeholder);
+                        String idTaxista = doc.getString("idTaxista");
+
+                        Taxi taxi = new Taxi(nombre, codigoReserva, estado, detalleViaje, direccionResumen, R.drawable.img_guest_placeholder, idTaxista);
                         taxis.add(taxi);
+
                     }
                     aplicarFiltros();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error al cargar solicitudes", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al cargar solicitudes: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
     }
 
     private void configurarFiltrosYBusqueda() {
@@ -146,27 +151,21 @@ public class TaxiAdminActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        // Configurar filtro por estado con estados reales
-        String[] estados = {"", "aceptada", "en camino", "llegado", "finalizada", "cancelada"};
-        String[] estadosDisplay = {"Todos los estados", "Aceptada", "En camino", "Llegado", "Finalizada", "Cancelada"};
+        // CORREGIR: Agregar elemento vacío al inicio para "Todos los estados"
+        String[] estados = {"", "Pendiente", "aceptada", "en camino", "llegado", "finalizada", "cancelada"};
+        String[] estadosDisplay = {"Todos los estados", "Pendiente", "Aceptada", "En camino", "Llegado", "Finalizada", "Cancelada"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, estadosDisplay);
         binding.inputFilter.setAdapter(adapter);
 
         binding.inputFilter.setOnItemClickListener((parent, view, position, id) -> {
-            if (position == 0) {
-                estadoSeleccionado = "";
-            } else {
-                estadoSeleccionado = estados[position];
-            }
+            estadoSeleccionado = estados[position]; // Ahora los índices coinciden
             aplicarFiltros();
         });
 
-        // Configurar botón limpiar filtros (si existe en el layout)
-        if (binding.btnClearFilters != null) {
-            binding.btnClearFilters.setOnClickListener(v -> limpiarFiltros());
-        }
+        // Configurar botón limpiar filtros
+        binding.btnClearFilters.setOnClickListener(v -> limpiarFiltros());
     }
 
     private void configurarOrdenamiento() {
@@ -228,22 +227,19 @@ public class TaxiAdminActivity extends AppCompatActivity {
             Collections.reverse(filtrados);
         }
 
-        // Actualizar contador de resultados (si existe en el layout)
-        if (binding.tvResultCount != null) {
-            actualizarContadorResultados(filtrados.size());
+        // Actualizar contador de resultados
+        actualizarContadorResultados(filtrados.size());
+
+        // Mostrar/ocultar estado vacío
+        if (filtrados.isEmpty()) {
+            binding.recyclerTaxi.setVisibility(View.GONE);
+            binding.emptyStateLayout.setVisibility(View.VISIBLE);
+        } else {
+            binding.recyclerTaxi.setVisibility(View.VISIBLE);
+            binding.emptyStateLayout.setVisibility(View.GONE);
         }
 
-        // Mostrar/ocultar estado vacío (si existe en el layout)
-        if (binding.emptyState != null) {
-            if (filtrados.isEmpty()) {
-                binding.recyclerTaxi.setVisibility(View.GONE);
-                binding.emptyState.setVisibility(View.VISIBLE);
-            } else {
-                binding.recyclerTaxi.setVisibility(View.VISIBLE);
-                binding.emptyState.setVisibility(View.GONE);
-            }
-        }
-
+        // Actualizar adapter
         adapter = new TaxiAdapter(filtrados, this);
         binding.recyclerTaxi.setAdapter(adapter);
     }
@@ -257,14 +253,13 @@ public class TaxiAdminActivity extends AppCompatActivity {
         } else {
             texto = "Mostrando " + cantidad + " solicitudes";
         }
-        if (binding.tvResultCount != null) {
-            binding.tvResultCount.setText(texto);
-        }
+
+        // Mostrar estadísticas
+        binding.tvEstadisticas.setText(texto);
+        binding.tvEstadisticas.setVisibility(View.VISIBLE);
     }
 
     private void inicializarVistas() {
-        // Vistas existentes
-
         // Nuevas vistas para notificaciones
         notificationIcon = findViewById(R.id.notification_icon);
         badgeText = findViewById(R.id.badge_text);
@@ -288,6 +283,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -296,6 +292,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
             viewModel.detenerActualizacionAutomatica();
         }
     }
+
     private void configurarToolbar() {
         // Configurar click del icono de notificaciones
         notificationIcon.setOnClickListener(v -> {
@@ -303,6 +300,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+
     private void actualizarBadgeNotificaciones(Integer contador) {
         if (contador != null && contador > 0) {
             badgeText.setVisibility(View.VISIBLE);

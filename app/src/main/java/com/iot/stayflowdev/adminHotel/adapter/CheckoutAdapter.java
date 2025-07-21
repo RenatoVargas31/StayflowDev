@@ -17,6 +17,7 @@ import com.iot.stayflowdev.adminHotel.model.Checkout;
 import com.iot.stayflowdev.model.Reserva;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.ViewHolder> {
 
@@ -39,7 +40,7 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Checkout checkout = checkoutList.get(position);
         holder.tvNombre.setText(checkout.getNombre());
-        holder.tvCodigo.setText("Código de reserva: " + checkout.getCodigoReserva());
+        holder.tvCodigo.setText("Código: " + checkout.getCodigoReserva());
         holder.imgGuest.setImageResource(checkout.getImagenResId());
 
         holder.itemView.setOnClickListener(v -> {
@@ -133,5 +134,12 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.ViewHo
     public void addItem(Checkout item) {
         checkoutList.add(item);
         notifyItemInserted(checkoutList.size() - 1);
+    }
+
+    // ===== NUEVO MÉTODO PARA FILTROS =====
+    public void updateItems(List<Checkout> nuevosCheckouts) {
+        this.checkoutList.clear();
+        this.checkoutList.addAll(nuevosCheckouts);
+        notifyDataSetChanged();
     }
 }

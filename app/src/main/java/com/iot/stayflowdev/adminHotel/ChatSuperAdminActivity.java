@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,10 +58,13 @@ public class ChatSuperAdminActivity extends AppCompatActivity {
 
         // Configurar toolbar
         setSupportActionBar(findViewById(R.id.toolbar));
+
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Chat con Super Admin");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         // Inicializar Firebase
         db = FirebaseFirestore.getInstance();
