@@ -23,20 +23,16 @@
         android:padding="12dp">
 
         <!-- Avatar del usuario -->
-        <FrameLayout
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageViewUserAvatar"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:background="@drawable/circle_bg"
-            android:backgroundTint="@color/md_theme_primaryContainer">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_person"
-                android:padding="12dp"
-                android:contentDescription="Avatar del usuario"
-                app:tint="@color/md_theme_onPrimaryContainer"/>
-        </FrameLayout>
+            android:src="@drawable/ic_person"
+            android:padding="0dp"
+            android:contentDescription="Avatar del usuario"
+            android:scaleType="centerCrop"
+            android:background="@android:color/transparent"
+            app:shapeAppearanceOverlay="@style/CircleImageView" />
 
         <!-- Información del usuario -->
         <LinearLayout
