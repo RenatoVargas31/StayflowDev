@@ -87,6 +87,7 @@
                 app:layout_constraintStart_toEndOf="@+id/horaLabel"
                 app:layout_constraintTop_toTopOf="@+id/horaLabel"
                 app:layout_constraintBottom_toBottomOf="@+id/horaLabel" />
+
             <!-- Tarjeta de Información del Pasajero -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pasajeroCard"
@@ -253,7 +254,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Llevo dos maletas grandes. Por favor ayuda con equipaje. Soy sordo, prefiero comunicación por mensajes."
+                            android:text="Solicitud generada automáticamente"
                             android:textColor="?attr/colorOnSurface"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -263,6 +264,7 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
+
             <!-- Tarjeta de Información del Recorrido -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/recorridoCard"
@@ -319,13 +321,13 @@
                         app:layout_constraintTop_toTopOf="@+id/origenDot"
                         app:layout_constraintBottom_toBottomOf="@+id/origenDot" />
 
-                    <!-- Nombre del lugar de origen -->
+                    <!-- Nombre del lugar de origen (Hotel) -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionOrigenName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Hotel Hilton Lima"
+                        android:text="Hotel"
                         android:textStyle="bold"
                         android:textSize="15sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
@@ -336,13 +338,13 @@
                         app:layout_constraintStart_toStartOf="@+id/origenLabel"
                         app:layout_constraintTop_toBottomOf="@+id/origenLabel" />
 
-                    <!-- Dirección del origen -->
+                    <!-- Dirección del origen (Hotel) -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionOrigen"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Av. Javier Prado Este 1234, San Isidro, Lima"
+                        android:text="Dirección del hotel"
                         android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         android:textColor="?attr/colorOnSurfaceVariant"
@@ -387,13 +389,13 @@
                         app:layout_constraintTop_toTopOf="@+id/destinoDot"
                         app:layout_constraintBottom_toBottomOf="@+id/destinoDot" />
 
-                    <!-- Nombre del lugar de destino -->
+                    <!-- Nombre del lugar de destino (Aeropuerto) -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionDestinoName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Centro Comercial Larcomar"
+                        android:text="Aeropuerto Internacional Jorge Chávez"
                         android:textStyle="bold"
                         android:textSize="15sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
@@ -404,13 +406,13 @@
                         app:layout_constraintStart_toStartOf="@+id/destinoLabel"
                         app:layout_constraintTop_toBottomOf="@+id/destinoLabel" />
 
-                    <!-- Dirección del destino -->
+                    <!-- Dirección del destino (Aeropuerto) -->
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/direccionDestino"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Malecón de la Reserva 610, Miraflores, Lima"
+                        android:text="Av. Elmer Faucett s/n, Callao 07031, Lima, Perú"
                         android:textSize="13sp"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         android:textColor="?attr/colorOnSurfaceVariant"
@@ -461,7 +463,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="8.5 km"
+                                    android:text="Calculando..."
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
                             </LinearLayout>
@@ -493,48 +495,37 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="25 min"
+                                    android:text="Calculando..."
                                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                     android:textColor="?attr/colorOnSurface" />
                             </LinearLayout>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Mapa de la ruta -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/mapaContainer"
+                    <!-- Contenedor para el mapa -->
+                    <FrameLayout
+                        android:id="@+id/map_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="200dp"
                         android:layout_marginTop="16dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        style="@style/Widget.Material3.CardView.Filled"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:background="#E0E0E0"
+                        app:layout_constraintTop_toBottomOf="@+id/detallesRecorrido"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/detallesRecorrido">
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                        <FrameLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="200dp">
-
-                            <fragment
-                                android:id="@+id/rutaMapa"
-                                android:name="com.google.android.gms.maps.SupportMapFragment"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
-
-                            <com.google.android.material.progressindicator.CircularProgressIndicator
-                                android:id="@+id/mapaLoading"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:indeterminate="true"
-                                android:visibility="gone" />
-                        </FrameLayout>
-                    </com.google.android.material.card.MaterialCardView>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Mapa de la ruta\n(Hotel → Aeropuerto)"
+                            android:textAlignment="center"
+                            android:textColor="#666"
+                            android:textSize="14sp" />
+                    </FrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
+
             <!-- Espacio adicional al final del scroll -->
             <View
                 android:layout_width="match_parent"
