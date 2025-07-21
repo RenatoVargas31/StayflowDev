@@ -192,17 +192,19 @@ public class ClienteBuscarActivity extends AppCompatActivity implements HotelesT
             }
 
             // Navegación según el ítem seleccionado
-            if (itemId == R.id.nav_favoritos) {
-                navigateToActivity(ClienteFavoritosActivity.class);
-                return true;
-            } else if (itemId == R.id.nav_reservas) {
+            if (itemId == R.id.nav_reservas) {
                 navigateToActivity(ClienteReservasActivity.class);
                 return true;
             } else if (itemId == R.id.nav_perfil) {
                 navigateToActivity(ClientePerfilActivity.class);
                 return true;
             }
-
+            /*
+            else if (itemId == R.id.nav_favoritos) {
+                navigateToActivity(ClienteFavoritosActivity.class);
+                return true;
+            }
+            */
             return false;
         });
     }

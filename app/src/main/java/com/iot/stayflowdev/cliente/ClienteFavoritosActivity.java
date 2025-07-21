@@ -38,17 +38,18 @@ public class ClienteFavoritosActivity extends AppCompatActivity {
 
     private void setupBottomNavigation() {
         // Establecer Favoritos como seleccionado
-        binding.bottomNavigation.setSelectedItemId(R.id.nav_favoritos);
+        //binding.bottomNavigation.setSelectedItemId(R.id.nav_favoritos);
 
         // Configurar listener de navegación
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
             // Si ya estamos en esta actividad, no hacer nada
+            /*
             if (itemId == R.id.nav_favoritos) {
                 return true;
             }
-
+            */
             // Navegación según el ítem seleccionado
             if (itemId == R.id.nav_buscar) {
                 navigateToActivity(ClienteBuscarActivity.class);

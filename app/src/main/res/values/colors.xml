@@ -159,5 +159,12 @@
     <color name="icon_bg_error">#FFD7D7</color>
     <color name="icon_bg_info">#CCE5FF</color>
 
-    <color name="ic_banner_superadmin_background">#FFFFFF</color> <!-- Puedes cambiar el color -->
+    <color name="ic_banner_superadmin_background">#FFFFFF</color>
+
+    <!-- Colores adicionales para la funcionalidad de verificación -->
+    <color name="success_color">#4CAF50</color>
+    <color name="error_color">#F44336</color>
+    <color name="background_color">#F7F9FF</color>
+    <color name="primary_color">#30628C</color>
+
 </resources>

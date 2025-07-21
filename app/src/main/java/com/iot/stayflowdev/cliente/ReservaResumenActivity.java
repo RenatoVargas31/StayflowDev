@@ -337,26 +337,52 @@ public class ReservaResumenActivity extends AppCompatActivity {
 
         Log.d(TAG, "Iniciando guardado de reserva en Firestore");
 
-        // Limpiar el ID para que Firestore genere uno nuevo
-        reserva.setId(null);
-        reserva.setEstado("sin chekout"); // Estado inicial
+        // Generar un ID personalizado con formato "STF-AÑO-XXXX"
+        String idPersonalizado = generarIdReserva();
+        reserva.setId(idPersonalizado);
+        reserva.setEstado("sin checkout"); // Estado inicial
 
-        // Guardar en la colección "reservas"
+        // Guardar en la colección "reservas" con el ID personalizado
         db.collection("reservas")
-                .add(reserva)
-                .addOnSuccessListener(documentReference -> {
-                    String reservaId = documentReference.getId();
-                    Log.d(TAG, "Reserva guardada exitosamente con ID: " + reservaId);
+                .document(idPersonalizado)  // Usar el ID personalizado como nombre del documento
+                .set(reserva)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Reserva guardada exitosamente con ID: " + idPersonalizado);
+                    manejarExitoReserva(idPersonalizado);
 
-                    // Actualizar el objeto con el ID generado
-                    reserva.setId(reservaId);
-
-                    manejarExitoReserva(reservaId);
+                    // Disminuir cantidad de habitaciones disponibles
+                    if (reserva.getHabitaciones() != null && !reserva.getHabitaciones().isEmpty()) {
+                        Log.d(TAG, "Disminuyendo habitaciones disponibles para la reserva");
+                        for (Reserva.Habitacion habitacion : reserva.getHabitaciones()) {
+                            if (habitacion.getId() != null) {
+                                hotelViewModel.disminuirHabitacionesDisponibles(hotel.getId(), habitacion.getId(), habitacion.getCantidad());
+                                Log.d(TAG, "Habitación " + habitacion.getId() + " actualizada: " + habitacion.getCantidad() + " unidades menos");
+                            } else {
+                                Log.e(TAG, "ID de habitación no válido: " + habitacion.getId());
+                            }
+                        }
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error al guardar reserva", e);
                     manejarErrorGuardado();
                 });
+    }
+
+    /**
+     * Genera un ID personalizado para la reserva en formato "STF-AÑO-TIMESTAMP"
+     * Esto garantiza IDs únicos sin necesidad de un contador en Firestore
+     */
+    private String generarIdReserva() {
+        // Obtener el año actual
+        int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+
+        // Usar un timestamp en milisegundos para garantizar unicidad
+        // Limitado a 4 dígitos para mantener el formato deseado
+        long timestamp = System.currentTimeMillis() % 10000;
+
+        // Formatear el ID: "STF-2025-XXXX"
+        return String.format(Locale.getDefault(), "STF-%d-%04d", anioActual, timestamp);
     }
 
     private void manejarExitoReserva(String reservaId) {
@@ -371,6 +397,7 @@ public class ReservaResumenActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ClienteReservasActivity.class);
         intent.putExtra("reserva_id", reservaId);
         startActivity(intent);
+        finish();
     }
 
     private void manejarErrorGuardado() {

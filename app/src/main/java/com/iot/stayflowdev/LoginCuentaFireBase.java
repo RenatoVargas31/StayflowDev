@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -66,13 +67,15 @@ public class LoginCuentaFireBase extends AppCompatActivity {
             iniciarSesion();
         });
 
-        // Configurar el enlace de olvidé mi contraseña (para implementación futura)
+        // Configurar el enlace de olvidé mi contraseña
         forgotPasswordText.setOnClickListener(v -> {
-            Toast.makeText(LoginCuentaFireBase.this,
-                    "Función de recuperación de contraseña próximamente",
-                    Toast.LENGTH_SHORT).show();
-            // Aquí se implementaría la funcionalidad para recuperar contraseña
+            // Redirigir a la actividad de ingreso de correo
+            Intent intent = new Intent(LoginCuentaFireBase.this, LoginIngCorreoActivity.class);
+            startActivity(intent);
         });
+
+        verificarConductorRecienRegistrado();
+
     }
 
     private void iniciarSesion() {
@@ -256,5 +259,30 @@ public class LoginCuentaFireBase extends AppCompatActivity {
         Intent intent = new Intent(this, LoginFireBaseActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void verificarConductorRecienRegistrado() {
+        Intent intent = getIntent();
+        boolean esConductorRecienRegistrado = intent.getBooleanExtra("conductorRecienRegistrado", false);
+        String mensajeActivacion = intent.getStringExtra("mensajeActivacion");
+
+        if (esConductorRecienRegistrado && mensajeActivacion != null) {
+            mostrarDialogoActivacionCuenta(mensajeActivacion);
+        }
+    }
+
+    private void mostrarDialogoActivacionCuenta(String mensaje) {
+        new AlertDialog.Builder(this)
+                .setTitle("Cuenta Pendiente de Activación")
+                .setMessage(mensaje)
+                .setPositiveButton("Entendido", (dialog, which) -> {
+                    dialog.dismiss();
+                    // Mostrar un toast adicional
+                    Toast.makeText(LoginCuentaFireBase.this,
+                            "Podrás iniciar sesión una vez que tu cuenta sea activada",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setCancelable(false)
+                .show();
     }
 }

@@ -232,9 +232,9 @@ public class ReportesActivity extends BaseSuperAdminActivity {
     }
 
     private void navigateToFilterView(Hotel hotel) {
-        Intent intent = new Intent(ReportesActivity.this, FilterReportActivity.class);
-        intent.putExtra(EXTRA_HOTEL_NAME, hotel.getNombre());
-        intent.putExtra(EXTRA_HOTEL_ID, hotel.getId());
-        startActivity(intent);
+        Log.d(TAG, "Navegando a filtros para hotel: " + hotel.getNombre() + " (ID: " + hotel.getId() + ")");
+
+        // Usar el nuevo método estático que pasa tanto el nombre como el ID
+        FilterReportActivity.start(this, hotel.getNombre(), hotel.getId());
     }
 }

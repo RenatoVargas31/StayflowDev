@@ -119,6 +119,12 @@
             android:name=".superAdmin.UserDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".superAdmin.DriverVerificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".superAdmin.FullScreenImageActivity"
+            android:exported="false" />
+        <activity
             android:name=".superAdmin.SystemMetricsActivity"
             android:exported="false" />
         <activity
@@ -243,6 +249,11 @@
         <activity
             android:name=".adminHotel.ChatSuperAdminActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".adminHotel.MensajeDetalleActivity"
+            android:exported="false" />
+
         <activity
             android:name=".adminHotel.PerfilAdminActivity"
             android:exported="false" /> <!-- Receiver para reinicio del sistema -->

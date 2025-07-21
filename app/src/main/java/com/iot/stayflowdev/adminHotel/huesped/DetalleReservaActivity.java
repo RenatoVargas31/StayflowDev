@@ -58,11 +58,13 @@ public class DetalleReservaActivity extends AppCompatActivity {
     private void configurarToolbar() {
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Detalle de Reserva");
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void configurarBottomNavigation() {

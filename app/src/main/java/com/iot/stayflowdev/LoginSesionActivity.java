@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -34,6 +36,9 @@ public class LoginSesionActivity extends AppCompatActivity {
 
         // Configurar listeners
         configurarListeners();
+
+        // Verificar si es un conductor recién registrado
+        verificarConductorRecienRegistrado();
     }
 
     private void inicializarVistas() {
@@ -63,5 +68,30 @@ public class LoginSesionActivity extends AppCompatActivity {
                 // Implementar la lógica de inicio de sesión aquí
             }
         });
+    }
+
+    private void verificarConductorRecienRegistrado() {
+        Intent intent = getIntent();
+        boolean esConductorRecienRegistrado = intent.getBooleanExtra("conductorRecienRegistrado", false);
+        String mensajeActivacion = intent.getStringExtra("mensajeActivacion");
+
+        if (esConductorRecienRegistrado && mensajeActivacion != null) {
+            mostrarDialogoActivacionCuenta(mensajeActivacion);
+        }
+    }
+
+    private void mostrarDialogoActivacionCuenta(String mensaje) {
+        new AlertDialog.Builder(this)
+                .setTitle("Cuenta Pendiente de Activación")
+                .setMessage(mensaje)
+                .setPositiveButton("Entendido", (dialog, which) -> {
+                    dialog.dismiss();
+                    // Mostrar un toast adicional
+                    Toast.makeText(LoginSesionActivity.this,
+                            "Podrás iniciar sesión una vez que tu cuenta sea activada",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setCancelable(false)
+                .show();
     }
 }

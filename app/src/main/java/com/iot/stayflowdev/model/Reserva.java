@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 public class Reserva {
     @DocumentId
     private String id;
+    @PropertyName("codigo")
+    private String codigo;
     @PropertyName("idUsuario")
     private String idUsuario; // ID del usuario que hizo la reserva
     @PropertyName("idHotel")
@@ -70,6 +72,8 @@ public class Reserva {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Habitacion {
+        @DocumentId
+        private String id; // ID de la habitación
         @PropertyName("tipo")
         private String tipo; // Tipo de habitación (individual, doble, suite)
         @PropertyName("cantidad")

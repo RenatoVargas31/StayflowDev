@@ -43,15 +43,15 @@
                     android:background="#FFF5F8FF">
 
                     <!-- Imagen de perfil -->
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imageViewProfile"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:src="@drawable/ic_person"
-                        app:tint="@color/md_theme_primary"
-                        android:background="#E0E0E0"
+                        android:background="@android:color/transparent"
                         android:scaleType="centerCrop"
-                        android:contentDescription="Foto de perfil"/>
+                        android:contentDescription="Foto de perfil"
+                        app:shapeAppearanceOverlay="@style/CircleImageView" />
 
                     <!-- Nombre del usuario -->
                     <TextView

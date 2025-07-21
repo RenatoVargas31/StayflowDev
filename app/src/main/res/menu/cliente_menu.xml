@@ -5,11 +5,13 @@
         android:title="Buscar"
         android:icon="@drawable/ic_buscar"
         />
+    <!--
     <item
         android:id="@+id/nav_favoritos"
         android:title="Favoritos"
         android:icon="@drawable/ic_love"
         />
+        -->
     <item
         android:id="@+id/nav_reservas"
         android:title="Reservas"

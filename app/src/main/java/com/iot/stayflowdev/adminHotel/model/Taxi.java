@@ -7,6 +7,22 @@ public class Taxi {
     private String detalleViaje;
     private String ruta;
     private int imagenResId;
+    private String idTaxista; // nuevo campo
+
+    // Inclúyelo en el constructor y en los getters/setters
+    public Taxi(String nombre, String codigoReserva, String estadoTaxi, String detalleViaje, String ruta, int imagenResId, String idTaxista) {
+        this.nombre = nombre;
+        this.codigoReserva = codigoReserva;
+        this.estadoTaxi = estadoTaxi;
+        this.detalleViaje = detalleViaje;
+        this.ruta = ruta;
+        this.imagenResId = imagenResId;
+        this.idTaxista = idTaxista;
+    }
+
+    public String getIdTaxista() {
+        return idTaxista;
+    }
 
     public Taxi(String nombre, String codigoReserva, String estadoTaxi, String detalleViaje, String ruta, int imagenResId) {
         this.nombre = nombre;

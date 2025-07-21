@@ -2,6 +2,8 @@ package com.iot.stayflowdev.adminHotel;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,7 +26,11 @@ import com.iot.stayflowdev.databinding.ActivityMensajeriaAdminBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.iot.stayflowdev.adminHotel.model.ClienteItem;
+import com.iot.stayflowdev.adminHotel.adapter.ClientesChatAdapter;
 public class MensajeriaAdminActivity extends AppCompatActivity {
 
     private ActivityMensajeriaAdminBinding binding;
@@ -33,6 +39,8 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
     private TextView badgeText;
     private AdminHotelViewModel viewModel;
     private NotificacionService notificacionService;
+    private FirebaseFirestore db;
+    private List<ClienteItem> listaClientes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +57,8 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.setSelectedItemId(R.id.menu_mensajeria);
-        // Guarda una referencia a la actividad actual
-        final Class<?> currentActivity = this.getClass();
 
+        final Class<?> currentActivity = this.getClass();
         bottomNav.setOnItemSelectedListener(item -> {
             Intent intent = null;
             int id = item.getItemId();
@@ -78,17 +85,31 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
             return true;
         });
 
-        cargarMensajes();
-
-        MensajeAdapter adapter = new MensajeAdapter(mensajes, this);
+        // ✅ Configuración del RecyclerView con clientes
+        db = FirebaseFirestore.getInstance();
         binding.recyclerMensajes.setLayoutManager(new LinearLayoutManager(this));
+        ClientesChatAdapter adapter = new ClientesChatAdapter(listaClientes, this::abrirChatConCliente);
         binding.recyclerMensajes.setAdapter(adapter);
-    }
 
-    private void cargarMensajes() {
-        mensajes.add(new Mensaje("Ana Bonino", "¿A qué hora puedo hacer check-in?", R.drawable.img_guest_placeholder));
-        mensajes.add(new Mensaje("Luis Ramírez", "¿Dónde se recoge la llave?", R.drawable.img_guest_placeholder));
-        mensajes.add(new Mensaje("María López", "¿Tienen estacionamiento disponible?", R.drawable.img_guest_placeholder));
+        binding.inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().toLowerCase().trim();
+                List<ClienteItem> filtrados = new ArrayList<>();
+                for (ClienteItem c : listaClientes) {
+                    if (c.getNombre().toLowerCase().contains(query)){
+                        filtrados.add(c);
+                    }
+                }
+                adapter.updateData(filtrados); // Asegúrate de tener este método en tu adapter
+            }
+        });
+
+
+        // 🔁 Cargar clientes desde Firestore
+        cargarClientesParaChat();
     }
 
     private void inicializarVistas() {
@@ -148,5 +169,34 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
         if (viewModel != null) {
             viewModel.cargarNotificacionesCheckout();
         }
+    }
+
+    private void cargarClientesParaChat() {
+        db.collection("usuarios")
+                .whereEqualTo("rol", "usuario")
+                .whereEqualTo("estado", true)
+                .get()
+                .addOnSuccessListener(query -> {
+                    listaClientes.clear();
+                    for (QueryDocumentSnapshot doc : query) {
+                        String id = doc.getId();
+                        String nombre = doc.getString("nombres") + " " + doc.getString("apellidos");
+                        String email = doc.getString("email");
+                        Boolean conectado = doc.getBoolean("conectado");
+
+                        ClienteItem cliente = new ClienteItem(id, nombre, email, conectado != null && conectado);
+                        listaClientes.add(cliente);
+                    }
+                    binding.recyclerMensajes.getAdapter().notifyDataSetChanged();
+                });
+    }
+
+
+    private void abrirChatConCliente(ClienteItem cliente) {
+        Intent intent = new Intent(this, MensajeDetalleActivity.class);
+        intent.putExtra("USER_ID", cliente.getId());
+        intent.putExtra("USER_NAME", cliente.getNombre());
+        intent.putExtra("USER_EMAIL", cliente.getEmail());
+        startActivity(intent);
     }
 }
