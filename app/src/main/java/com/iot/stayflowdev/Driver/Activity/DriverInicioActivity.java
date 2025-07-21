@@ -94,7 +94,7 @@ public class DriverInicioActivity extends AppCompatActivity {
         configurarRecyclerView();
         configurarSwitch();
         configurarBottomNavigation();
-        configurarNotificaciones();
+        //configurarNotificaciones();
         actualizarEstadoUI(binding.statusSwitch.isChecked());
         verificarEstadoGPS();
         inicializarSolicitudes();
@@ -385,13 +385,13 @@ public class DriverInicioActivity extends AppCompatActivity {
             }
         }
     }
-
+/*
     private void configurarNotificaciones() {
         binding.notificationIcon.setOnClickListener(v -> {
             Intent intent = new Intent(DriverInicioActivity.this, DriverNotificacionActivity.class);
             startActivity(intent);
         });
-    }
+    } */
 
     private void configurarBottomNavigation() {
         binding.bottomNavigation.setSelectedItemId(R.id.nav_inicio);
