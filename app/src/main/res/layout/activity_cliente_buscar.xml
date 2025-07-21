@@ -102,15 +102,13 @@
                     android:text="Hoteles mejor valorados"
                     android:textAppearance="?attr/textAppearanceTitleMedium" />
 
-                <!-- RecyclerView horizontal para mostrar hoteles en carrusel -->
+                <!-- RecyclerView vertical para mostrar hoteles (cambiado de horizontal a vertical) -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerHotelesTop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:orientation="horizontal" />
+                    android:orientation="vertical" />
 
                 <!-- Estado de carga -->
                 <ProgressBar
@@ -130,15 +128,6 @@
                     android:textColor="?attr/colorError"
                     android:visibility="gone" />
             </LinearLayout>
-
-            <!-- Sección de Lugares históricos -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/black"
-                android:text="Lugares históricos que suelen visitar"
-                android:textAppearance="?attr/textAppearanceTitleMedium" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

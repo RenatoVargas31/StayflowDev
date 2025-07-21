@@ -59,28 +59,26 @@ import java.util.List;
 import java.util.Locale;
 
 public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyCallback, MapManager.MapEventListener {
-    // ==================== VARIABLES PRINCIPALES ====================
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private LocationRequest locationRequest;
     private boolean isFirstLocation = true;
     private boolean mostroDialogoGps = false;
     private static final int LOCATION_REQUEST_CODE = 1;
-
-    // MapManager - Optimiza toda la lógica del mapa
     private MapManager mapManager;
-
-    // UI Components - Cards
     private CardView destinationCard;
     private CardView navigationCard;
     private CardView finalizeTripCard;
-
-    // UI Components - Destination Card
     private LinearLayout collapsedContent, expandedContent;
     private TextView destinationName, direccionName, arrivalTime, arrivalTimeDetailed;
-    private TextView distanceValue, estimatedCost, remainingDistance, routeText;
+    private TextView distanceValue,remainingDistance, routeText;
     private ImageButton btnCloseDestination;
-    private MaterialButton btnStartTrip, btnContactPassenger;
+    private MaterialButton btnStartTrip;
+
+    // Variables desde DriverReservaInfoActivity.java
+    private LatLng hotelLocationFromIntent;
+    private String hotelNombreFromIntent;
+    private String hotelDireccionFromIntent;
 
     // UI Components - Navigation Card
     private ImageView navigationIcon;
@@ -126,6 +124,22 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         initializeMap();
         setupWindowInsets();
         setupMockNavigation();
+        verificarHotelDesdeIntent();
+    }
+    private void verificarHotelDesdeIntent() {
+        Intent intent = getIntent();
+
+        if (intent.hasExtra("HOTEL_LAT") && intent.hasExtra("HOTEL_LNG")) {
+            // Obtener datos del hotel
+            double hotelLat = intent.getDoubleExtra("HOTEL_LAT", 0.0);
+            double hotelLng = intent.getDoubleExtra("HOTEL_LNG", 0.0);
+            hotelNombreFromIntent = intent.getStringExtra("HOTEL_NOMBRE");
+            hotelDireccionFromIntent = intent.getStringExtra("HOTEL_DIRECCION");
+
+            hotelLocationFromIntent = new LatLng(hotelLat, hotelLng);
+
+            Log.d("DriverMapa", "Hotel recibido desde Intent: " + hotelNombreFromIntent + " en " + hotelLocationFromIntent.toString());
+        }
     }
 
     // ==================== INITIALIZATION ====================
@@ -146,11 +160,11 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         arrivalTime = findViewById(R.id.arrival_time);
         arrivalTimeDetailed = findViewById(R.id.arrival_time_detailed);
         distanceValue = findViewById(R.id.distance_value);
-        estimatedCost = findViewById(R.id.estimated_cost);
+       // estimatedCost = findViewById(R.id.estimated_cost);
         remainingDistance = findViewById(R.id.remaining_distance);
         btnCloseDestination = findViewById(R.id.btn_close_destination);
         btnStartTrip = findViewById(R.id.btn_start_trip);
-        btnContactPassenger = findViewById(R.id.btn_contact_passenger);
+       // btnContactPassenger = findViewById(R.id.btn_contact_passenger);
 
         // ==================== NAVIGATION CARD ====================
         navigationCard = findViewById(R.id.navigation_card);
@@ -188,10 +202,10 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         collapsedContent.setOnClickListener(v -> toggleCardExpansion());
         btnCloseDestination.setOnClickListener(v -> clearDestination());
         btnStartTrip.setOnClickListener(v -> startTrip());
-        btnContactPassenger.setOnClickListener(v -> {
+        /*btnContactPassenger.setOnClickListener(v -> {
             Intent intent = new Intent(DriverMapaActivity.this, DriverChatActivity.class);
             startActivity(intent);
-        });
+        }); */
 
         // ==================== NAVIGATION CARD LISTENERS ====================
         btnFinalizeTrip.setOnClickListener(v -> showFinalizeTripCard());
@@ -503,7 +517,7 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         arrivalTime.setText("-- mins");
         arrivalTimeDetailed.setText("-- mins");
         distanceValue.setText("-- km");
-        estimatedCost.setText("S/ --");
+      //  estimatedCost.setText("S/ --");
         remainingDistance.setText("Calculando ruta óptima...");
     }
 
@@ -511,7 +525,7 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         distanceValue.setText(routeInfo.distance);
         arrivalTime.setText(routeInfo.durationMinutes + " mins");
         arrivalTimeDetailed.setText(routeInfo.durationMinutes + " mins");
-        estimatedCost.setText(String.format(Locale.getDefault(), "S/ %.2f", routeInfo.estimatedCost));
+       // estimatedCost.setText(String.format(Locale.getDefault(), "S/ %.2f", routeInfo.estimatedCost));
         remainingDistance.setText("Ruta óptima calculada");
     }
 
@@ -626,9 +640,6 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
-
-    // ==================== MAPMANAGER EVENT LISTENERS ====================
-
     @Override
     public void onLocationUpdated(LatLng location) {
         Log.d("DriverMapa", "Ubicación actualizada: " + location.latitude + ", " + location.longitude);
@@ -671,9 +682,6 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapClick(LatLng latLng) {
         handleMapClick(latLng);
     }
-
-    // ==================== CONFIGURATION & LIFECYCLE (EXISTING METHODS) ====================
-
     private void configureLocation() {
         locationRequest = LocationRequest.create()
                 .setInterval(3000)
@@ -700,7 +708,6 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
             }
         };
     }
-
     private void initializeMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.google_map_fragment);
@@ -711,12 +718,31 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         }
         mapFragment.getMapAsync(this);
     }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mapManager.initializeMap(googleMap);
+
+        // Si viene información del hotel, configurarlo como destino automáticamente
+        if (hotelLocationFromIntent != null) {
+            configurarHotelComoDestino();
+        }
+
         verificarUbicacionYGps();
     }
+    private void configurarHotelComoDestino() {
+        // Usar el método existente setDestination del mapManager
+        String placeName = hotelNombreFromIntent != null ? hotelNombreFromIntent : "Hotel";
+        String fullAddress = hotelDireccionFromIntent != null ? hotelDireccionFromIntent : "Ubicación del hotel";
+
+        // Esto activará automáticamente onDestinationSelected y seguirá el flujo normal
+        mapManager.setDestination(hotelLocationFromIntent, placeName, fullAddress);
+
+        // Centrar el mapa en el hotel
+        mapManager.centerOnCurrentLocation(15f); // O centrar en el hotel si prefieres
+
+        Log.d("DriverMapa", "Hotel configurado como destino: " + placeName);
+    }
+
 
     private void configurarBottomNavigation() {
         bottomNavigation.setSelectedItemId(R.id.nav_mapa);
@@ -846,12 +872,5 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
 
     public LatLng getCurrentCoordinates() {
         return mapManager != null ? mapManager.getCurrentLocation() : null;
-    }
-
-    public String getCurrentCoordinatesAsString() {
-        LatLng location = getCurrentCoordinates();
-        return location != null ?
-                String.format(Locale.getDefault(), "%.6f,%.6f", location.latitude, location.longitude) :
-                "Ubicación no disponible";
     }
 }

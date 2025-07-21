@@ -98,9 +98,9 @@ public class ClienteBuscarActivity extends AppCompatActivity implements HotelesT
         // Inicializar adaptador con listener para los clics
         hotelesTopAdapter = new HotelesTopAdapter(this);
 
-        // Configurar RecyclerView con LinearLayoutManager horizontal para el carrusel
+        // Configurar RecyclerView con LinearLayoutManager vertical (cambiado de horizontal)
         LinearLayoutManager layoutManager = new LinearLayoutManager(
-                this, LinearLayoutManager.HORIZONTAL, false);
+                this, LinearLayoutManager.VERTICAL, false);
         binding.recyclerHotelesTop.setLayoutManager(layoutManager);
         binding.recyclerHotelesTop.setAdapter(hotelesTopAdapter);
     }

@@ -306,7 +306,7 @@
 
                         </LinearLayout>
 
-                        <!-- Sección de costo -->
+                        <!-- Sección de costo
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -325,7 +325,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="S/ --"
+                                android:text="S/ "
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -338,7 +338,7 @@
                                 android:textColor="#757575"
                                 android:textSize="12sp" />
 
-                        </LinearLayout>
+                        </LinearLayout> -->
 
                     </LinearLayout>
 
@@ -359,14 +359,13 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <!-- Botones secundarios (Chat) -->
+                        <!-- Botones secundarios (Chat)
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:layout_marginBottom="8dp">
 
-                            <!-- Botón Contactar Pasajero -->
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_contact_passenger"
                                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -379,7 +378,7 @@
                                 android:textAllCaps="false"
                                 android:textColor="?attr/colorOnSurfaceVariant"
                                 app:strokeColor="?attr/colorOutline" />
-                        </LinearLayout>
+                        </LinearLayout> -->
 
                         <!-- Botón principal - Iniciar Viaje -->
                         <com.google.android.material.button.MaterialButton

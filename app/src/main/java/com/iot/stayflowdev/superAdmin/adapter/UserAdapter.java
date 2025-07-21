@@ -1,5 +1,8 @@
 package com.iot.stayflowdev.superAdmin.adapter;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.User;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,50 +72,31 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.imageViewUserAvatar.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 
         if (fotoUrl != null && !fotoUrl.isEmpty() && !fotoUrl.equals("null")) {
-            // Debug: Confirmar que se intenta cargar la imagen
-            android.util.Log.d("UserAdapter", "Cargando imagen para: " + user.getName());
+            // Cargar la foto del usuario con las utilidades optimizadas
+            ImageLoadingUtils.loadProfileImage(holder.itemView.getContext(), fotoUrl, holder.imageViewUserAvatar,
+                new ImageLoadingUtils.ImageLoadCallback() {
+                    @Override
+                    public void onLoadSuccess() {
+                        // Configuración para foto real cargada exitosamente
+                        holder.imageViewUserAvatar.setPadding(0, 0, 0, 0);
+                        holder.imageViewUserAvatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        holder.imageViewUserAvatar.setColorFilter(null);
+                        holder.imageViewUserAvatar.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                    }
 
-            // Cargar la foto del usuario desde Firebase Storage
-            Glide.with(holder.itemView.getContext())
-                    .load(fotoUrl)
-                    .apply(new RequestOptions()
-                            .placeholder(R.drawable.ic_person)
-                            .error(R.drawable.ic_person)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .override(200, 200)) // Redimensionar para mejor rendimiento
-                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
-                            android.util.Log.e("UserAdapter", "Error cargando imagen para " + user.getName() + ": " + e.getMessage());
-                            // Si falla la carga, mostrar ícono por defecto
-                            holder.imageViewUserAvatar.setImageResource(R.drawable.ic_person);
-                            holder.imageViewUserAvatar.setBackgroundColor(holder.itemView.getContext().getColor(R.color.md_theme_primaryContainer));
-                            holder.imageViewUserAvatar.setColorFilter(holder.itemView.getContext().getColor(R.color.md_theme_onPrimaryContainer));
-                            holder.imageViewUserAvatar.setPadding(16, 16, 16, 16);
-                            holder.imageViewUserAvatar.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                            android.util.Log.d("UserAdapter", "Imagen cargada exitosamente para: " + user.getName());
-                            // Configuración para foto real
-                            holder.imageViewUserAvatar.setPadding(0, 0, 0, 0);
-                            holder.imageViewUserAvatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                            return false;
-                        }
-                    })
-                    .into(holder.imageViewUserAvatar);
-
+                    @Override
+                    public void onLoadFailed() {
+                        // Si falla la carga, mostrar ícono por defecto
+                        holder.imageViewUserAvatar.setImageResource(R.drawable.ic_person);
+                        holder.imageViewUserAvatar.setBackgroundColor(holder.itemView.getContext().getColor(R.color.md_theme_primaryContainer));
+                        holder.imageViewUserAvatar.setColorFilter(holder.itemView.getContext().getColor(R.color.md_theme_onPrimaryContainer));
+                        holder.imageViewUserAvatar.setPadding(16, 16, 16, 16);
+                        holder.imageViewUserAvatar.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    }
+                });
         } else {
-            // Debug: Usuario sin foto
-            android.util.Log.d("UserAdapter", "Usuario sin foto: " + user.getName());
-
             // No hay foto, mostrar ícono por defecto con fondo de color
-            Glide.with(holder.itemView.getContext()).clear(holder.imageViewUserAvatar);
             holder.imageViewUserAvatar.setImageResource(R.drawable.ic_person);
-
-            // Configuración para ícono por defecto
             holder.imageViewUserAvatar.setBackgroundColor(holder.itemView.getContext().getColor(R.color.md_theme_primaryContainer));
             holder.imageViewUserAvatar.setColorFilter(holder.itemView.getContext().getColor(R.color.md_theme_onPrimaryContainer));
             holder.imageViewUserAvatar.setPadding(16, 16, 16, 16);

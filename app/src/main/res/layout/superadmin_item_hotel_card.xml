@@ -23,21 +23,15 @@
         android:padding="12dp">
 
         <!-- Imagen del hotel -->
-        <FrameLayout
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="@drawable/circle_bg"
-            android:backgroundTint="@color/md_theme_primaryContainer">
-
-            <ImageView
-                android:id="@+id/imageViewHotel"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_apartment"
-                android:padding="12dp"
-                android:contentDescription="Imagen del hotel"
-                app:tint="@color/md_theme_onPrimaryContainer" />
-        </FrameLayout>
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageViewHotel"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_apartment"
+            android:scaleType="centerCrop"
+            android:background="@color/md_theme_surfaceVariant"
+            android:contentDescription="Imagen del hotel"
+            app:shapeAppearanceOverlay="@style/RoundedImageView" />
 
         <!-- Información del hotel -->
         <LinearLayout

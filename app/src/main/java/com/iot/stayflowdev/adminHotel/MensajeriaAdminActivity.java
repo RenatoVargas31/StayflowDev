@@ -193,10 +193,15 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
 
 
     private void abrirChatConCliente(ClienteItem cliente) {
-        Intent intent = new Intent(this, MensajeDetalleActivity.class);
-        intent.putExtra("USER_ID", cliente.getId());
-        intent.putExtra("USER_NAME", cliente.getNombre());
-        intent.putExtra("USER_EMAIL", cliente.getEmail());
+        Intent intent = new Intent(this, AdminChatClienteActivity.class);
+        intent.putExtra(AdminChatClienteActivity.EXTRA_CLIENTE_ID, cliente.getId());
+        intent.putExtra(AdminChatClienteActivity.EXTRA_CLIENTE_NAME, cliente.getNombre());
+        // Generar chat ID único entre administrador y cliente
+        String chatId = com.iot.stayflowdev.adminHotel.model.ChatMessage.generateChatId(
+            com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid(),
+            cliente.getId()
+        );
+        intent.putExtra(AdminChatClienteActivity.EXTRA_CHAT_ID, chatId);
         startActivity(intent);
     }
 }

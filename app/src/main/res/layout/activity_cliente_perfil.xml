@@ -71,6 +71,26 @@
                     app:strokeWidth="2dp"
                     app:strokeColor="@color/md_theme_primary" />
 
+                <!-- Indicador de progreso para la carga de imagen -->
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-50dp"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/md_theme_primary"
+                    app:trackColor="@android:color/transparent" />
+
+                <!-- Botón para cambiar foto de perfil -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonChangePicture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cambiar Foto"
+                    android:layout_marginTop="12dp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
                 <!-- Información de perfil -->
                 <TextView
                     android:id="@+id/tv_nombre_cliente"

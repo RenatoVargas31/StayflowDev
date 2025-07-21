@@ -53,4 +53,14 @@ public class ChatMessage {
     public boolean isRead() { return read; }
 
     public void setRead(boolean read) { this.read = read; }
+
+    // Método para generar ID de chat único entre dos usuarios
+    public static String generateChatId(String userId1, String userId2) {
+        // Ordenar alfabéticamente para que siempre sea el mismo ID independientemente del orden
+        if (userId1.compareTo(userId2) < 0) {
+            return userId1 + "_" + userId2;
+        } else {
+            return userId2 + "_" + userId1;
+        }
+    }
 }

@@ -76,7 +76,7 @@ public class TaxistaRepository {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String imagenPerfilURL = documentSnapshot.getString("imagenPerfilURL");
+                            String imagenPerfilURL = documentSnapshot.getString("fotoPerfilUrl");
 
                             if (imagenPerfilURL != null && !imagenPerfilURL.isEmpty()) {
                                 // Si la URL ya es una URL de descarga completa, devolverla directamente
@@ -123,7 +123,7 @@ public class TaxistaRepository {
                             if (usuario != null) {
                                 if ("driver".equals(usuario.getRol()) || "taxista".equals(usuario.getRol())) {
 
-                                    String imagenPerfilURL = documentSnapshot.getString("imagenPerfilURL");
+                                    String imagenPerfilURL = documentSnapshot.getString("fotoPerfilUrl");
 
                                     if (imagenPerfilURL != null && !imagenPerfilURL.isEmpty()) {
                                         // Obtener URL de la imagen
@@ -207,7 +207,7 @@ public class TaxistaRepository {
 
             db.collection("usuarios")
                     .document(uid)
-                    .update("imagenPerfilURL", downloadUrl)
+                    .update("fotoPerfilUrl", downloadUrl)
                     .addOnSuccessListener(aVoid -> success.onSuccess(downloadUrl))
                     .addOnFailureListener(failure);
         } catch (IllegalStateException e) {
@@ -221,6 +221,19 @@ public class TaxistaRepository {
 
     public String obtenerUidActual() {
         return obtenerUidUsuario();
+    }
+
+    // Método público para actualizar la imagen de perfil con callbacks
+    public void actualizarImagenPerfil(String userId, String imageUrl, Runnable onSuccess, OnFailureListener onFailure) {
+        db.collection("usuarios")
+                .document(userId)
+                .update("fotoPerfilUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(onFailure);
     }
 
     // Clase helper para devolver usuario con imagen
