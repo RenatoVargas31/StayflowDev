@@ -6,14 +6,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.widget.SwitchCompat;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.model.User;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 
 public class UserDetailActivity extends BaseSuperAdminActivity {
 
@@ -204,39 +205,12 @@ public class UserDetailActivity extends BaseSuperAdminActivity {
             // Debug: Log para verificar la URL
             Log.d(TAG, "Cargando imagen de perfil: " + user.getFotoPerfilUrl());
 
-            Glide.with(this)
-                .load(user.getFotoPerfilUrl())
-                .placeholder(R.drawable.ic_person)
-                .error(R.drawable.ic_person)
-                .circleCrop()
-                .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
-                        Log.e(TAG, "Error cargando imagen de perfil: " + e.getMessage());
-                        // Configurar imagen por defecto con fondo
-                        imageViewProfile.setImageResource(R.drawable.ic_person);
-                        imageViewProfile.setBackgroundColor(getColor(R.color.md_theme_surfaceVariant));
-                        imageViewProfile.setPadding(16, 16, 16, 16);
-                        imageViewProfile.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                        Log.d(TAG, "Imagen de perfil cargada exitosamente");
-                        // Limpiar configuraciones para la imagen real
-                        imageViewProfile.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-                        imageViewProfile.setPadding(0, 0, 0, 0);
-                        imageViewProfile.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                        return false;
-                    }
-                })
-                .into(imageViewProfile);
+            ImageLoadingUtils.loadImageWithGlide(this, user.getFotoPerfilUrl(), imageViewProfile, R.drawable.ic_person, R.drawable.ic_person);
         } else {
             // No hay foto, mostrar ícono por defecto con fondo
             Log.d(TAG, "Usuario sin foto de perfil, mostrando icono por defecto");
 
-            Glide.with(this).clear(imageViewProfile);
+            ImageLoadingUtils.clearImage(imageViewProfile);
             imageViewProfile.setImageResource(R.drawable.ic_person);
             imageViewProfile.setBackgroundColor(getColor(R.color.md_theme_surfaceVariant));
             imageViewProfile.setPadding(16, 16, 16, 16);

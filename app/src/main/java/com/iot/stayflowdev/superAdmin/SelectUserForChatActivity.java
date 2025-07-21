@@ -39,7 +39,7 @@ public class SelectUserForChatActivity extends BaseSuperAdminActivity {
 
     @Override
     protected String getToolbarTitle() {
-        return "Seleccionar Usuario para Chat";
+        return "Seleccionar Administrador de Hotel";
     }
 
     @Override
@@ -75,34 +75,43 @@ public class SelectUserForChatActivity extends BaseSuperAdminActivity {
     }
 
     private void loadUsers() {
-        // Cargar todos los usuarios excepto el SuperAdmin actual
+        // Cargar solo usuarios con rol "adminhotel" (administradores de hotel)
         db.collection("usuarios")
                 .whereEqualTo("estado", true) // Solo usuarios activos
+                .whereEqualTo("rol", "adminhotel") // Solo administradores de hotel
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     usersList.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String userId = document.getId();
-                        String name = document.getString("nombres") + " " + document.getString("apellidos");
+                        String nombres = document.getString("nombres");
+                        String apellidos = document.getString("apellidos");
+                        String name = (nombres != null ? nombres : "") + " " + (apellidos != null ? apellidos : "");
+                        name = name.trim();
+                        if (name.isEmpty()) {
+                            name = "Usuario sin nombre";
+                        }
+
                         String email = document.getString("email");
                         String role = document.getString("rol");
                         Boolean connected = document.getBoolean("conectado");
 
-                        // Filtrar el SuperAdmin actual si es necesario
-                        if (role != null && !role.equals("superadmin")) {
-                            UserItem userItem = new UserItem(userId, name, email, role,
-                                                           connected != null && connected);
-                            usersList.add(userItem);
-                        }
+                        UserItem userItem = new UserItem(userId, name, email, role,
+                                                       connected != null && connected);
+                        usersList.add(userItem);
                     }
 
                     usersAdapter.notifyDataSetChanged();
-                    Log.d(TAG, "Usuarios cargados: " + usersList.size());
+                    Log.d(TAG, "Administradores de hotel cargados: " + usersList.size());
+
+                    if (usersList.isEmpty()) {
+                        Toast.makeText(this, "No hay administradores de hotel disponibles para chat", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error al cargar usuarios", e);
-                    Toast.makeText(this, "Error al cargar usuarios", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error al cargar administradores de hotel", e);
+                    Toast.makeText(this, "Error al cargar administradores de hotel", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -117,4 +126,3 @@ public class SelectUserForChatActivity extends BaseSuperAdminActivity {
         overridePendingTransition(0, 0);
     }
 }
-
