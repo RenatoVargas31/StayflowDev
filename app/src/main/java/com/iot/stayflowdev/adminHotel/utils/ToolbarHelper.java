@@ -51,7 +51,7 @@ public class ToolbarHelper {
                 });
 
                 // Cargar notificaciones
-                viewModel.cargarNotificacionesCheckout();
+                viewModel.cargarNotificacionesCheckoutTiempoReal();
             }
         }
     }

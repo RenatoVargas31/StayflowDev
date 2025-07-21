@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.iot.stayflowdev.adminHotel.model.UsuarioResumen;
 import com.iot.stayflowdev.model.Reserva;
@@ -40,6 +41,8 @@ public class AdminHotelViewModel extends ViewModel {
     private MutableLiveData<Integer> contadorNotificaciones = new MutableLiveData<>();
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable actualizadorNotificaciones;
+    private ListenerRegistration listenerNotificaciones;
+
 
     public AdminHotelViewModel() {
         repository = new AdminHotelRepository();
@@ -50,7 +53,7 @@ public class AdminHotelViewModel extends ViewModel {
                 hotelIdCache = id;
                 Log.d("AdminVM", "Hotel ID cacheado: " + id);
                 cargarDescripcionHotel();
-                cargarNotificacionesCheckout();
+                cargarNotificacionesCheckoutTiempoReal();
                 iniciarActualizacionAutomatica();
             } else {
                 Log.e("AdminVM", "Hotel ID no obtenido aún.");
@@ -125,7 +128,7 @@ public class AdminHotelViewModel extends ViewModel {
     }
 
     // Método para cargar notificaciones de checkout
-    public void cargarNotificacionesCheckout() {
+    public void cargarNotificacionesCheckoutTiempoReal() {
         String hotelId = obtenerHotelIdActual();
         if (hotelId == null) {
             Log.e("AdminHotelViewModel", "Hotel ID no disponible");
@@ -134,17 +137,21 @@ public class AdminHotelViewModel extends ViewModel {
             return;
         }
 
-        Log.d("NotificationDebug", "Buscando notificaciones para hotel: " + hotelId);
+        if (listenerNotificaciones != null) {
+            listenerNotificaciones.remove(); // Detener listener anterior
+        }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("reservas")
+        listenerNotificaciones = FirebaseFirestore.getInstance()
+                .collection("reservas")
                 .whereEqualTo("idHotel", hotelId)
                 .whereEqualTo("estado", "sin checkout")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Log.d("NotificationDebug", "Reservas sin checkout encontradas: " + queryDocumentSnapshots.size());
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Log.e("AdminHotelViewModel", "Error en snapshot de notificaciones", error);
+                        return;
+                    }
 
-                    if (queryDocumentSnapshots.isEmpty()) {
+                    if (queryDocumentSnapshots == null || queryDocumentSnapshots.isEmpty()) {
                         actualizarNotificaciones(new ArrayList<>());
                         return;
                     }
@@ -153,7 +160,6 @@ public class AdminHotelViewModel extends ViewModel {
                     AtomicInteger contador = new AtomicInteger(0);
                     int totalDocumentos = queryDocumentSnapshots.size();
 
-                    // Obtener fechas de referencia para comparar solo el día (sin horas)
                     Calendar calendarHoy = Calendar.getInstance();
                     calendarHoy.set(Calendar.HOUR_OF_DAY, 0);
                     calendarHoy.set(Calendar.MINUTE, 0);
@@ -164,26 +170,18 @@ public class AdminHotelViewModel extends ViewModel {
                     calendarHoy.add(Calendar.DAY_OF_MONTH, 1);
                     Timestamp finHoy = new Timestamp(calendarHoy.getTime());
 
-                    // También obtener ayer para checkouts vencidos
-                    calendarHoy.add(Calendar.DAY_OF_MONTH, -2); // Volver a ayer
-                    Timestamp inicioAyer = new Timestamp(calendarHoy.getTime());
-
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Reserva reserva = doc.toObject(Reserva.class);
                         reserva.setId(doc.getId());
 
-                        // Obtener datos del usuario para el nombre
                         obtenerNombreUsuario(reserva.getIdUsuario(), nombreUsuario -> {
                             Timestamp fechaCheckout = reserva.getFechaFin();
                             String tipoNotificacion = "";
 
                             if (fechaCheckout != null) {
-                                // Determinar tipo de notificación comparando solo fechas (sin horas)
                                 if (fechaCheckout.compareTo(inicioHoy) < 0) {
-                                    // Checkout era ayer o antes = VENCIDO
                                     tipoNotificacion = "CHECKOUT_VENCIDO";
                                 } else if (fechaCheckout.compareTo(inicioHoy) >= 0 && fechaCheckout.compareTo(finHoy) < 0) {
-                                    // Checkout es hoy = HOY
                                     tipoNotificacion = "CHECKOUT_HOY";
                                 }
                             }
@@ -199,23 +197,16 @@ public class AdminHotelViewModel extends ViewModel {
                                         "sin checkout"
                                 );
                                 notificacion.setId("notif_" + reserva.getId());
-
                                 synchronized (notificaciones) {
                                     notificaciones.add(notificacion);
                                 }
                             }
 
-                            // Verificar si hemos procesado todas las reservas
                             if (contador.incrementAndGet() == totalDocumentos) {
                                 actualizarNotificaciones(notificaciones);
                             }
                         });
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("AdminHotelViewModel", "Error cargando notificaciones", e);
-                    notificacionesCheckout.setValue(new ArrayList<>());
-                    contadorNotificaciones.setValue(0);
                 });
     }
 
@@ -311,7 +302,7 @@ public class AdminHotelViewModel extends ViewModel {
         actualizadorNotificaciones = new Runnable() {
             @Override
             public void run() {
-                cargarNotificacionesCheckout();
+                cargarNotificacionesCheckoutTiempoReal();
                 handler.postDelayed(this, 5 * 60 * 1000); // Cada 5 minutos
             }
         };
@@ -349,12 +340,6 @@ public class AdminHotelViewModel extends ViewModel {
 
         Log.e("AdminHotelViewModel", "No se pudo obtener hotel ID - cache vacío y sin usuario autenticado");
         return null;
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        detenerActualizacionAutomatica();
     }
 
     public void actualizarUbicacionConCoordenadas(String hotelId, String direccion, LatLng coordenadas,
@@ -569,5 +554,14 @@ public class AdminHotelViewModel extends ViewModel {
                 });
 
         return liveData;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        if (listenerNotificaciones != null) {
+            listenerNotificaciones.remove();
+        }
+        detenerActualizacionAutomatica();
     }
 }

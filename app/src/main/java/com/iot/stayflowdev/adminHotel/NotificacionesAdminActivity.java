@@ -102,7 +102,7 @@ public class NotificacionesAdminActivity extends AppCompatActivity {
 
 
         // Cargar notificaciones
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
     }
 
     private void onNotificacionClick(NotificacionCheckout notificacion) {

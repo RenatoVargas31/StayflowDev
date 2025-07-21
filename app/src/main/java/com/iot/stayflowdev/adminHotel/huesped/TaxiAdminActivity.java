@@ -278,7 +278,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
         });
 
         // Cargar notificaciones al iniciar
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
 
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
@@ -315,7 +315,7 @@ public class TaxiAdminActivity extends AppCompatActivity {
         super.onResume();
         // Actualizar notificaciones cuando regresamos a esta activity
         if (viewModel != null) {
-            viewModel.cargarNotificacionesCheckout();
+            viewModel.cargarNotificacionesCheckoutTiempoReal();
         }
     }
 }

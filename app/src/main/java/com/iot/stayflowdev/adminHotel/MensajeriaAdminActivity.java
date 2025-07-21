@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,7 +26,10 @@ import com.iot.stayflowdev.adminHotel.service.NotificacionService;
 import com.iot.stayflowdev.databinding.ActivityMensajeriaAdminBinding;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -107,9 +111,15 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
             }
         });
 
+        viewModel.getHotelId().observe(this, hotelId -> {
+            if (hotelId != null && !hotelId.trim().isEmpty()) {
+                cargarClientesParaChat(hotelId);
+            } else {
+                Log.e("MensajeriaAdmin", "No se pudo obtener hotelId del ViewModel.");
+            }
+        });
 
-        // 🔁 Cargar clientes desde Firestore
-        cargarClientesParaChat();
+
     }
 
     private void inicializarVistas() {
@@ -133,7 +143,7 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
         });
 
         // Cargar notificaciones al iniciar
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
 
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
@@ -167,29 +177,48 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
         super.onResume();
         // Actualizar notificaciones cuando regresamos a esta activity
         if (viewModel != null) {
-            viewModel.cargarNotificacionesCheckout();
+            viewModel.cargarNotificacionesCheckoutTiempoReal();
         }
     }
 
-    private void cargarClientesParaChat() {
-        db.collection("usuarios")
-                .whereEqualTo("rol", "usuario")
-                .whereEqualTo("estado", true)
+    private void cargarClientesParaChat(String hotelId) {
+        db.collection("reservas")
+                .whereEqualTo("idHotel", hotelId)
                 .get()
-                .addOnSuccessListener(query -> {
-                    listaClientes.clear();
-                    for (QueryDocumentSnapshot doc : query) {
-                        String id = doc.getId();
-                        String nombre = doc.getString("nombres") + " " + doc.getString("apellidos");
-                        String email = doc.getString("email");
-                        Boolean conectado = doc.getBoolean("conectado");
-
-                        ClienteItem cliente = new ClienteItem(id, nombre, email, conectado != null && conectado);
-                        listaClientes.add(cliente);
+                .addOnSuccessListener(reservaQuery -> {
+                    Set<String> idsUsuarios = new HashSet<>();
+                    for (QueryDocumentSnapshot reservaDoc : reservaQuery) {
+                        idsUsuarios.add(reservaDoc.getString("idUsuario"));
                     }
-                    binding.recyclerMensajes.getAdapter().notifyDataSetChanged();
+
+                    if (idsUsuarios.isEmpty()) {
+                        listaClientes.clear();
+                        binding.recyclerMensajes.getAdapter().notifyDataSetChanged();
+                        return;
+                    }
+
+                    db.collection("usuarios")
+                            .whereEqualTo("rol", "usuario")
+                            .whereEqualTo("estado", true)
+                            .get()
+                            .addOnSuccessListener(userQuery -> {
+                                listaClientes.clear();
+                                for (QueryDocumentSnapshot userDoc : userQuery) {
+                                    String id = userDoc.getId();
+                                    if (!idsUsuarios.contains(id)) continue;
+
+                                    String nombre = userDoc.getString("nombres") + " " + userDoc.getString("apellidos");
+                                    String email = userDoc.getString("email");
+                                    Boolean conectado = userDoc.getBoolean("conectado");
+
+                                    ClienteItem cliente = new ClienteItem(id, nombre.trim(), email, conectado != null && conectado);
+                                    listaClientes.add(cliente);
+                                }
+                                binding.recyclerMensajes.getAdapter().notifyDataSetChanged();
+                            });
                 });
     }
+
 
 
     private void abrirChatConCliente(ClienteItem cliente) {
@@ -204,4 +233,5 @@ public class MensajeriaAdminActivity extends AppCompatActivity {
         intent.putExtra(AdminChatClienteActivity.EXTRA_CHAT_ID, chatId);
         startActivity(intent);
     }
+
 }

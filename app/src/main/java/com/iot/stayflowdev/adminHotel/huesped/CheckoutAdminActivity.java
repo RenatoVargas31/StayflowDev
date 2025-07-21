@@ -432,7 +432,7 @@ public class CheckoutAdminActivity extends AppCompatActivity {
         });
 
         // Cargar notificaciones al iniciar
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
 
         // Iniciar actualizaciones automáticas cada 5 minutos
         viewModel.iniciarActualizacionAutomatica();
@@ -469,7 +469,7 @@ public class CheckoutAdminActivity extends AppCompatActivity {
         super.onResume();
         // Actualizar notificaciones cuando regresamos a esta activity
         if (viewModel != null) {
-            viewModel.cargarNotificacionesCheckout();
+            viewModel.cargarNotificacionesCheckoutTiempoReal();
         }
     }
 

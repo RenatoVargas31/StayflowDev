@@ -114,7 +114,7 @@ public class ReportesAdminActivity extends AppCompatActivity {
     private void configurarViewModel() {
         viewModel = new ViewModelProvider(this).get(AdminHotelViewModel.class);
         viewModel.getContadorNotificaciones().observe(this, this::actualizarBadgeNotificaciones);
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
         viewModel.iniciarActualizacionAutomatica();
     }
 
@@ -230,7 +230,7 @@ public class ReportesAdminActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (viewModel != null) {
-            viewModel.cargarNotificacionesCheckout();
+            viewModel.cargarNotificacionesCheckoutTiempoReal();
         }
     }
 

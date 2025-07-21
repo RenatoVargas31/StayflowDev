@@ -125,7 +125,7 @@ public class AdminInicioActivity extends AppCompatActivity {
         });
 
         // Cargar notificaciones al iniciar
-        viewModel.cargarNotificacionesCheckout();
+        viewModel.cargarNotificacionesCheckoutTiempoReal();
 
         // Configurar card de mensajería de pruebas
         configurarMensajeriaPruebas();
@@ -165,7 +165,7 @@ public class AdminInicioActivity extends AppCompatActivity {
         super.onResume();
         // Actualizar notificaciones cuando regresamos a esta activity
         if (viewModel != null) {
-            viewModel.cargarNotificacionesCheckout();
+            viewModel.cargarNotificacionesCheckoutTiempoReal();
         }
     }
 
@@ -270,7 +270,7 @@ public class AdminInicioActivity extends AppCompatActivity {
                 }
             });
 
-            viewModel.cargarNotificacionesCheckout(); // fuerza la carga
+            viewModel.cargarNotificacionesCheckoutTiempoReal(); // fuerza la carga
         }
     }
 
