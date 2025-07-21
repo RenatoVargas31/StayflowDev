@@ -247,6 +247,10 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         String contraseña = password.getText().toString();
         boolean habilitado = switchHabilitado.isChecked();
 
+        // GUARDAR LA SESIÓN ACTUAL DEL SUPER ADMIN antes de crear el nuevo usuario
+        String superAdminEmail = mAuth.getCurrentUser().getEmail();
+        String superAdminUid = mAuth.getCurrentUser().getUid();
+
         // Primero, crear el usuario en Firebase Auth
         mAuth.createUserWithEmailAndPassword(email, contraseña)
             .addOnCompleteListener(this, task -> {
@@ -257,7 +261,8 @@ public class AddHotelAdminActivity extends AppCompatActivity {
 
                     // Ahora, guardar los datos en Firestore
                     guardarUsuarioEnFirestore(uid, nombres, apellidos, email, telefono,
-                                             tipoDocumento, numeroDocumento, habilitado);
+                                             tipoDocumento, numeroDocumento, habilitado,
+                                             superAdminEmail, superAdminUid);
                 } else {
                     // Si falla la creación del usuario
                     setLoadingState(false);
@@ -271,7 +276,8 @@ public class AddHotelAdminActivity extends AppCompatActivity {
 
     private void guardarUsuarioEnFirestore(String uid, String nombres, String apellidos,
                                          String email, String telefono, String tipoDocumento,
-                                         String numeroDocumento, boolean habilitado) {
+                                         String numeroDocumento, boolean habilitado,
+                                         String superAdminEmail, String superAdminUid) {
         // Crear el mapa de datos para Firestore
         Map<String, Object> userData = new HashMap<>();
         userData.put("nombres", nombres);
@@ -297,10 +303,27 @@ public class AddHotelAdminActivity extends AppCompatActivity {
             .set(userData)
             .addOnSuccessListener(aVoid -> {
                 Log.d(TAG, "Documento guardado correctamente con UID: " + uid);
-                setLoadingState(false);
+
+                // IMPORTANTE: Cerrar sesión del usuario recién creado y restaurar la sesión del super admin
+                mAuth.signOut();
+
+                // Restaurar la sesión del super admin usando signInWithEmailAndPassword
+                // Nota: Esto requiere que tengamos la contraseña del super admin, lo cual no es seguro
+                // Una mejor alternativa es usar Firebase Admin SDK en el backend
+
+                // Por ahora, simplemente cerramos sesión del nuevo usuario
+                // El super admin tendrá que volver a iniciar sesión
+                Log.d(TAG, "Sesión del nuevo admin cerrada. Super admin debe volver a iniciar sesión.");
 
                 // Registrar en el servicio de logs
                 registrarCreacionAdministrador(uid, nombres, apellidos, email, telefono, tipoDocumento, numeroDocumento, habilitado);
+
+                setLoadingState(false);
+
+                // Mostrar mensaje explicativo al usuario
+                Snackbar.make(findViewById(android.R.id.content),
+                            "Administrador creado exitosamente. Por seguridad, debe volver a iniciar sesión.",
+                            Snackbar.LENGTH_LONG).show();
 
                 // Crear un Intent con los datos completos para actualizar la UI
                 Intent resultIntent = new Intent();
@@ -310,10 +333,19 @@ public class AddHotelAdminActivity extends AppCompatActivity {
                 resultIntent.putExtra(EXTRA_ADMIN_ROLE, "adminhotel");
                 resultIntent.putExtra(EXTRA_ADMIN_ROLE_DESC, "Administrador de Hotel");
                 resultIntent.putExtra(EXTRA_ADMIN_ENABLED, habilitado);
+                resultIntent.putExtra("REQUIRE_REAUTH", true); // Indicar que se requiere re-autenticación
 
                 // Establecer el resultado y finalizar
                 setResult(RESULT_OK, resultIntent);
-                finish();
+
+                // Redirigir al login después de un breve delay
+                new android.os.Handler().postDelayed(() -> {
+                    // Ir a la pantalla de login
+                    Intent loginIntent = new Intent(this, com.iot.stayflowdev.LoginActivity.class);
+                    loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(loginIntent);
+                    finish();
+                }, 2000); // 2 segundos de delay para que el usuario lea el mensaje
             })
             .addOnFailureListener(e -> {
                 Log.w(TAG, "Error al guardar documento", e);
@@ -353,3 +385,4 @@ public class AddHotelAdminActivity extends AppCompatActivity {
         buttonGuardar.setEnabled(!isLoading);
     }
 }
+

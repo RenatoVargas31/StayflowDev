@@ -44,6 +44,9 @@ public class User {
     private long ultimaConexion; // Timestamp de última conexión
     private String tokenSesion; // Token de sesión actual
 
+    // Campo para verificación de taxistas
+    private boolean verificado; // Indica si el taxista ha sido verificado por el super admin
+
     // Constructor vacío requerido por Firestore
     public User() {
         // Constructor vacío necesario para Firestore
@@ -266,5 +269,13 @@ public class User {
 
     public void setTokenSesion(String tokenSesion) {
         this.tokenSesion = tokenSesion;
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
     }
 }

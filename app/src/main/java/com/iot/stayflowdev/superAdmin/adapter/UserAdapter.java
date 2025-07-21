@@ -30,6 +30,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public interface OnUserClickListener {
         void onDetailsClick(User user);
         void onStatusChanged(User user, boolean isEnabled, String reason);
+        void onVerifyTaxista(User user); // Nueva interfaz para verificar taxistas
     }
 
     public UserAdapter(List<User> userList, OnUserClickListener listener) {
@@ -139,6 +140,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 listener.onDetailsClick(user);
             }
         });
+
+        // Nuevo: Listener para verificación de taxistas
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onVerifyTaxista(user);
+                return true; // Indicar que el evento fue manejado
+            }
+            return false;
+        });
+
+        // Nuevo: Mostrar botón de verificación solo para taxistas no verificados
+        if ("driver".equals(user.getRol()) && !user.isVerificado()) {
+            holder.btnVerifyTaxista.setVisibility(View.VISIBLE);
+            holder.btnVerifyTaxista.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onVerifyTaxista(user);
+                }
+            });
+        } else {
+            holder.btnVerifyTaxista.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -278,6 +300,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         ShapeableImageView imageViewUserAvatar;
         TextView textViewUserName, textViewUserRole, textViewUserStatus;
         SwitchCompat switchUserStatus;
+        View btnVerifyTaxista; // Botón para verificar taxista
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -287,6 +310,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             textViewUserRole = itemView.findViewById(R.id.textViewUserRole);
             textViewUserStatus = itemView.findViewById(R.id.textViewUserStatus);
             switchUserStatus = itemView.findViewById(R.id.switchUserStatus);
+            btnVerifyTaxista = itemView.findViewById(R.id.btnVerifyTaxista); // Inicializar botón
         }
     }
 }

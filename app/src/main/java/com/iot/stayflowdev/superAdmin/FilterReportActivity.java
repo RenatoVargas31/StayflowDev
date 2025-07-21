@@ -111,16 +111,18 @@ public class FilterReportActivity extends AppCompatActivity implements DateRange
 
     private void navigateToReport(String periodName, Date startDate, Date endDate) {
         Intent intent = new Intent(this, ReportDetailActivity.class);
-        intent.putExtra("HOTEL_NAME", hotelName);
+        intent.putExtra(ReportDetailActivity.EXTRA_HOTEL_NAME, hotelName);
+        intent.putExtra(ReportDetailActivity.EXTRA_HOTEL_ID, getIntent().getStringExtra("HOTEL_ID"));
         intent.putExtra("PERIOD_NAME", periodName);
-        intent.putExtra("START_DATE", startDate.getTime());
-        intent.putExtra("END_DATE", endDate.getTime());
+        intent.putExtra(ReportDetailActivity.EXTRA_START_DATE, startDate.getTime());
+        intent.putExtra(ReportDetailActivity.EXTRA_END_DATE, endDate.getTime());
         startActivity(intent);
     }
 
-    public static void start(AppCompatActivity activity, String hotelName) {
+    public static void start(AppCompatActivity activity, String hotelName, String hotelId) {
         Intent intent = new Intent(activity, FilterReportActivity.class);
         intent.putExtra("HOTEL_NAME", hotelName);
+        intent.putExtra("HOTEL_ID", hotelId);
         activity.startActivity(intent);
     }
 }

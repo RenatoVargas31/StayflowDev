@@ -194,10 +194,10 @@ public class LogsActivity extends BaseSuperAdminActivity {
      * Convierte un SystemLog a LogItem para mantener compatibilidad con el adapter existente
      */
     private LogItem convertSystemLogToLogItem(SystemLog systemLog) {
-        // Formato para la fecha
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        String formattedTime = systemLog.getTimestamp() != null && systemLog.getTimestamp().toDate() != null ?
-            timeFormat.format(systemLog.getTimestamp().toDate()) : "N/A";
+        // Formato para mostrar fecha y hora completa
+        SimpleDateFormat fullDateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String formattedDateTime = systemLog.getTimestamp() != null && systemLog.getTimestamp().toDate() != null ?
+            fullDateTimeFormat.format(systemLog.getTimestamp().toDate()) : "N/A";
 
         // Convertir categoría
         String category;
@@ -226,7 +226,7 @@ public class LogsActivity extends BaseSuperAdminActivity {
         return new LogItem(
             systemLog.getId(),
             systemLog.getTitle(),
-            formattedTime,
+            formattedDateTime,
             systemLog.getDescription(),
             category,
             iconResId,

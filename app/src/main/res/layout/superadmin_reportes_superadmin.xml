@@ -10,7 +10,8 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Chip Group para filtrado -->
+        <!--
+
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -71,7 +72,9 @@
                     app:chipIconVisible="true" />
 
             </com.google.android.material.chip.ChipGroup>
+
         </HorizontalScrollView>
+        -->
 
         <!-- Barra de búsqueda -->
         <com.google.android.material.card.MaterialCardView
