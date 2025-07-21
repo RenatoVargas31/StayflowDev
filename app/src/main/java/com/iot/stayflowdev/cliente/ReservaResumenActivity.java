@@ -39,6 +39,7 @@ public class ReservaResumenActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private Reserva reserva;
     private Hotel hotel;
+    private boolean modoVisualizacion = false;
 
     private static final String TAG = "ReservaResumen";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -62,10 +63,14 @@ public class ReservaResumenActivity extends AppCompatActivity {
         hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
         db = FirebaseFirestore.getInstance();
 
+        // Verificar si estamos en modo visualización
+        modoVisualizacion = getIntent().getBooleanExtra("modo_visualizacion", false);
+        Log.d(TAG, "Modo visualización: " + modoVisualizacion);
+
         // Configurar toolbar
         configurarToolbar();
 
-        // Configurar botón confirmar
+        // Configurar botón confirmar según el modo
         configurarBotonConfirmar();
 
         // Obtener datos de la reserva
@@ -75,14 +80,24 @@ public class ReservaResumenActivity extends AppCompatActivity {
     private void configurarToolbar() {
         binding.btnBack.setOnClickListener(v -> onBackPressed());
     }
-    private void configurarBotonConfirmar() {
-        binding.btnConfirmarReserva.setOnClickListener(v -> {
-            // Deshabilitar botón para evitar múltiples clics
-            binding.btnConfirmarReserva.setEnabled(false);
-            binding.btnConfirmarReserva.setText("Procesando...");
 
-            guardarReservaEnFirestore();
-        });
+    private void configurarBotonConfirmar() {
+        if (modoVisualizacion) {
+            // En modo visualización, ocultar el botón ya que existe una flecha para volver
+            binding.btnConfirmarReserva.setVisibility(View.GONE);
+            binding.containerBotonFijo.setVisibility(View.GONE); // También ocultar el contenedor para mejor apariencia
+        } else {
+            // En modo creación (comportamiento original)
+            binding.btnConfirmarReserva.setVisibility(View.VISIBLE);
+            binding.containerBotonFijo.setVisibility(View.VISIBLE);
+            binding.btnConfirmarReserva.setOnClickListener(v -> {
+                // Deshabilitar botón para evitar múltiples clics
+                binding.btnConfirmarReserva.setEnabled(false);
+                binding.btnConfirmarReserva.setText("Procesando...");
+
+                guardarReservaEnFirestore();
+            });
+        }
     }
     private void obtenerReservaDelIntent() {
         try {
@@ -330,6 +345,12 @@ public class ReservaResumenActivity extends AppCompatActivity {
     // ================= MÉTODOS PARA GUARDAR EN FIRESTORE =================
 
     private void guardarReservaEnFirestore() {
+        // Si estamos en modo visualización, no guardar nada
+        if (modoVisualizacion) {
+            finish();
+            return;
+        }
+
         if (reserva == null) {
             mostrarErrorGuardado("Error: No hay datos de reserva para guardar");
             return;
