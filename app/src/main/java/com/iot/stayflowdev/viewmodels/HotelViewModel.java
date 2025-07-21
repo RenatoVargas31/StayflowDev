@@ -93,6 +93,9 @@ public class HotelViewModel extends ViewModel {
     public LiveData<List<LugaresCercanos>> getLugaresHistoricosPorHotel(String hotelId) {
         return repository.obtenerLugaresHistoricosCercanos(hotelId);
     }
+    public void disminuirHabitacionesDisponibles(String hotelId, String habitacionId, int cantidad) {
+        repository.disminuirHabitacionesDisponibles(hotelId, habitacionId,cantidad);
+    }
 
     private final MutableLiveData<String> descripcionHotel = new MutableLiveData<>();
     public LiveData<String> getDescripcionHotel() {

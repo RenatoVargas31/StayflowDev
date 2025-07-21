@@ -70,6 +70,8 @@ public class Reserva {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Habitacion {
+        @DocumentId
+        private String id; // ID de la habitación
         @PropertyName("tipo")
         private String tipo; // Tipo de habitación (individual, doble, suite)
         @PropertyName("cantidad")

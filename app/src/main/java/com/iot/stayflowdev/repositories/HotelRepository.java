@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.iot.stayflowdev.model.Hotel;
@@ -181,6 +182,56 @@ public class HotelRepository {
                     errorLiveData.setValue("Error al cargar los lugares históricos: " + e.getMessage());
                 });
         return lugaresHistoricosLiveData;
+    }
+
+    //Disminuir cantidad de habitaciones disponibles en un hotel, cada hotel de la colección "hoteles" tiene una subcolección "habitaciones" y cada habitción tiene un campo "cantidad" esta disminución no es fija, el id del hotel, el id de la habitación y la cantidad a disminuir se pasan como parámetros
+    /**
+     * Disminuye la cantidad de habitaciones disponibles en un hotel.
+     * @param hotelId ID del hotel
+     * @param habitacionId ID de la habitación
+     * @param cantidad Cantidad a disminuir
+     */
+
+    public void disminuirHabitacionesDisponibles(String hotelId, String habitacionId, int cantidad) {
+        db.collection("hoteles")
+                .document(hotelId)
+                .collection("habitaciones")
+                .document(habitacionId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Convertimos el string a entero, operamos y luego volvemos a string
+                        String cantidadActualStr = documentSnapshot.getString("cantidad");
+                        Log.d(TAG, "Cantidad actual: " + cantidadActualStr);
+                        try {
+                            int cantidadActual = Integer.parseInt(cantidadActualStr);
+                            int nuevaCantidad = Math.max(0, cantidadActual - cantidad); // Evita cantidades negativas
+                            Log.d(TAG, "Nueva cantidad después de disminuir: " + nuevaCantidad);
+                            // Actualizamos el valor como string
+                            db.collection("hoteles")
+                                    .document(hotelId)
+                                    .collection("habitaciones")
+                                    .document(habitacionId)
+                                    .update("cantidad", String.valueOf(nuevaCantidad))
+                                    .addOnSuccessListener(aVoid ->
+                                            Log.d(TAG, "Cantidad de habitaciones disminuida correctamente"))
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error al disminuir habitaciones disponibles", e);
+                                        errorLiveData.setValue("Error al disminuir habitaciones: " + e.getMessage());
+                                    });
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Error: el valor de cantidad no es un número válido", e);
+                            errorLiveData.setValue("Error: el formato de cantidad es inválido");
+                        }
+                    } else {
+                        Log.e(TAG, "La habitación no existe");
+                        errorLiveData.setValue("Error: La habitación especificada no existe");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al obtener la habitación", e);
+                    errorLiveData.setValue("Error al obtener la habitación: " + e.getMessage());
+                });
     }
     /**
      * Obtiene un LiveData que contiene mensajes de error que puedan ocurrir durante las operaciones con hoteles.
