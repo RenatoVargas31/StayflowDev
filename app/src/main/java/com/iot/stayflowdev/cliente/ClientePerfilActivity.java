@@ -490,6 +490,7 @@ public class ClientePerfilActivity extends AppCompatActivity {
     // Inflar el menú
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflar el menú de perfil
         getMenuInflater().inflate(R.menu.profile_menu, menu);
         return true;
     }
@@ -497,8 +498,9 @@ public class ClientePerfilActivity extends AppCompatActivity {
     // Manejar eventos del menú
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Manejar los clicks en los items del menú
         if (item.getItemId() == R.id.action_logout) {
-            Log.d(TAG, "Botón de logout presionado");
+            // Cerrar sesión
             cerrarSesion();
             return true;
         }
