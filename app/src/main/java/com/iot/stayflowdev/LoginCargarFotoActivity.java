@@ -263,7 +263,10 @@ public class LoginCargarFotoActivity extends AppCompatActivity {
         switch (rol.toLowerCase()) {
             case "driver":
                 Toast.makeText(this, "¡Registro de taxista completado con éxito!", Toast.LENGTH_SHORT).show();
-                intent = new Intent(this, com.iot.stayflowdev.Driver.Activity.DriverInicioActivity.class);
+                intent = new Intent(this, LoginSesionActivity.class);
+                // Agregar un extra para indicar que es un conductor recién registrado
+                intent.putExtra("conductorRecienRegistrado", true);
+                intent.putExtra("mensajeActivacion", "Tu registro como conductor ha sido completado exitosamente. Tu cuenta será activada por el administrador pronto. Te notificaremos cuando puedas usar la aplicación.");
                 break;
             case "usuario":
             default:
