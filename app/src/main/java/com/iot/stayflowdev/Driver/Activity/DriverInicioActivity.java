@@ -86,7 +86,7 @@ public class DriverInicioActivity extends AppCompatActivity {
         });
 
         taxistaRepository = new TaxistaRepository();
-        solicitudesRepository = new SolicitudesRepository();
+        solicitudesRepository = new SolicitudesRepository(this);
         distanceCalculator = new DistanceCalculator(this);
 
         verificarAutenticacion();
@@ -143,6 +143,7 @@ public class DriverInicioActivity extends AppCompatActivity {
         }
         redirigirALogin();
     }
+// EN DriverInicioActivity - SIMPLIFICAR:
 
     private void inicializarSolicitudes() {
         generarSolicitudesDesdeReservas();
@@ -150,87 +151,18 @@ public class DriverInicioActivity extends AppCompatActivity {
 
     private void generarSolicitudesDesdeReservas() {
         solicitudesRepository.generarSolicitudesDesdeReservas(
-                cantidadGeneradas -> cargarSolicitudesPendientesConDistancia(),
-                exception -> cargarSolicitudesPendientesConDistancia()
+                cantidadGeneradas -> cargarSolicitudesPendientes(), // ← Simplificado
+                exception -> cargarSolicitudesPendientes()
         );
     }
 
-    private void cargarSolicitudesPendientesConDistancia() {
+    private void cargarSolicitudesPendientes() {
         solicitudesRepository.obtenerSolicitudesPendientes(
                 solicitudesObtenidas -> {
-                    if (solicitudesObtenidas.isEmpty()) {
-                        configurarSolicitudes(solicitudesObtenidas);
-                        return;
-                    }
-                    calcularDistanciasParaSolicitudes(solicitudesObtenidas);
+                    configurarSolicitudes(solicitudesObtenidas); // ← Directo, sin cálculos
                 },
                 this::manejarErrorSolicitudes
         );
-    }
-
-    private void calcularDistanciasParaSolicitudes(List<SolicitudTaxi> solicitudesObtenidas) {
-        int[] procesadas = {0};
-        int total = solicitudesObtenidas.size();
-
-        for (int i = 0; i < solicitudesObtenidas.size(); i++) {
-            SolicitudTaxi solicitud = solicitudesObtenidas.get(i);
-
-            if (solicitud.tieneCoordenadasValidas()) {
-                distanceCalculator.calcularDistancia(
-                        solicitud.getOrigenLatitud(), solicitud.getOrigenLongitud(),
-                        solicitud.getDestinoLatitud(), solicitud.getDestinoLongitud(),
-                        new DistanceCalculator.DistanceCallback() {
-                            @Override
-                            public void onSuccess(double distanceKm, int timeMinutes, String distanceText, String timeText) {
-                                solicitud.setDistanciaKm(distanceKm);
-                                solicitud.setTiempoEstimadoMin(timeMinutes);
-                                procesadas[0]++;
-
-                                actualizarDistanciaEnFirestore(solicitud, distanceKm, timeMinutes);
-
-                                if (procesadas[0] == total) {
-                                    runOnUiThread(() -> configurarSolicitudes(solicitudesObtenidas));
-                                }
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                double distanciaAprox = calcularDistanciaHaversine(
-                                        solicitud.getOrigenLatitud(), solicitud.getOrigenLongitud(),
-                                        solicitud.getDestinoLatitud(), solicitud.getDestinoLongitud()
-                                );
-                                solicitud.setDistanciaKm(distanciaAprox);
-                                solicitud.setTiempoEstimadoMin((int)(distanciaAprox * 1.5));
-                                procesadas[0]++;
-
-                                if (procesadas[0] == total) {
-                                    runOnUiThread(() -> configurarSolicitudes(solicitudesObtenidas));
-                                }
-                            }
-                        }
-                );
-            } else {
-                solicitud.setDistanciaKm(0);
-                solicitud.setTiempoEstimadoMin(0);
-                procesadas[0]++;
-
-                if (procesadas[0] == total) {
-                    runOnUiThread(() -> configurarSolicitudes(solicitudesObtenidas));
-                }
-            }
-        }
-    }
-
-    private void actualizarDistanciaEnFirestore(SolicitudTaxi solicitud, double distanceKm, int timeMinutes) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("distanciaKm", distanceKm);
-        updates.put("tiempoEstimadoMin", timeMinutes);
-        updates.put("fechaCalculoDistancia", FieldValue.serverTimestamp());
-
-        FirebaseFirestore.getInstance()
-                .collection("solicitudesTaxi")
-                .document(solicitud.getSolicitudId())
-                .update(updates);
     }
 
     private double calcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2) {
@@ -244,9 +176,6 @@ public class DriverInicioActivity extends AppCompatActivity {
         return R * c;
     }
 
-    private void cargarSolicitudesPendientes() {
-        cargarSolicitudesPendientesConDistancia();
-    }
 
     private void configurarSolicitudes(List<SolicitudTaxi> solicitudesObtenidas) {
         this.solicitudes = solicitudesObtenidas;

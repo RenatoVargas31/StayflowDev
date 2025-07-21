@@ -32,10 +32,23 @@ public class SolicitudesRepository {
 
     private final FirebaseFirestore db;
     private final FirebaseAuth auth;
+    private final Context context;
+    private final DistanceCalculator distanceCalculator;
 
-    public SolicitudesRepository() {
+    // CONSTRUCTOR CON CONTEXT para cálculo de distancia
+    public SolicitudesRepository(Context context) {
+        this.context = context;
         this.db = FirebaseFirestore.getInstance();
         this.auth = FirebaseAuth.getInstance();
+        this.distanceCalculator = new DistanceCalculator(context);
+    }
+
+    // CONSTRUCTOR SIN CONTEXT para compatibilidad
+    public SolicitudesRepository() {
+        this.context = null;
+        this.db = FirebaseFirestore.getInstance();
+        this.auth = FirebaseAuth.getInstance();
+        this.distanceCalculator = null;
     }
 
     // Método para obtener el UID del usuario autenticado
@@ -101,8 +114,6 @@ public class SolicitudesRepository {
 
         return distance;
     }
-
-    // Método para obtener información del destino
     public String getDestinoNombre() {
         return DESTINO_NOMBRE;
     }
@@ -122,8 +133,6 @@ public class SolicitudesRepository {
     public GeoPoint getCoordenadasDestino() {
         return new GeoPoint(Double.parseDouble(LatitudDestino), Double.parseDouble(LongitudDestino));
     }
-
-    // Listar todas las solicitudes de servicio existentes en la db
     public void obtenerSolicitudesPendientes(OnSuccessListener<List<SolicitudTaxi>> success, OnFailureListener failure) {
         db.collection("solicitudesTaxi")
                 .whereEqualTo("esAceptada", false)
@@ -137,6 +146,7 @@ public class SolicitudesRepository {
                         return;
                     }
 
+                    // Crear lista de solicitudes básicas
                     for (DocumentSnapshot doc : snapshot) {
                         try {
                             SolicitudTaxi solicitud = crearSolicitudBasica(doc);
@@ -147,9 +157,136 @@ public class SolicitudesRepository {
                     }
 
                     Log.d(TAG, "Solicitudes pendientes cargadas: " + solicitudes.size());
-                    success.onSuccess(solicitudes);
+
+                    // CALCULAR DISTANCIAS si tenemos DistanceCalculator
+                    if (distanceCalculator != null) {
+                        calcularDistanciasYDevolver(solicitudes, success);
+                    } else {
+                        // Sin cálculo de distancia
+                        success.onSuccess(solicitudes);
+                    }
                 })
                 .addOnFailureListener(failure);
+    }
+
+    private void calcularDistanciasYDevolver(List<SolicitudTaxi> solicitudes, OnSuccessListener<List<SolicitudTaxi>> success) {
+        Log.d(TAG, "🗺️ Iniciando cálculo de distancias para " + solicitudes.size() + " solicitudes");
+
+        AtomicInteger procesadas = new AtomicInteger(0);
+        int total = solicitudes.size();
+
+        // Si no hay solicitudes, devolver inmediatamente
+        if (total == 0) {
+            success.onSuccess(solicitudes);
+            return;
+        }
+
+        for (SolicitudTaxi solicitud : solicitudes) {
+            if (solicitud.tieneCoordenadasValidas()) {
+                Log.d(TAG, "📍 Calculando distancia para: " + solicitud.getOrigen());
+
+                distanceCalculator.calcularDistancia(
+                        solicitud.getOrigenLatitud(), solicitud.getOrigenLongitud(),
+                        solicitud.getDestinoLatitud(), solicitud.getDestinoLongitud(),
+                        new DistanceCalculator.DistanceCallback() {
+                            @Override
+                            public void onSuccess(double distanceKm, int timeMinutes, String distanceText, String timeText) {
+                                Log.d(TAG, "✅ Distancia calculada para " + solicitud.getOrigen() + ": " + distanceText + " - " + timeText);
+
+                                // Configurar en el objeto
+                                solicitud.setDistanciaKm(distanceKm);
+                                solicitud.setTiempoEstimadoMin(timeMinutes);
+
+                                // Guardar en Firebase
+                                actualizarDistanciaEnFirestore(solicitud, distanceKm, timeMinutes, distanceText, timeText, true);
+
+                                // Verificar si terminamos
+                                verificarCompletado(procesadas, total, solicitudes, success);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.w(TAG, "⚠️ Error calculando distancia para " + solicitud.getOrigen() + ": " + error);
+
+                                // Usar Haversine como backup
+                                double distanciaAprox = calcularDistanciaHaversine(
+                                        solicitud.getOrigenLatitud(), solicitud.getOrigenLongitud(),
+                                        solicitud.getDestinoLatitud(), solicitud.getDestinoLongitud()
+                                );
+                                int tiempoAprox = (int)(distanciaAprox * 1.5); // Estimación básica
+
+                                solicitud.setDistanciaKm(distanciaAprox);
+                                solicitud.setTiempoEstimadoMin(tiempoAprox);
+
+                                // Guardar en Firebase (marcado como aproximado)
+                                actualizarDistanciaEnFirestore(solicitud, distanciaAprox, tiempoAprox,
+                                        String.format("~%.1f km", distanciaAprox), tiempoAprox + " min", false);
+
+                                verificarCompletado(procesadas, total, solicitudes, success);
+                            }
+                        }
+                );
+            } else {
+                Log.w(TAG, "⚠️ Solicitud sin coordenadas válidas: " + solicitud.getOrigen());
+
+                // Sin coordenadas válidas
+                solicitud.setDistanciaKm(0);
+                solicitud.setTiempoEstimadoMin(0);
+
+                verificarCompletado(procesadas, total, solicitudes, success);
+            }
+        }
+    }
+
+    private void verificarCompletado(AtomicInteger procesadas, int total, List<SolicitudTaxi> solicitudes, OnSuccessListener<List<SolicitudTaxi>> success) {
+        int completadas = procesadas.incrementAndGet();
+        Log.d(TAG, "📊 Progreso: " + completadas + "/" + total + " solicitudes procesadas");
+
+        if (completadas == total) {
+            Log.d(TAG, "🎉 Todas las distancias calculadas. Devolviendo " + solicitudes.size() + " solicitudes");
+            success.onSuccess(solicitudes);
+        }
+    }
+
+    private void actualizarDistanciaEnFirestore(SolicitudTaxi solicitud, double distanceKm, int timeMinutes,
+                                                String distanceText, String timeText, boolean esGoogleMaps) {
+
+        if (solicitud.getSolicitudId() == null || solicitud.getSolicitudId().isEmpty()) {
+            Log.e(TAG, "❌ ID de solicitud es null o vacío, no se puede actualizar");
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("distanciaKm", distanceKm);
+        updates.put("tiempoEstimadoMin", timeMinutes);
+        updates.put("distanciaTexto", distanceText);
+        updates.put("tiempoTexto", timeText);
+        updates.put("fechaCalculoDistancia", FieldValue.serverTimestamp());
+        updates.put("calculadoConGoogleMaps", esGoogleMaps);
+
+        Log.d(TAG, "💾 Actualizando Firebase para solicitud: " + solicitud.getSolicitudId());
+        Log.d(TAG, "   📏 " + distanceText + " | ⏱️ " + timeText + " | 🗺️ " + (esGoogleMaps ? "Google Maps" : "Haversine"));
+
+        db.collection("solicitudesTaxi")
+                .document(solicitud.getSolicitudId())
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "✅ Firebase actualizado exitosamente para: " + solicitud.getOrigen());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Error actualizando Firebase para: " + solicitud.getOrigen(), e);
+                });
+    }
+
+    private double calcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radio de la Tierra en kilómetros
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     private SolicitudTaxi crearSolicitudBasica(DocumentSnapshot doc) {
@@ -168,6 +305,10 @@ public class SolicitudesRepository {
 
         Long pasajeros = doc.getLong("numeroPasajeros");
         int numeroPasajeros = pasajeros != null ? pasajeros.intValue() : 0;
+
+        // OBTENER DISTANCIA Y TIEMPO YA CALCULADOS (si existen)
+        Double distanciaKm = doc.getDouble("distanciaKm");
+        Long tiempoMin = doc.getLong("tiempoEstimadoMin");
 
         SolicitudTaxi solicitud = new SolicitudTaxi(origen, origenDireccion, destino, destinoDireccion);
         solicitud.setSolicitudId(doc.getId());
@@ -198,14 +339,22 @@ public class SolicitudesRepository {
             solicitud.setDestinoLongitud(destinoCoordenadas.getLongitude());
         }
 
+        // CONFIGURAR DISTANCIA Y TIEMPO YA CALCULADOS (si existen)
+        if (distanciaKm != null && distanciaKm > 0) {
+            solicitud.setDistanciaKm(distanciaKm);
+            Log.d(TAG, "📏 Distancia precalculada encontrada: " + distanciaKm + " km");
+        }
+        if (tiempoMin != null && tiempoMin > 0) {
+            solicitud.setTiempoEstimadoMin(tiempoMin.intValue());
+            Log.d(TAG, "⏱️ Tiempo precalculado encontrado: " + tiempoMin + " min");
+        }
+
         return solicitud;
     }
 
-    // MÉTODO MEJORADO - Previene duplicados y elimina cálculo de distancia
     public void generarSolicitudesDesdeReservas(OnSuccessListener<Integer> success, OnFailureListener failure) {
         Log.d(TAG, "🔄 Iniciando generación de solicitudes desde reservas...");
 
-        // PASO 1: Obtener todas las reservas con quieroTaxi = true
         db.collection("reservas")
                 .whereEqualTo("quieroTaxi", true)
                 .get()
@@ -218,7 +367,6 @@ public class SolicitudesRepository {
                         return;
                     }
 
-                    // PASO 2: Obtener todas las solicitudes existentes para verificar duplicados
                     verificarYProcesarReservas(reservasSnapshot, success, failure);
                 })
                 .addOnFailureListener(failure);
@@ -227,20 +375,25 @@ public class SolicitudesRepository {
     private void verificarYProcesarReservas(QuerySnapshot reservasSnapshot, OnSuccessListener<Integer> success, OnFailureListener failure) {
         Log.d(TAG, "🔍 Verificando solicitudes existentes para evitar duplicados...");
 
+        // VERIFICACIÓN MÁS ESPECÍFICA - Solo buscar por reservaId
         db.collection("solicitudesTaxi")
+                .whereIn("reservaId", extraerIdsReservas(reservasSnapshot))
                 .get()
                 .addOnSuccessListener(solicitudesSnapshot -> {
-                    // Crear set de IDs de reservas que ya tienen solicitudes
                     Set<String> reservasConSolicitud = new HashSet<>();
+
+                    Log.d(TAG, "🔎 Solicitudes encontradas que coinciden con reservas: " + solicitudesSnapshot.size());
 
                     for (DocumentSnapshot solicitudDoc : solicitudesSnapshot) {
                         String reservaId = solicitudDoc.getString("reservaId");
-                        if (reservaId != null) {
+                        if (reservaId != null && !reservaId.trim().isEmpty()) {
                             reservasConSolicitud.add(reservaId);
+                            Log.d(TAG, "📌 Reserva YA tiene solicitud: " + reservaId +
+                                    " (Solicitud: " + solicitudDoc.getId() + ")");
                         }
                     }
 
-                    Log.d(TAG, "📊 Solicitudes existentes encontradas: " + reservasConSolicitud.size());
+                    Log.d(TAG, "📊 Total de reservas con solicitudes existentes: " + reservasConSolicitud.size());
 
                     // Filtrar reservas que NO tienen solicitud
                     List<DocumentSnapshot> reservasSinSolicitud = new ArrayList<>();
@@ -248,25 +401,30 @@ public class SolicitudesRepository {
                         String reservaId = reservaDoc.getId();
                         if (!reservasConSolicitud.contains(reservaId)) {
                             reservasSinSolicitud.add(reservaDoc);
+                            Log.d(TAG, "✨ Reserva NUEVA para procesar: " + reservaId);
                         } else {
-                            Log.d(TAG, "⚠️ Saltando reserva duplicada: " + reservaId);
+                            Log.w(TAG, "⚠️ SALTANDO reserva duplicada: " + reservaId);
                         }
                     }
 
-                    Log.d(TAG, "✨ Reservas nuevas a procesar: " + reservasSinSolicitud.size());
+                    Log.d(TAG, "🎯 RESUMEN:");
+                    Log.d(TAG, "   📋 Total reservas con quieroTaxi: " + reservasSnapshot.size());
+                    Log.d(TAG, "   ✅ Ya tienen solicitud: " + reservasConSolicitud.size());
+                    Log.d(TAG, "   🆕 Nuevas a procesar: " + reservasSinSolicitud.size());
 
                     if (reservasSinSolicitud.isEmpty()) {
-                        Log.d(TAG, "✅ Todas las reservas ya tienen solicitudes");
+                        Log.d(TAG, "✅ Todas las reservas ya tienen solicitudes - No hay nada que hacer");
                         success.onSuccess(0);
                         return;
                     }
 
-                    // Procesar solo las reservas nuevas
                     procesarReservasNuevas(reservasSinSolicitud, success, failure);
                 })
-                .addOnFailureListener(failure);
+                .addOnFailureListener(error -> {
+                    Log.e(TAG, "❌ Error verificando duplicados", error);
+                    failure.onFailure(error);
+                });
     }
-
     private void procesarReservasNuevas(List<DocumentSnapshot> reservasSinSolicitud, OnSuccessListener<Integer> success, OnFailureListener failure) {
         AtomicInteger solicitudesCreadas = new AtomicInteger(0);
         int totalReservas = reservasSinSolicitud.size();
@@ -290,12 +448,29 @@ public class SolicitudesRepository {
 
                         if (completadas == totalReservas) {
                             Log.d(TAG, "⚠️ Proceso terminado con errores. Solicitudes creadas: " + (completadas - 1));
-                            success.onSuccess(completadas - 1); // Restar 1 porque esta falló
+                            success.onSuccess(completadas - 1);
                         }
                     }
             );
         }
     }
+    private List<String> extraerIdsReservas(QuerySnapshot reservasSnapshot) {
+        List<String> ids = new ArrayList<>();
+        for (DocumentSnapshot doc : reservasSnapshot) {
+            ids.add(doc.getId());
+        }
+
+        // Firestore tiene límite de 10 elementos en whereIn, dividir si es necesario
+        if (ids.size() > 10) {
+            Log.w(TAG, "⚠️ Más de 10 reservas, usando consulta general por compatibilidad");
+            return new ArrayList<>(); // Forzar consulta general
+        }
+
+        Log.d(TAG, "🔍 Buscando solicitudes para reservas: " + ids);
+        return ids;
+    }
+
+
 
     private void procesarReserva(DocumentSnapshot reservaDoc, Runnable onComplete, OnFailureListener onError) {
         String reservaId = reservaDoc.getId();
