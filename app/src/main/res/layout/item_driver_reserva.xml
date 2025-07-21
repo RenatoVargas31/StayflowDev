@@ -4,14 +4,13 @@
     android:id="@+id/card_reserva"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="12dp"
-    android:layout_marginEnd="12dp"
+    android:layout_marginHorizontal="12dp"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="0dp"
+    android:layout_marginBottom="4dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardElevation="6dp"
-    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="20dp"
     app:strokeWidth="1dp"
     app:strokeColor="@color/md_theme_outline"
     app:cardBackgroundColor="@color/white"
@@ -22,69 +21,81 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Icono -->
         <ImageView
             android:id="@+id/iv_icon"
-            android:layout_width="29dp"
-            android:layout_height="27dp"
-            android:contentDescription="Icono de tipo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="Tipo de transporte"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nombre"
+            android:src="@drawable/ic_carro"
+            app:tint="@color/md_theme_onPrimaryContainer"
 
+            />
+
+        <!-- Nombre del pasajero o conductor -->
         <TextView
             android:id="@+id/tv_nombre"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
+            android:text="Luis Fernández"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/tv_fecha_hora"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
             app:layout_constraintStart_toEndOf="@+id/iv_icon"
-            app:layout_constraintTop_toTopOf="@+id/iv_icon" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_fecha_hora"
+            android:layout_marginStart="12dp" />
 
-        <TextView
-            android:id="@+id/tv_origen"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#757575"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_nombre"
-            app:layout_constraintStart_toStartOf="@+id/tv_nombre"
-            app:layout_constraintTop_toBottomOf="@+id/tv_nombre" />
-
-        <TextView
-            android:id="@+id/tv_destino"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#757575"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_origen"
-            app:layout_constraintStart_toStartOf="@+id/tv_origen"
-            app:layout_constraintTop_toBottomOf="@+id/tv_origen" />
-
-        <TextView
-            android:id="@+id/tv_distancia"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#757575"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_destino"
-            app:layout_constraintStart_toStartOf="@+id/tv_destino"
-            app:layout_constraintTop_toBottomOf="@+id/tv_destino" />
-
+        <!-- Fecha y hora -->
         <TextView
             android:id="@+id/tv_fecha_hora"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_icon" />
+            android:text="21 Jul, 10:30 AM"
+            android:textSize="12sp"
+            android:textColor="#616161"
+            app:layout_constraintTop_toTopOf="@+id/tv_nombre"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Origen -->
+        <TextView
+            android:id="@+id/tv_origen"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Desde: Av. Larco 123"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_nombre"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nombre"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="6dp" />
+
+        <!-- Destino -->
+        <TextView
+            android:id="@+id/tv_destino"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Hasta: Av. Benavides 456"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            app:layout_constraintTop_toBottomOf="@+id/tv_origen"
+            app:layout_constraintStart_toStartOf="@+id/tv_origen"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="2dp" />
+
+        <!-- Distancia -->
+        <TextView
+            android:id="@+id/tv_distancia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3.5 km"
+            android:textColor="#616161"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@+id/tv_destino"
+            app:layout_constraintStart_toStartOf="@+id/tv_destino"
+            android:layout_marginTop="4dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
