@@ -123,9 +123,9 @@ public class NotificationHelper {
     }
 
     // Método para mostrar notificación de logs pendientes
-    public void showLogsNotification(int umbral) {
-        String title = "Logs por Revisar";
-        String message = "Hay " + umbral + " logs pendientes por revisar";
+    public void showLogsNotification(int umbral, int currentCount) {
+        String title = "Umbral de Logs Alcanzado";
+        String message = "Se han registrado " + currentCount + " logs (umbral: " + umbral + "). Revisa los logs del sistema.";
         showNotification(title, message, "logs");
     }
 }

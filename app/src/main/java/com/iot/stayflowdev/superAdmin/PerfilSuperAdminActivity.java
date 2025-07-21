@@ -1,12 +1,7 @@
 package com.iot.stayflowdev.superAdmin;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -20,57 +15,43 @@ import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.superAdmin.utils.NotificationPreferences;
 import com.iot.stayflowdev.superAdmin.utils.NotificationWorker;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class PerfilSuperAdminActivity extends BaseSuperAdminActivity {
     private static final String TAG = "PerfilSuperAdmin";
 
-    private static final String WORK_REPORTES = "work_reportes";
-    private static final String WORK_LOGS = "work_logs";
-
+    // Switches para notificaciones
     private SwitchMaterial switchReportes;
     private SwitchMaterial switchLogs;
-    private TextInputLayout layoutPeriodicidadReportes;
+
+    // Campo para umbral de logs
     private TextInputLayout layoutUmbralLogs;
-    private AutoCompleteTextView dropdownPeriodicidadReportes;
+
+    // Botón para guardar
     private MaterialButton buttonGuardar;
-    private NotificationPreferences notificationPreferences;
+
+    // Servicios
+    private NotificationPreferences preferences;
     private WorkManager workManager;
-    private List<String> periodicidades;
-    private Handler mainHandler;
-    private ArrayAdapter<String> dropdownAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: Iniciando actividad");
+        Log.d(TAG, "Iniciando configuración de notificaciones");
 
-        mainHandler = new Handler(Looper.getMainLooper());
-
-        // Inicializar la lista de periodicidades
-        periodicidades = Arrays.asList(
-            "Cada minuto",
-            "Diario",
-            "Semanal",
-            "Mensual"
-        );
-
-        // Inicializar preferencias de notificaciones y WorkManager
-        notificationPreferences = new NotificationPreferences(this);
+        // Inicializar servicios
+        preferences = new NotificationPreferences(this);
         workManager = WorkManager.getInstance(this);
 
         // Inicializar vistas
         initializeViews();
-        setupDropdowns();
-        loadSavedPreferences();
+        loadConfiguration();
         setupListeners();
     }
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.superadmin_perfil_superadmin;
+        return R.layout.activity_superadmin_perfil_simplified;
     }
 
     @Override
@@ -80,263 +61,126 @@ public class PerfilSuperAdminActivity extends BaseSuperAdminActivity {
 
     @Override
     protected String getToolbarTitle() {
-        return "Perfil";
+        return "Configuración de Notificaciones";
     }
 
     private void initializeViews() {
-        Log.d(TAG, "initializeViews: Inicializando vistas");
         switchReportes = findViewById(R.id.switchReportes);
         switchLogs = findViewById(R.id.switchLogs);
-        layoutPeriodicidadReportes = findViewById(R.id.layoutPeriodicidadReportes);
         layoutUmbralLogs = findViewById(R.id.layoutUmbralLogs);
-        dropdownPeriodicidadReportes = findViewById(R.id.dropdownPeriodicidadReportes);
         buttonGuardar = findViewById(R.id.buttonGuardar);
 
-        // Configurar estado inicial
-        layoutPeriodicidadReportes.setEnabled(false);
-        dropdownPeriodicidadReportes.setEnabled(false);
+        // Estado inicial deshabilitado para el umbral
         layoutUmbralLogs.setEnabled(false);
-        
-        Log.d(TAG, "initializeViews: Vistas inicializadas");
     }
 
-    private void setupDropdowns() {
-        Log.d(TAG, "setupDropdowns: Configurando dropdown");
-        
-        // Crear y configurar el adapter
-        dropdownAdapter = new ArrayAdapter<>(
-            this,
-            R.layout.dropdown_item,
-            periodicidades
-        );
-        
-        // Establecer el adapter en el AutoCompleteTextView
-        dropdownPeriodicidadReportes.setAdapter(dropdownAdapter);
-        
-        // Verificar que el adapter tenga los datos correctos
-        Log.d(TAG, "setupDropdowns: Adapter configurado con " + dropdownAdapter.getCount() + " opciones");
-        for (int i = 0; i < dropdownAdapter.getCount(); i++) {
-            Log.d(TAG, "setupDropdowns: Item " + i + ": " + dropdownAdapter.getItem(i));
+    private void loadConfiguration() {
+        // Cargar configuración guardada
+        switchReportes.setChecked(preferences.isReportesEnabled());
+        switchLogs.setChecked(preferences.isLogsEnabled());
+
+        int umbral = preferences.getUmbralLogs();
+        if (umbral > 0) {
+            layoutUmbralLogs.getEditText().setText(String.valueOf(umbral));
         }
 
-        // Configurar el TextInputLayout
-        layoutPeriodicidadReportes.setEndIconOnClickListener(v -> {
-            Log.d(TAG, "EndIcon clicked");
-            showDropdown();
-        });
-
-        // Configurar el AutoCompleteTextView
-        dropdownPeriodicidadReportes.setOnClickListener(v -> {
-            Log.d(TAG, "AutoCompleteTextView clicked");
-            showDropdown();
-        });
-
-        dropdownPeriodicidadReportes.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = periodicidades.get(position);
-            Log.d(TAG, "Item seleccionado: " + selected);
-            dropdownPeriodicidadReportes.setText(selected, false);
-            Toast.makeText(this, "Notificaciones configuradas para " + selected.toLowerCase(), Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void showDropdown() {
-        if (switchReportes.isChecked()) {
-            Log.d(TAG, "Intentando mostrar dropdown");
-            mainHandler.post(() -> {
-                try {
-                    if (dropdownAdapter.getCount() > 0) {
-                        dropdownPeriodicidadReportes.showDropDown();
-                        Log.d(TAG, "Dropdown mostrado exitosamente");
-                    } else {
-                        Log.e(TAG, "El adapter no tiene items");
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error al mostrar dropdown", e);
-                }
-            });
-        }
-    }
-
-    private void loadSavedPreferences() {
-        Log.d(TAG, "loadSavedPreferences: Cargando preferencias");
-        boolean reportesEnabled = notificationPreferences.isReportesEnabled();
-        boolean logsEnabled = notificationPreferences.isLogsEnabled();
-        String periodicidad = notificationPreferences.getPeriodicidadReportes();
-        int umbralLogs = notificationPreferences.getUmbralLogs();
-
-        Log.d(TAG, "loadSavedPreferences: reportesEnabled=" + reportesEnabled + 
-                   ", periodicidad=" + periodicidad);
-
-        switchReportes.setChecked(reportesEnabled);
-        switchLogs.setChecked(logsEnabled);
-        
-        updateFieldsState(reportesEnabled, logsEnabled);
-        
-        if (periodicidad != null && !periodicidad.isEmpty()) {
-            dropdownPeriodicidadReportes.setText(periodicidad, false);
-        }
-        
-        if (umbralLogs > 0) {
-            layoutUmbralLogs.getEditText().setText(String.valueOf(umbralLogs));
-        }
-    }
-
-    private void updateFieldsState(boolean reportesEnabled, boolean logsEnabled) {
-        Log.d(TAG, "updateFieldsState: reportesEnabled=" + reportesEnabled + 
-                   ", logsEnabled=" + logsEnabled);
-        
-        // Actualizar estado de los campos de reportes
-        layoutPeriodicidadReportes.setEnabled(reportesEnabled);
-        dropdownPeriodicidadReportes.setEnabled(reportesEnabled);
-        
-        // Actualizar estado de los campos de logs
-        layoutUmbralLogs.setEnabled(logsEnabled);
-        if (layoutUmbralLogs.getEditText() != null) {
-            layoutUmbralLogs.getEditText().setEnabled(logsEnabled);
-        }
-
-        // Mostrar dropdown si está habilitado
-        if (reportesEnabled) {
-            mainHandler.postDelayed(this::showDropdown, 300); // Pequeño delay para asegurar que la UI esté lista
-        }
+        // Actualizar estado de campos
+        updateFieldsState();
     }
 
     private void setupListeners() {
-        Log.d(TAG, "setupListeners: Configurando listeners");
-        
-        // Listener para switch de reportes
-        switchReportes.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Log.d(TAG, "switchReportes changed: " + isChecked);
-            updateFieldsState(isChecked, switchLogs.isChecked());
+        // Switch de reportes
+        switchReportes.setOnCheckedChangeListener((v, isChecked) -> {
+            updateFieldsState();
         });
 
-        // Listener para switch de logs
-        switchLogs.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Log.d(TAG, "switchLogs changed: " + isChecked);
-            updateFieldsState(switchReportes.isChecked(), isChecked);
+        // Switch de logs
+        switchLogs.setOnCheckedChangeListener((v, isChecked) -> {
+            updateFieldsState();
         });
 
-        // Listener para el botón guardar
-        buttonGuardar.setOnClickListener(v -> {
-            Log.d(TAG, "buttonGuardar clicked");
-            savePreferences();
-        });
+        // Botón guardar
+        buttonGuardar.setOnClickListener(v -> saveConfiguration());
     }
 
-    private void savePreferences() {
+    private void updateFieldsState() {
+        layoutUmbralLogs.setEnabled(switchLogs.isChecked());
+        if (layoutUmbralLogs.getEditText() != null) {
+            layoutUmbralLogs.getEditText().setEnabled(switchLogs.isChecked());
+        }
+    }
+
+    private void saveConfiguration() {
+        // Obtener valores
         boolean reportesEnabled = switchReportes.isChecked();
         boolean logsEnabled = switchLogs.isChecked();
-        String periodicidad = dropdownPeriodicidadReportes.getText().toString();
-        String umbralLogsStr = layoutUmbralLogs.getEditText() != null ? 
+
+        String umbralStr = layoutUmbralLogs.getEditText() != null ?
             layoutUmbralLogs.getEditText().getText().toString() : "";
 
-        if (reportesEnabled && periodicidad.isEmpty()) {
-            Toast.makeText(this, "Por favor seleccione una periodicidad", Toast.LENGTH_SHORT).show();
+        // Validar umbral de logs si está habilitado
+        if (logsEnabled && umbralStr.isEmpty()) {
+            Toast.makeText(this, "Ingrese un umbral para las notificaciones de logs", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (logsEnabled && umbralLogsStr.isEmpty()) {
-            Toast.makeText(this, "Por favor ingrese un umbral de logs", Toast.LENGTH_SHORT).show();
-            return;
+        // Guardar configuración
+        preferences.setReportesEnabled(reportesEnabled);
+        preferences.setLogsEnabled(logsEnabled);
+
+        if (!umbralStr.isEmpty()) {
+            try {
+                int umbral = Integer.parseInt(umbralStr);
+                preferences.setUmbralLogs(umbral);
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "El umbral debe ser un número válido", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
-        notificationPreferences.setReportesEnabled(reportesEnabled);
-        notificationPreferences.setLogsEnabled(logsEnabled);
-        notificationPreferences.setPeriodicidadReportes(periodicidad);
-        
-        if (!umbralLogsStr.isEmpty()) {
-            notificationPreferences.setUmbralLogs(Integer.parseInt(umbralLogsStr));
-        }
+        // Configurar notificaciones
+        configureNotifications(reportesEnabled, logsEnabled);
 
+        Toast.makeText(this, "Configuración guardada correctamente", Toast.LENGTH_SHORT).show();
+    }
+
+    private void configureNotifications(boolean reportesEnabled, boolean logsEnabled) {
+        // Cancelar trabajos existentes
+        workManager.cancelUniqueWork("notification_reportes");
+        workManager.cancelUniqueWork("notification_logs");
+
+        // Configurar notificaciones de reportes (cada 6 horas)
         if (reportesEnabled) {
-            scheduleReportesNotification(periodicidad);
-        } else {
-            workManager.cancelUniqueWork(WORK_REPORTES);
+            PeriodicWorkRequest reportesWork = new PeriodicWorkRequest.Builder(
+                    NotificationWorker.class, 6, TimeUnit.HOURS)
+                    .setInputData(new androidx.work.Data.Builder()
+                            .putString("type", "reportes")
+                            .build())
+                    .build();
+
+            workManager.enqueueUniquePeriodicWork(
+                    "notification_reportes",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    reportesWork
+            );
         }
 
+        // Configurar notificaciones de logs (cada 2 horas)
         if (logsEnabled) {
-            scheduleLogsNotification(Integer.parseInt(umbralLogsStr));
-        } else {
-            workManager.cancelUniqueWork(WORK_LOGS);
+            PeriodicWorkRequest logsWork = new PeriodicWorkRequest.Builder(
+                    NotificationWorker.class, 2, TimeUnit.HOURS)
+                    .setInputData(new androidx.work.Data.Builder()
+                            .putString("type", "logs")
+                            .putInt("umbral", preferences.getUmbralLogs())
+                            .build())
+                    .build();
+
+            workManager.enqueueUniquePeriodicWork(
+                    "notification_logs",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    logsWork
+            );
         }
-
-        Toast.makeText(this, "Preferencias guardadas", Toast.LENGTH_SHORT).show();
-    }
-
-    private void scheduleReportesNotification(String periodicidad) {
-        workManager.cancelUniqueWork(WORK_REPORTES);
-
-        long interval = getIntervalFromPeriodicidad(periodicidad);
-        if (interval <= 0) {
-            Toast.makeText(this, "Error al configurar la periodicidad", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        PeriodicWorkRequest reportesWork = new PeriodicWorkRequest.Builder(
-            NotificationWorker.class, interval, TimeUnit.MILLISECONDS)
-            .setInputData(new androidx.work.Data.Builder()
-                .putString("type", "reportes")
-                .build())
-            .setInitialDelay(interval, TimeUnit.MILLISECONDS)
-            .build();
-
-        workManager.enqueueUniquePeriodicWork(
-            WORK_REPORTES,
-            ExistingPeriodicWorkPolicy.REPLACE,
-            reportesWork
-        );
-
-        String mensaje = "Notificaciones programadas para ";
-        switch (periodicidad) {
-            case "Cada minuto":
-                mensaje += "cada 1 minuto";
-                break;
-            case "Diario":
-                mensaje += "cada 24 horas";
-                break;
-            case "Semanal":
-                mensaje += "cada 7 días";
-                break;
-            case "Mensual":
-                mensaje += "cada 30 días";
-                break;
-        }
-        Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
-    }
-
-    private long getIntervalFromPeriodicidad(String periodicidad) {
-        switch (periodicidad) {
-            case "Cada minuto":
-                return TimeUnit.MINUTES.toMillis(1);
-            case "Diario":
-                return TimeUnit.DAYS.toMillis(1);
-            case "Semanal":
-                return TimeUnit.DAYS.toMillis(7);
-            case "Mensual":
-                return TimeUnit.DAYS.toMillis(30);
-            default:
-                return 0;
-        }
-    }
-
-    private void scheduleLogsNotification(int umbral) {
-        workManager.cancelUniqueWork(WORK_LOGS);
-
-        PeriodicWorkRequest logsWork = new PeriodicWorkRequest.Builder(
-            NotificationWorker.class, 15, TimeUnit.MINUTES)
-            .setInputData(new androidx.work.Data.Builder()
-                .putString("type", "logs")
-                .putInt("umbral", umbral)
-                .build())
-            .build();
-
-        workManager.enqueueUniquePeriodicWork(
-            WORK_LOGS,
-            ExistingPeriodicWorkPolicy.REPLACE,
-            logsWork
-        );
     }
 }
-
-
 

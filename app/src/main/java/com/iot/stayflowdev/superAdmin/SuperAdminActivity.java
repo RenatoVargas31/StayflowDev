@@ -11,16 +11,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.iot.stayflowdev.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.iot.stayflowdev.superAdmin.utils.PeriodicNotificationManager;
 import com.iot.stayflowdev.superAdmin.utils.PermissionHelper;
 import com.iot.stayflowdev.superAdmin.utils.NotificationHelper;
+import com.iot.stayflowdev.superAdmin.utils.LogsManager;
 
 public class SuperAdminActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
     private MaterialToolbar toolbar;
-    private PeriodicNotificationManager periodicNotificationManager;
     private NotificationHelper notificationHelper;
+    private LogsManager logsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,10 @@ public class SuperAdminActivity extends AppCompatActivity {
 
         bottomNav = findViewById(R.id.bottom_navigation);
         notificationHelper = new NotificationHelper(this);
+        logsManager = LogsManager.getInstance(this);
+
+        // Registro de logs del sistema
+        logsManager.logSystemEvent("SuperAdmin Activity iniciada");
 
         bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -72,17 +76,9 @@ public class SuperAdminActivity extends AppCompatActivity {
                 PermissionHelper.requestNotificationPermission(this);
             }
         } else {
-            startNotificationManager();
             // Mostrar notificación de bienvenida
             showWelcomeNotification();
         }
-    }
-
-    private void showWelcomeNotification() {
-        notificationHelper.showSystemNotification(
-                "Bienvenido a StayFlow",
-                "Has iniciado sesión como Super Administrador. Recibirás notificaciones importantes sobre el sistema."
-        );
     }
 
     private void showNotificationPermissionRationaleDialog() {
@@ -104,19 +100,19 @@ public class SuperAdminActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionHelper.NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startNotificationManager();
                 // Mostrar notificación de bienvenida después de conceder el permiso
                 showWelcomeNotification();
             } else {
-                Toast.makeText(this, "Las notificaciones están desactivadas. Puedes activarlas más tarde en la configuración.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Las notificaciones están desactivadas. Puedes activarlas en la configuración.", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    private void startNotificationManager() {
-        // Iniciar las notificaciones periódicas
-        periodicNotificationManager = new PeriodicNotificationManager(this);
-        periodicNotificationManager.startPeriodicChecks();
+    private void showWelcomeNotification() {
+        notificationHelper.showSystemNotification(
+                "Bienvenido a StayFlow",
+                "Has iniciado sesión como Super Administrador."
+        );
     }
 
     @Override
@@ -128,9 +124,6 @@ public class SuperAdminActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (periodicNotificationManager != null) {
-            periodicNotificationManager.cleanup();
-        }
+        // Ya no hay periodicNotificationManager que limpiar
     }
 }
-

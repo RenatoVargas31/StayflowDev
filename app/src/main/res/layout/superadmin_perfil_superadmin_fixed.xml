@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Sección de Perfil -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/imageViewProfile"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/ic_person"
+                    android:background="@drawable/circle_bg"
+                    android:scaleType="centerCrop"
+                    android:padding="2dp" />
+
+                <!-- Indicador de progreso para la carga de imagen -->
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-70dp"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/md_theme_primary"
+                    app:trackColor="@android:color/transparent" />
+
+                <!-- Botón para cambiar foto de perfil -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonChangePicture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cambiar Foto"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+                <TextView
+                    android:id="@+id/textViewName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Super Admin"
+                    android:textSize="24sp"
+                    android:textStyle="bold"/>
+
+                <!-- Sección de datos personales -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Email -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Correo:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewEmail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="superadmin@stayflow.com"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Tipo de Documento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Tipo de Documento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewTipoDocumento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="DNI"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Número de Documento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Número de Documento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewNumeroDocumento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="12345678"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Fecha de Nacimiento -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Fecha de Nacimiento:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewFechaNacimiento"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="01/01/1990"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Teléfono -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Teléfono:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewTelefono"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="+51 999888777"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Domicilio -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Domicilio:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewDomicilio"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Av. Principal 123"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+
+                    <!-- Estado -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Estado:"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/textViewEstado"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Activo"
+                            android:textColor="@color/md_theme_onSurfaceVariant"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Sección de Notificaciones -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Configuración de Notificaciones"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Notificaciones de Reportes -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notificaciones de Reportes"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchReportes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activar notificaciones de reportes"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutPeriodicidadReportes"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Seleccione cada cuánto desea recibir notificaciones"
+                        app:startIconDrawable="@drawable/ic_notification"
+                        app:endIconMode="dropdown_menu"
+                        app:helperText="Las notificaciones le recordarán revisar los reportes pendientes"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownPeriodicidadReportes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="16dp"
+                            android:minHeight="48dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Botón Guardar Reportes -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonGuardarReportes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Guardar Configuración de Reportes"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button"/>
+
+                    <!-- Nota informativa sobre restricciones de notificaciones -->
+                    <TextView
+                        android:id="@+id/textViewNotificationInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Configura la periodicidad y presiona 'Guardar' para aplicar los cambios."
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/md_theme_onSurfaceVariant" />
+                </LinearLayout>
+
+                <!-- Notificaciones de Logs -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notificaciones de Logs"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activar notificaciones de logs"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutPeriodicidadLogs"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Periodicidad de verificación de logs"
+                        app:startIconDrawable="@drawable/ic_notification"
+                        app:endIconMode="dropdown_menu"
+                        app:helperText="Frecuencia con la que se verificará si se alcanzó el umbral de logs"
+                        android:layout_marginBottom="8dp"
+                        android:enabled="false">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownPeriodicidadLogs"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="16dp"
+                            android:minHeight="48dp"
+                            android:enabled="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutUmbralLogs"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Umbral de logs para notificar"
+                        app:helperText="Número de logs sin leer para recibir notificación"
+                        android:layout_marginBottom="8dp"
+                        android:enabled="false">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextUmbralLogs"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:enabled="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Contador actual de logs -->
+                    <TextView
+                        android:id="@+id/textViewLogsCounter"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Logs sin leer actuales: 0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_primary"
+                        android:gravity="center"/>
+
+                    <!-- Botón Guardar Logs -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonGuardarLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Guardar Configuración de Logs"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+                    <!-- Botón Marcar Logs como Leídos -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonResetLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Marcar Logs como Leídos"
+                        android:textColor="@color/md_theme_error"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+                    <!-- Información adicional sobre logs -->
+                    <TextView
+                        android:id="@+id/textViewLogsInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Los logs se acumulan en tiempo real. Cuando alcances el umbral configurado, recibirás una notificación inmediata. Puedes marcar los logs como leídos para resetear el contador."
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/md_theme_onSurfaceVariant" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Cerrar Sesión -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Cerrar Sesión"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/md_theme_error"
+            android:textColor="@color/md_theme_error"/>
+
+    </LinearLayout>
+</ScrollView>

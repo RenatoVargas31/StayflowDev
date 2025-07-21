@@ -216,6 +216,10 @@ public class User {
 
     @Exclude
     public String getRoleDescription() {
+        if (rol == null) {
+            return "Rol no definido";
+        }
+
         switch (rol) {
             case "adminhotel":
                 return "Administrador de Hotel";
@@ -226,7 +230,7 @@ public class User {
             case "superadmin":
                 return "Super Administrador";
             default:
-                return "";
+                return "Rol desconocido: " + rol;
         }
     }
 

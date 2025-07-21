@@ -290,13 +290,23 @@
                             android:minHeight="48dp"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Botón Guardar Reportes -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonGuardarReportes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Guardar Configuración de Reportes"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button"/>
+
                     <!-- Nota informativa sobre restricciones de notificaciones -->
                     <TextView
                         android:id="@+id/textViewNotificationInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Las notificaciones se programarán según el intervalo seleccionado. Los cambios se aplicarán inmediatamente al seleccionar una opción."
+                        android:text="Configura la periodicidad y presiona 'Guardar' para aplicar los cambios."
                         android:textSize="12sp"
                         android:textStyle="italic"
                         android:textColor="@color/md_theme_onSurfaceVariant" />
@@ -323,30 +333,82 @@
                         android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutPeriodicidadLogs"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Periodicidad de verificación de logs"
+                        app:startIconDrawable="@drawable/ic_notification"
+                        app:endIconMode="dropdown_menu"
+                        app:helperText="Frecuencia con la que se verificará si se alcanzó el umbral de logs"
+                        android:layout_marginBottom="8dp"
+                        android:enabled="false">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownPeriodicidadLogs"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="16dp"
+                            android:minHeight="48dp"
+                            android:enabled="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutUmbralLogs"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Umbral de logs para notificar">
+                        android:hint="Umbral de logs para notificar"
+                        app:helperText="Número de logs sin leer para recibir notificación"
+                        android:layout_marginBottom="8dp"
+                        android:enabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextUmbralLogs"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="number"/>
+                            android:inputType="number"
+                            android:enabled="false"/>
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Contador actual de logs -->
+                    <TextView
+                        android:id="@+id/textViewLogsCounter"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Logs sin leer actuales: 0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_primary"
+                        android:gravity="center"/>
+
+                    <!-- Botón Marcar Logs como Leídos -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonResetLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Marcar Logs como Leídos"
+                        android:textColor="@color/md_theme_error"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+                    <!-- Información adicional sobre logs -->
+                    <TextView
+                        android:id="@+id/textViewLogsInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Los logs se acumulan en tiempo real. Cuando alcances el umbral configurado, recibirás una notificación inmediata. Puedes marcar los logs como leídos para resetear el contador."
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/md_theme_onSurfaceVariant" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Botón Guardar -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGuardar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Guardar Cambios"
-            android:padding="12dp"
-            app:cornerRadius="8dp"/>
 
         <!-- Botón Cerrar Sesión -->
         <com.google.android.material.button.MaterialButton

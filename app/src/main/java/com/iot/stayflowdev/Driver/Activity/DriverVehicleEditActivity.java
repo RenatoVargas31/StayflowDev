@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -83,10 +84,10 @@ public class DriverVehicleEditActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // Click en el contenedor de la foto para cambiarla
-        binding.photoContainer.setOnClickListener(v -> openImagePicker());
+        // Click en foto - SIMPLE
+        binding.photoContainer.setOnClickListener(v -> selectImage());
 
-        // Switch de estado activo/inactivo
+        // Switch de estado
         binding.switchActive.setOnCheckedChangeListener((buttonView, isChecked) -> {
             updateStatusDescription(isChecked);
         });
@@ -103,7 +104,46 @@ public class DriverVehicleEditActivity extends AppCompatActivity {
         // Botón guardar
         binding.btnSave.setOnClickListener(v -> validateAndSave());
     }
+    private void selectImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
+    }
 
+    private boolean hasChanges() {
+        if (currentVehicle == null) return false;
+
+        String newModelo = binding.etModelo.getText().toString().trim();
+        boolean newStatus = binding.switchActive.isChecked();
+
+        // Verificar cambios en campos
+        boolean modeloChanged = !newModelo.equals(currentVehicle.getModelo());
+        boolean statusChanged = newStatus != currentVehicle.isActivo();
+
+        return modeloChanged || statusChanged || selectedImageUri != null;
+    }
+
+    private void saveChanges() {
+        showLoading(true);
+        binding.btnSave.setEnabled(false);
+
+        // Preparar datos para actualizar
+        Map<String, Object> updateData = new HashMap<>();
+
+        String newModelo = binding.etModelo.getText().toString().trim();
+        boolean newStatus = binding.switchActive.isChecked();
+
+        updateData.put("modelo", newModelo);
+        updateData.put("activo", newStatus);
+
+        // Si hay imagen nueva, subirla primero
+        if (selectedImageUri != null) {
+            uploadImageAndSave(updateData);
+        } else {
+            updateVehicleData(updateData);
+        }
+    }
     private void loadVehicleData() {
         showLoading(true);
 
@@ -171,22 +211,6 @@ public class DriverVehicleEditActivity extends AppCompatActivity {
         }
     }
 
-    private void openImagePicker() {
-        // Verificar permisos
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    PERMISSION_REQUEST_READ_STORAGE);
-            return;
-        }
-
-        // Intent para seleccionar imagen
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
-    }
-
     private void validateAndSave() {
         // Validar modelo
         String modelo = binding.etModelo.getText().toString().trim();
@@ -209,41 +233,6 @@ public class DriverVehicleEditActivity extends AppCompatActivity {
         // Guardar cambios
         saveChanges();
     }
-
-    private boolean hasChanges() {
-        if (currentVehicle == null) return false;
-
-        String newModelo = binding.etModelo.getText().toString().trim();
-        boolean newStatus = binding.switchActive.isChecked();
-
-        // Verificar cambios en campos
-        boolean modeloChanged = !newModelo.equals(currentVehicle.getModelo());
-        boolean statusChanged = newStatus != currentVehicle.isActivo();
-
-        return modeloChanged || statusChanged || imageChanged;
-    }
-
-    private void saveChanges() {
-        showLoading(true);
-        binding.btnSave.setEnabled(false);
-
-        // Preparar datos para actualizar
-        Map<String, Object> updateData = new HashMap<>();
-
-        String newModelo = binding.etModelo.getText().toString().trim();
-        boolean newStatus = binding.switchActive.isChecked();
-
-        updateData.put("modelo", newModelo);
-        updateData.put("activo", newStatus);
-
-        // Si hay imagen nueva, subirla primero
-        if (selectedImageUri != null && imageChanged) {
-            uploadImageAndSave(updateData);
-        } else {
-            updateVehicleData(updateData);
-        }
-    }
-
     private void uploadImageAndSave(Map<String, Object> updateData) {
         showSnackbar("Subiendo imagen...");
 
@@ -326,28 +315,10 @@ public class DriverVehicleEditActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PICK_IMAGE) {
             if (data != null && data.getData() != null) {
                 selectedImageUri = data.getData();
-                imageChanged = true;
 
                 // Mostrar imagen seleccionada inmediatamente
-                Glide.with(this)
-                        .load(selectedImageUri)
-                        .centerCrop()
-                        .into(binding.ivVehiclePhoto);
-
+                binding.ivVehiclePhoto.setImageURI(selectedImageUri);
                 showSnackbar("Imagen seleccionada. Guarda los cambios para aplicarla.");
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSION_REQUEST_READ_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openImagePicker();
-            } else {
-                showSnackbar("Permiso necesario para seleccionar imagen");
             }
         }
     }

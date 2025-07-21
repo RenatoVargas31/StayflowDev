@@ -593,6 +593,7 @@ public class ClienteDetalleHotelActivity extends AppCompatActivity implements Cl
             if (habitacion != null) {
                 // Crear objeto Reserva.Habitacion
                 Reserva.Habitacion habitacionReserva = new Reserva.Habitacion();
+                habitacionReserva.setId(habitacionId);
                 habitacionReserva.setTipo(habitacion.getTipo());
                 habitacionReserva.setCantidad(cantidad);
                 habitacionReserva.setPrecio(habitacion.getPrecio());

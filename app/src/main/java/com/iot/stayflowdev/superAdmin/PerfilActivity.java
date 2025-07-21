@@ -69,10 +69,15 @@ public class PerfilActivity extends BaseSuperAdminActivity {
     private SwitchMaterial switchReportes;
     private SwitchMaterial switchLogs;
     private TextInputLayout layoutPeriodicidadReportes;
+    private TextInputLayout layoutPeriodicidadLogs;
     private TextInputLayout layoutUmbralLogs;
     private AutoCompleteTextView dropdownPeriodicidadReportes;
-    private MaterialButton buttonGuardar;
+    private AutoCompleteTextView dropdownPeriodicidadLogs;
+    private MaterialButton buttonGuardarReportes;
+    private MaterialButton buttonGuardarLogs;
+    private MaterialButton buttonResetLogs;
     private MaterialButton buttonLogout;
+    private TextView textViewLogsCounter;
 
     // Utilities
     private FirebaseAuth mAuth;
@@ -82,7 +87,8 @@ public class PerfilActivity extends BaseSuperAdminActivity {
     private NotificationPreferences notificationPreferences;
     private WorkManager workManager;
     private List<String> periodicidades;
-    private ArrayAdapter<String> dropdownAdapter;
+    private ArrayAdapter<String> dropdownAdapterReportes;
+    private ArrayAdapter<String> dropdownAdapterLogs;
     private User currentUser;
 
     // Lanzador para seleccionar imagen
@@ -140,13 +146,19 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         switchReportes = findViewById(R.id.switchReportes);
         switchLogs = findViewById(R.id.switchLogs);
         layoutPeriodicidadReportes = findViewById(R.id.layoutPeriodicidadReportes);
+        layoutPeriodicidadLogs = findViewById(R.id.layoutPeriodicidadLogs);
         layoutUmbralLogs = findViewById(R.id.layoutUmbralLogs);
         dropdownPeriodicidadReportes = findViewById(R.id.dropdownPeriodicidadReportes);
-        buttonGuardar = findViewById(R.id.buttonGuardar);
+        dropdownPeriodicidadLogs = findViewById(R.id.dropdownPeriodicidadLogs);
+        buttonGuardarReportes = findViewById(R.id.buttonGuardarReportes);
+        buttonGuardarLogs = findViewById(R.id.buttonGuardarLogs);
+        buttonResetLogs = findViewById(R.id.buttonResetLogs);
         buttonLogout = findViewById(R.id.buttonLogout);
+        textViewLogsCounter = findViewById(R.id.textViewLogsCounter);
 
         // Configurar estados iniciales
         layoutPeriodicidadReportes.setEnabled(false);
+        layoutPeriodicidadLogs.setEnabled(false);
         layoutUmbralLogs.setEnabled(false);
 
         // Configurar botón para cambiar foto
@@ -369,13 +381,13 @@ public class PerfilActivity extends BaseSuperAdminActivity {
     }
 
     private void setupDropdown() {
-        dropdownAdapter = new ArrayAdapter<>(
+        dropdownAdapterReportes = new ArrayAdapter<>(
             this,
             android.R.layout.simple_dropdown_item_1line,
             periodicidades
         );
 
-        dropdownPeriodicidadReportes.setAdapter(dropdownAdapter);
+        dropdownPeriodicidadReportes.setAdapter(dropdownAdapterReportes);
         dropdownPeriodicidadReportes.setThreshold(0);
 
         // Configurar comportamiento del dropdown
@@ -391,27 +403,47 @@ public class PerfilActivity extends BaseSuperAdminActivity {
             }
         });
 
-        // Aplicar cambios inmediatamente al seleccionar una opción
+        // SOLO GUARDAR LA PREFERENCIA, NO PROGRAMAR NOTIFICACIONES
         dropdownPeriodicidadReportes.setOnItemClickListener((parent, view, position, id) -> {
             String selected = periodicidades.get(position);
             Log.d(TAG, "Periodicidad seleccionada: " + selected);
 
-            // Guardar la preferencia seleccionada
+            // Solo guardar la preferencia, las notificaciones se programan al guardar
             notificationPreferences.setPeriodicidadReportes(selected);
+            Toast.makeText(this, "Periodicidad seleccionada: " + selected, Toast.LENGTH_SHORT).show();
+        });
 
-            // Programar la notificación con el nuevo intervalo
-            if (switchReportes.isChecked()) {
-                scheduleReportesNotification(selected);
+        // Configurar dropdown para logs
+        dropdownAdapterLogs = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            periodicidades
+        );
 
-                // Si las notificaciones de logs están activadas, actualizar también con el mismo intervalo
-                if (switchLogs.isChecked() && layoutUmbralLogs.getEditText() != null &&
-                    !layoutUmbralLogs.getEditText().getText().toString().isEmpty()) {
-                    int umbral = Integer.parseInt(layoutUmbralLogs.getEditText().getText().toString());
-                    scheduleLogsNotification(umbral);
-                }
+        dropdownPeriodicidadLogs.setAdapter(dropdownAdapterLogs);
+        dropdownPeriodicidadLogs.setThreshold(0);
 
-                Toast.makeText(this, "Notificaciones programadas cada " + selected.toLowerCase(), Toast.LENGTH_SHORT).show();
+        // Comportamiento del dropdown de logs
+        layoutPeriodicidadLogs.setEndIconOnClickListener(view -> {
+            if (dropdownPeriodicidadLogs.isEnabled()) {
+                dropdownPeriodicidadLogs.showDropDown();
             }
+        });
+
+        dropdownPeriodicidadLogs.setOnClickListener(view -> {
+            if (dropdownPeriodicidadLogs.isEnabled()) {
+                dropdownPeriodicidadLogs.showDropDown();
+            }
+        });
+
+        // SOLO GUARDAR LA PREFERENCIA, NO PROGRAMAR NOTIFICACIONES
+        dropdownPeriodicidadLogs.setOnItemClickListener((parent, view, position, id) -> {
+            String selected = periodicidades.get(position);
+            Log.d(TAG, "Periodicidad de logs seleccionada: " + selected);
+
+            // Solo guardar la preferencia, las notificaciones se programan al guardar
+            notificationPreferences.setPeriodicidadLogs(selected);
+            Toast.makeText(this, "Periodicidad de logs seleccionada: " + selected, Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -419,27 +451,38 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         switchReportes.setOnCheckedChangeListener((buttonView, isChecked) -> {
             layoutPeriodicidadReportes.setEnabled(isChecked);
             dropdownPeriodicidadReportes.setEnabled(isChecked);
+            buttonGuardarReportes.setEnabled(isChecked);
             if (!isChecked) {
                 dropdownPeriodicidadReportes.setText("", false);
+                // Cancelar notificaciones si se deshabilita
+                workManager.cancelUniqueWork(WORK_REPORTES);
+                workManager.cancelUniqueWork(WORK_REPORTES + "_periodic");
             }
-
         });
 
         switchLogs.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            layoutPeriodicidadLogs.setEnabled(isChecked);
+            dropdownPeriodicidadLogs.setEnabled(isChecked);
             layoutUmbralLogs.setEnabled(isChecked);
+            buttonGuardarLogs.setEnabled(isChecked);
             if (layoutUmbralLogs.getEditText() != null) {
                 layoutUmbralLogs.getEditText().setEnabled(isChecked);
             }
             if (!isChecked) {
+                dropdownPeriodicidadLogs.setText("", false);
                 if (layoutUmbralLogs.getEditText() != null) {
                     layoutUmbralLogs.getEditText().setText("");
                 }
+                // Cancelar notificaciones si se deshabilita
+                workManager.cancelUniqueWork(WORK_LOGS);
+                workManager.cancelUniqueWork(WORK_LOGS + "_periodic");
             }
         });
 
-        buttonGuardar.setOnClickListener(v -> savePreferences());
+        buttonGuardarReportes.setOnClickListener(v -> saveReportesPreferences());
+        buttonGuardarLogs.setOnClickListener(v -> saveLogsPreferences());
+        buttonResetLogs.setOnClickListener(v -> resetLogsCounter());
         buttonLogout.setOnClickListener(v -> cerrarSesion());
-
     }
 
     private void cerrarSesion() {
@@ -463,7 +506,8 @@ public class PerfilActivity extends BaseSuperAdminActivity {
     private void loadSavedPreferences() {
         boolean reportesEnabled = notificationPreferences.isReportesEnabled();
         boolean logsEnabled = notificationPreferences.isLogsEnabled();
-        String periodicidad = notificationPreferences.getPeriodicidadReportes();
+        String periodicidadReportes = notificationPreferences.getPeriodicidadReportes();
+        String periodicidadLogs = notificationPreferences.getPeriodicidadLogs();
         int umbralLogs = notificationPreferences.getUmbralLogs();
 
         switchReportes.setChecked(reportesEnabled);
@@ -471,23 +515,31 @@ public class PerfilActivity extends BaseSuperAdminActivity {
 
         layoutPeriodicidadReportes.setEnabled(reportesEnabled);
         dropdownPeriodicidadReportes.setEnabled(reportesEnabled);
+        buttonGuardarReportes.setEnabled(reportesEnabled);
+
+        layoutPeriodicidadLogs.setEnabled(logsEnabled);
+        dropdownPeriodicidadLogs.setEnabled(logsEnabled);
         layoutUmbralLogs.setEnabled(logsEnabled);
 
-        if (periodicidad != null && !periodicidad.isEmpty()) {
-            dropdownPeriodicidadReportes.setText(periodicidad, false);
+        if (periodicidadReportes != null && !periodicidadReportes.isEmpty()) {
+            dropdownPeriodicidadReportes.setText(periodicidadReportes, false);
+        }
+
+        if (periodicidadLogs != null && !periodicidadLogs.isEmpty()) {
+            dropdownPeriodicidadLogs.setText(periodicidadLogs, false);
         }
 
         if (umbralLogs > 0 && layoutUmbralLogs.getEditText() != null) {
             layoutUmbralLogs.getEditText().setText(String.valueOf(umbralLogs));
         }
+
+        // Actualizar contador de logs
+        updateLogsCounter();
     }
 
-    private void savePreferences() {
+    private void saveReportesPreferences() {
         boolean reportesEnabled = switchReportes.isChecked();
-        boolean logsEnabled = switchLogs.isChecked();
         String periodicidad = dropdownPeriodicidadReportes.getText().toString();
-        String umbralLogsStr = layoutUmbralLogs.getEditText() != null ?
-            layoutUmbralLogs.getEditText().getText().toString() : "";
 
         // Validaciones
         if (reportesEnabled && periodicidad.isEmpty()) {
@@ -495,19 +547,9 @@ public class PerfilActivity extends BaseSuperAdminActivity {
             return;
         }
 
-        if (logsEnabled && umbralLogsStr.isEmpty()) {
-            Toast.makeText(this, "Por favor ingrese un umbral de logs", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         // Guardar preferencias
         notificationPreferences.setReportesEnabled(reportesEnabled);
-        notificationPreferences.setLogsEnabled(logsEnabled);
         notificationPreferences.setPeriodicidadReportes(periodicidad);
-
-        if (!umbralLogsStr.isEmpty()) {
-            notificationPreferences.setUmbralLogs(Integer.parseInt(umbralLogsStr));
-        }
 
         // Programar o cancelar notificaciones
         if (reportesEnabled) {
@@ -516,13 +558,89 @@ public class PerfilActivity extends BaseSuperAdminActivity {
             workManager.cancelUniqueWork(WORK_REPORTES);
         }
 
-        if (logsEnabled && !umbralLogsStr.isEmpty()) {
-            scheduleLogsNotification(Integer.parseInt(umbralLogsStr));
-        } else {
-            workManager.cancelUniqueWork(WORK_LOGS);
+        Toast.makeText(this, "Preferencias de reportes guardadas correctamente", Toast.LENGTH_SHORT).show();
+    }
+
+    private void saveLogsPreferences() {
+        boolean logsEnabled = switchLogs.isChecked();
+        String periodicidadLogs = dropdownPeriodicidadLogs.getText().toString();
+        String umbralLogsStr = "";
+        int umbral = 0;
+
+        if (layoutUmbralLogs.getEditText() != null) {
+            umbralLogsStr = layoutUmbralLogs.getEditText().getText().toString();
+            if (!umbralLogsStr.isEmpty()) {
+                try {
+                    umbral = Integer.parseInt(umbralLogsStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "El umbral debe ser un número válido", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
         }
 
-        Toast.makeText(this, "Preferencias guardadas correctamente", Toast.LENGTH_SHORT).show();
+        // Validaciones
+        if (logsEnabled && (periodicidadLogs.isEmpty() || umbral <= 0)) {
+            Toast.makeText(this, "Por favor complete la periodicidad y umbral de logs", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Guardar preferencias
+        notificationPreferences.setLogsEnabled(logsEnabled);
+        notificationPreferences.setPeriodicidadLogs(periodicidadLogs);
+        notificationPreferences.setUmbralLogs(umbral);
+
+        // Programar o cancelar notificaciones de logs
+        if (logsEnabled && umbral > 0) {
+            scheduleLogsNotification(umbral, periodicidadLogs);
+        } else {
+            workManager.cancelUniqueWork(WORK_LOGS);
+            workManager.cancelUniqueWork(WORK_LOGS + "_periodic");
+        }
+
+        Toast.makeText(this, "Preferencias de logs guardadas correctamente", Toast.LENGTH_SHORT).show();
+    }
+
+    private void resetLogsCounter() {
+        // Resetear el contador de logs en las preferencias
+        notificationPreferences.resetLogsCount();
+
+        // Actualizar la interfaz
+        updateLogsCounter();
+
+        Toast.makeText(this, "Contador de logs reseteado", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateLogsCounter() {
+        // Usar la misma lógica que InicioActivity: consultar "system_logs" en lugar de "logs"
+        if (textViewLogsCounter != null) {
+            Log.d(TAG, "Consultando logs sin leer desde system_logs...");
+
+            db.collection("system_logs")
+                .whereEqualTo("leido", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots != null) {
+                        int realLogsCount = queryDocumentSnapshots.size();
+                        textViewLogsCounter.setText("Logs sin leer actuales: " + realLogsCount);
+
+                        // Sincronizar el contador local con el real
+                        notificationPreferences.setLogsCount(realLogsCount);
+
+                        Log.d(TAG, "Logs sin leer encontrados en system_logs: " + realLogsCount);
+                        Log.d(TAG, "Total de documentos en la consulta: " + queryDocumentSnapshots.getDocuments().size());
+                    } else {
+                        Log.w(TAG, "La consulta de system_logs devolvió null");
+                        textViewLogsCounter.setText("Logs sin leer actuales: 0");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al consultar logs sin leer de system_logs: " + e.getMessage(), e);
+                    // Fallback: mostrar 0 si hay error en la consulta
+                    textViewLogsCounter.setText("Logs sin leer actuales: 0");
+                    Toast.makeText(this, "Error al consultar logs. Mostrando valor por defecto.", Toast.LENGTH_SHORT).show();
+                });
+        }
     }
 
     private void scheduleReportesNotification(String periodicidad) {
@@ -599,7 +717,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         }
     }
 
-    private void scheduleLogsNotification(int umbral) {
+    private void scheduleLogsNotification(int umbral, String periodicidad) {
         // Permitir al usuario configurar el intervalo para los logs también
         String currentPeriodicidad = dropdownPeriodicidadReportes.getText().toString();
         long interval = getIntervalFromPeriodicidad(currentPeriodicidad);
@@ -672,8 +790,12 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         }
 
         // Deshabilitar o habilitar el botón de guardar y cerrar sesión
-        if (buttonGuardar != null) {
-            buttonGuardar.setEnabled(enabled);
+        if (buttonGuardarReportes != null) {
+            buttonGuardarReportes.setEnabled(enabled);
+        }
+
+        if (buttonGuardarLogs != null) {
+            buttonGuardarLogs.setEnabled(enabled);
         }
 
         if (buttonLogout != null) {
@@ -683,7 +805,7 @@ public class PerfilActivity extends BaseSuperAdminActivity {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.superadmin_perfil_superadmin;
+        return R.layout.superadmin_perfil_superadmin_fixed;
     }
 
     @Override
@@ -696,3 +818,4 @@ public class PerfilActivity extends BaseSuperAdminActivity {
         return "Perfil";
     }
 }
+
