@@ -1,16 +1,22 @@
 package com.iot.stayflowdev.Driver.Activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -21,8 +27,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.iot.stayflowdev.Driver.Dtos.Vehiculo;
 import com.iot.stayflowdev.Driver.Repository.TarjetaCreditoRepository;
 import com.iot.stayflowdev.Driver.Repository.TaxistaRepository;
@@ -31,8 +42,11 @@ import com.iot.stayflowdev.LoginActivity;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.databinding.ActivityDriverPerfilBinding;
 import com.iot.stayflowdev.model.User;
+import com.iot.stayflowdev.utils.ImageLoadingUtils;
 import com.iot.stayflowdev.utils.UserSessionManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Map;
 
 public class DriverPerfilActivity extends AppCompatActivity {
@@ -42,6 +56,8 @@ public class DriverPerfilActivity extends AppCompatActivity {
     private TaxistaRepository taxistaRepository;
     private TarjetaCreditoRepository tarjetaRepository; // ← AGREGAR ESTO
 
+    // ActivityResultLauncher para el resultado de la selección de imagen
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +76,22 @@ public class DriverPerfilActivity extends AppCompatActivity {
         taxistaRepository = new TaxistaRepository();
         vehiculoRepository = new VehiculoRepository();
         tarjetaRepository = new TarjetaCreditoRepository(); // ← AGREGAR ESTO
+
+        // Inicializar el ActivityResultLauncher para la selección de imágenes
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            Uri imageUri = data.getData();
+                            if (imageUri != null) {
+                                // Subir la imagen seleccionada a Firebase Storage
+                                subirImagenPerfil(imageUri);
+                            }
+                        }
+                    }
+                });
 
         // Cargar información del perfil
         cargarInformacionPerfil();
@@ -422,6 +454,22 @@ public class DriverPerfilActivity extends AppCompatActivity {
         binding.layoutCapacidad.setOnClickListener(v -> {
             Toast.makeText(this, "Configuración de capacidad próximamente", Toast.LENGTH_SHORT).show();
         });
+
+        // Cambiar foto de perfil - Botón
+        binding.buttonChangePicture.setOnClickListener(v -> {
+            // Abrir el selector de imágenes
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
+        });
+
+        // Cambiar foto de perfil - Imagen clickeable
+        binding.ivProfilePicture.setOnClickListener(v -> {
+            // Abrir el selector de imágenes
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
+        });
     }
 
     // Método para refrescar información del perfil
@@ -529,4 +577,125 @@ public class DriverPerfilActivity extends AppCompatActivity {
         binding = null;
     }
 
+    private void subirImagenPerfil(Uri imageUri) {
+        // Mostrar indicador de carga y bloquear interacciones
+        mostrarCargando(true);
+
+        // Obtener referencia a Firebase Storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        // Crear referencia para la imagen del perfil
+        String userId = taxistaRepository.obtenerUidActual();
+        StorageReference profileImageRef = storageRef.child("perfil/" + userId + "/foto_perfil.jpg");
+
+        // Subir la imagen
+        UploadTask uploadTask = profileImageRef.putFile(imageUri);
+
+        // Manejar el resultado de la subida
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            // La imagen se subió exitosamente, obtener la URL de descarga
+            profileImageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                String imageUrl = uri.toString();
+                Log.d(TAG, "Imagen de perfil subida y disponible en: " + imageUrl);
+
+                // Actualizar la imagen en el perfil del taxista
+                taxistaRepository.actualizarImagenPerfil(userId, imageUrl,
+                        () -> {
+                            // Actualización exitosa
+                            Log.d(TAG, "URL de imagen de perfil actualizada en Firestore");
+                            Toast.makeText(this, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show();
+
+                            // Ocultar indicador de carga y restaurar interacciones
+                            mostrarCargando(false);
+
+                            // Recargar información del perfil para mostrar la nueva imagen
+                            cargarInformacionPerfil();
+                        },
+                        e -> {
+                            // Ocurrió un error al actualizar la URL de la imagen
+                            Log.e(TAG, "Error al actualizar URL de imagen de perfil: " + e.getMessage());
+                            Toast.makeText(this, "Error al actualizar foto de perfil", Toast.LENGTH_SHORT).show();
+                            mostrarCargando(false);
+                        });
+            });
+        }).addOnFailureListener(e -> {
+            // Ocurrió un error durante la subida
+            Log.e(TAG, "Error al subir imagen de perfil: " + e.getMessage());
+            Toast.makeText(this, "Error al subir foto de perfil", Toast.LENGTH_SHORT).show();
+            mostrarCargando(false);
+        });
+    }
+
+    // Método para mostrar/ocultar estado de carga y bloquear interacciones
+    private void mostrarCargando(boolean mostrar) {
+        if (mostrar) {
+            // Mostrar indicador de progreso
+            binding.progressIndicator.setVisibility(View.VISIBLE);
+
+            // Deshabilitar navegación inferior
+            binding.bottomNavigation.setEnabled(false);
+            for (int i = 0; i < binding.bottomNavigation.getMenu().size(); i++) {
+                binding.bottomNavigation.getMenu().getItem(i).setEnabled(false);
+            }
+
+            // Deshabilitar botón de cambiar foto
+            binding.buttonChangePicture.setEnabled(false);
+
+            // Deshabilitar imagen de perfil clickeable
+            binding.ivProfilePicture.setEnabled(false);
+            binding.ivProfilePicture.setClickable(false);
+
+            // Deshabilitar todas las opciones del perfil
+            binding.layoutVehicleModel.setEnabled(false);
+            binding.layoutVehicleModel.setClickable(false);
+            binding.layoutCorreo.setEnabled(false);
+            binding.layoutCorreo.setClickable(false);
+            binding.layoutTelefono.setEnabled(false);
+            binding.layoutTelefono.setClickable(false);
+            binding.layoutCapacidad.setEnabled(false);
+            binding.layoutCapacidad.setClickable(false);
+
+            // Deshabilitar scroll
+            binding.scrollView.setEnabled(false);
+
+            // Opcional: Cambiar alpha para indicar visualmente que está deshabilitado
+            binding.bottomNavigation.setAlpha(0.5f);
+            binding.buttonChangePicture.setAlpha(0.5f);
+
+        } else {
+            // Ocultar indicador de progreso
+            binding.progressIndicator.setVisibility(View.GONE);
+
+            // Habilitar navegación inferior
+            binding.bottomNavigation.setEnabled(true);
+            for (int i = 0; i < binding.bottomNavigation.getMenu().size(); i++) {
+                binding.bottomNavigation.getMenu().getItem(i).setEnabled(true);
+            }
+
+            // Habilitar botón de cambiar foto
+            binding.buttonChangePicture.setEnabled(true);
+
+            // Habilitar imagen de perfil clickeable
+            binding.ivProfilePicture.setEnabled(true);
+            binding.ivProfilePicture.setClickable(true);
+
+            // Habilitar todas las opciones del perfil
+            binding.layoutVehicleModel.setEnabled(true);
+            binding.layoutVehicleModel.setClickable(true);
+            binding.layoutCorreo.setEnabled(true);
+            binding.layoutCorreo.setClickable(true);
+            binding.layoutTelefono.setEnabled(true);
+            binding.layoutTelefono.setClickable(true);
+            binding.layoutCapacidad.setEnabled(true);
+            binding.layoutCapacidad.setClickable(true);
+
+            // Habilitar scroll
+            binding.scrollView.setEnabled(true);
+
+            // Restaurar alpha normal
+            binding.bottomNavigation.setAlpha(1.0f);
+            binding.buttonChangePicture.setAlpha(1.0f);
+        }
+    }
 }

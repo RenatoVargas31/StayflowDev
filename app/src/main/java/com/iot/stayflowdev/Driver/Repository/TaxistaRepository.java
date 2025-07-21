@@ -223,6 +223,19 @@ public class TaxistaRepository {
         return obtenerUidUsuario();
     }
 
+    // Método público para actualizar la imagen de perfil con callbacks
+    public void actualizarImagenPerfil(String userId, String imageUrl, Runnable onSuccess, OnFailureListener onFailure) {
+        db.collection("usuarios")
+                .document(userId)
+                .update("fotoPerfilUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(onFailure);
+    }
+
     // Clase helper para devolver usuario con imagen
     public static class TaxistaConImagen {
         private User usuario;
