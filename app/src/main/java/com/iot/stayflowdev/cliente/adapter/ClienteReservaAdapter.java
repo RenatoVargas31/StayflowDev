@@ -2,17 +2,23 @@ package com.iot.stayflowdev.cliente.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.iot.stayflowdev.R;
+import com.iot.stayflowdev.cliente.ClienteChatActivity;
 import com.iot.stayflowdev.model.Hotel;
 import com.iot.stayflowdev.model.Reserva;
 import com.iot.stayflowdev.viewmodels.ReservaViewModel;
@@ -76,6 +82,20 @@ public class ClienteReservaAdapter extends RecyclerView.Adapter<ClienteReservaAd
                 holder.nombreHotel.setText("Hotel no disponible");
             }
         });
+
+        // Configurar listener del botón de chat
+        holder.buttonChat.setOnClickListener(v -> {
+            Log.d("ClienteReservaAdapter", "Botón de chat presionado para reserva: " + reserva.getId());
+            obtenerAdministradorHotel(reserva, hotel -> {
+                if (hotel != null) {
+                    Log.d("ClienteReservaAdapter", "Hotel obtenido, abriendo chat con admin: " + hotel.getAdminId());
+                    abrirChat(reserva, hotel);
+                } else {
+                    Log.e("ClienteReservaAdapter", "No se pudo obtener el hotel o administrador");
+                    Toast.makeText(context, "No se pudo obtener información del administrador", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
     }
 
     /**
@@ -88,6 +108,189 @@ public class ClienteReservaAdapter extends RecyclerView.Adapter<ClienteReservaAd
                       listener.onHotelLoaded(null);
                       return null;
                   });
+    }
+
+    /**
+     * Obtiene el administrador del hotel y abre el chat
+     */
+    private void obtenerAdministradorHotel(Reserva reserva, OnHotelLoadedListener listener) {
+        Log.d("ClienteReservaAdapter", "Obteniendo administrador para hotel ID: " + reserva.getIdHotel());
+        CompletableFuture<Hotel> hotelFuture = viewModel.obtenerHotelParaReserva(reserva);
+        hotelFuture.thenAccept(hotel -> {
+            if (hotel != null) {
+                Log.d("ClienteReservaAdapter", "Hotel encontrado: " + hotel.getNombre());
+                Log.d("ClienteReservaAdapter", "Campo administradorAsignado: " + hotel.getAdministradorAsignado());
+
+                if (hotel.getAdministradorAsignado() != null && !hotel.getAdministradorAsignado().trim().isEmpty()) {
+                    // El administradorAsignado debería ser el ID del documento en usuarios
+                    String adminId = hotel.getAdministradorAsignado().trim();
+                    Log.d("ClienteReservaAdapter", "Buscando administrador en colección usuarios con ID: " + adminId);
+
+                    // Buscar en la colección usuarios (la colección correcta)
+                    FirebaseFirestore.getInstance()
+                        .collection("usuarios")
+                        .document(adminId)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                Log.d("ClienteReservaAdapter", "Administrador encontrado en usuarios con ID: " + adminId);
+                                // Verificar que sea realmente un administrador de hotel
+                                String tipoUsuario = documentSnapshot.getString("tipoUsuario");
+                                String rol = documentSnapshot.getString("rol");
+                                Log.d("ClienteReservaAdapter", "Tipo usuario: " + tipoUsuario + ", Rol: " + rol);
+
+                                // Actualizar validación para incluir "adminhotel"
+                                if ("administrador".equals(tipoUsuario) || "admin".equals(tipoUsuario) ||
+                                    "administrador de hotel".equals(tipoUsuario) ||
+                                    "hotel admin".equals(rol) || "adminhotel".equals(rol)) {
+                                    Log.d("ClienteReservaAdapter", "Usuario validado como administrador de hotel");
+                                    hotel.setAdminId(adminId);
+                                    listener.onHotelLoaded(hotel);
+                                } else {
+                                    Log.e("ClienteReservaAdapter", "Usuario encontrado pero no es administrador de hotel");
+                                    buscarCualquierAdministrador(hotel, listener);
+                                }
+                            } else {
+                                Log.e("ClienteReservaAdapter", "No existe documento usuarios con ID: " + adminId);
+                                buscarCualquierAdministrador(hotel, listener);
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("ClienteReservaAdapter", "Error al buscar en usuarios: " + e.getMessage());
+                            buscarCualquierAdministrador(hotel, listener);
+                        });
+                } else {
+                    Log.e("ClienteReservaAdapter", "Campo administradorAsignado es nulo o vacío");
+                    buscarCualquierAdministrador(hotel, listener);
+                }
+            } else {
+                Log.e("ClienteReservaAdapter", "Hotel no encontrado para la reserva");
+                listener.onHotelLoaded(null);
+            }
+        }).exceptionally(e -> {
+            Log.e("ClienteReservaAdapter", "Error al obtener hotel: " + e.getMessage());
+            listener.onHotelLoaded(null);
+            return null;
+        });
+    }
+
+    /**
+     * Busca cualquier administrador de hotel disponible como fallback
+     */
+    private void buscarCualquierAdministrador(Hotel hotel, OnHotelLoadedListener listener) {
+        Log.d("ClienteReservaAdapter", "Buscando cualquier administrador de hotel disponible...");
+
+        FirebaseFirestore.getInstance()
+            .collection("usuarios")
+            .whereEqualTo("tipoUsuario", "administrador")
+            .limit(5)
+            .get()
+            .addOnSuccessListener(querySnapshot -> {
+                Log.d("ClienteReservaAdapter", "Administradores encontrados: " + querySnapshot.size());
+
+                if (!querySnapshot.isEmpty()) {
+                    // Usar el primer administrador encontrado
+                    String adminId = querySnapshot.getDocuments().get(0).getId();
+                    String nombre = querySnapshot.getDocuments().get(0).getString("nombre");
+                    Log.d("ClienteReservaAdapter", "Usando administrador: " + nombre + " (ID: " + adminId + ")");
+                    hotel.setAdminId(adminId);
+                    listener.onHotelLoaded(hotel);
+                } else {
+                    Log.d("ClienteReservaAdapter", "No se encontraron administradores, buscando por rol...");
+                    // Intentar buscar por rol
+                    buscarPorRol(hotel, listener);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("ClienteReservaAdapter", "Error al buscar administradores: " + e.getMessage());
+                buscarPorRol(hotel, listener);
+            });
+    }
+
+    /**
+     * Busca administradores por rol como último recurso
+     */
+    private void buscarPorRol(Hotel hotel, OnHotelLoadedListener listener) {
+        Log.d("ClienteReservaAdapter", "Buscando administradores por rol...");
+
+        FirebaseFirestore.getInstance()
+            .collection("usuarios")
+            .whereEqualTo("rol", "hotel admin")
+            .limit(5)
+            .get()
+            .addOnSuccessListener(querySnapshot -> {
+                if (!querySnapshot.isEmpty()) {
+                    String adminId = querySnapshot.getDocuments().get(0).getId();
+                    String nombre = querySnapshot.getDocuments().get(0).getString("nombre");
+                    Log.d("ClienteReservaAdapter", "Administrador encontrado por rol: " + nombre + " (ID: " + adminId + ")");
+                    hotel.setAdminId(adminId);
+                    listener.onHotelLoaded(hotel);
+                } else {
+                    Log.d("ClienteReservaAdapter", "Listando todos los usuarios para debug...");
+                    listarUsuariosParaDebug(hotel, listener);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("ClienteReservaAdapter", "Error al buscar por rol: " + e.getMessage());
+                listarUsuariosParaDebug(hotel, listener);
+            });
+    }
+
+    /**
+     * Lista algunos usuarios para debug y encontrar la estructura correcta
+     */
+    private void listarUsuariosParaDebug(Hotel hotel, OnHotelLoadedListener listener) {
+        Log.d("ClienteReservaAdapter", "Listando usuarios para debug...");
+
+        FirebaseFirestore.getInstance()
+            .collection("usuarios")
+            .limit(5)
+            .get()
+            .addOnSuccessListener(querySnapshot -> {
+                Log.d("ClienteReservaAdapter", "Total usuarios encontrados: " + querySnapshot.size());
+
+                for (int i = 0; i < querySnapshot.getDocuments().size(); i++) {
+                    var doc = querySnapshot.getDocuments().get(i);
+                    Log.d("ClienteReservaAdapter", "Usuario " + i + " - ID: " + doc.getId());
+                    Log.d("ClienteReservaAdapter", "Usuario " + i + " - Nombre: " + doc.getString("nombre"));
+                    Log.d("ClienteReservaAdapter", "Usuario " + i + " - TipoUsuario: " + doc.getString("tipoUsuario"));
+                    Log.d("ClienteReservaAdapter", "Usuario " + i + " - Rol: " + doc.getString("rol"));
+                    Log.d("ClienteReservaAdapter", "Usuario " + i + " - Email: " + doc.getString("email"));
+                }
+
+                // Si hay usuarios, usar el primero disponible como fallback temporal
+                if (!querySnapshot.isEmpty()) {
+                    String firstUserId = querySnapshot.getDocuments().get(0).getId();
+                    Log.d("ClienteReservaAdapter", "Usando primer usuario disponible como fallback: " + firstUserId);
+                    hotel.setAdminId(firstUserId);
+                    listener.onHotelLoaded(hotel);
+                } else {
+                    Log.e("ClienteReservaAdapter", "No hay usuarios disponibles en la colección");
+                    listener.onHotelLoaded(null);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("ClienteReservaAdapter", "Error al listar usuarios: " + e.getMessage());
+                listener.onHotelLoaded(null);
+            });
+    }
+
+    /**
+     * Abre la actividad de chat con el administrador del hotel
+     */
+    private void abrirChat(Reserva reserva, Hotel hotel) {
+        Log.d("ClienteReservaAdapter", "Abriendo chat - Hotel: " + hotel.getNombre() + ", Admin: " + hotel.getAdminId());
+        try {
+            Intent intent = new Intent(context, ClienteChatActivity.class);
+            intent.putExtra(ClienteChatActivity.EXTRA_HOTEL_ID, reserva.getIdHotel());
+            intent.putExtra(ClienteChatActivity.EXTRA_HOTEL_NAME, hotel.getNombre());
+            intent.putExtra(ClienteChatActivity.EXTRA_ADMIN_ID, hotel.getAdminId());
+            context.startActivity(intent);
+            Log.d("ClienteReservaAdapter", "Actividad de chat iniciada exitosamente");
+        } catch (Exception e) {
+            Log.e("ClienteReservaAdapter", "Error al abrir chat: " + e.getMessage());
+            Toast.makeText(context, "Error al abrir el chat", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -126,6 +329,7 @@ public class ClienteReservaAdapter extends RecyclerView.Adapter<ClienteReservaAd
         final TextView estado;
         final ImageView iconoTaxi;
         final TextView textoTaxi;
+        final MaterialButton buttonChat;
 
         public ReservaViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -135,6 +339,7 @@ public class ClienteReservaAdapter extends RecyclerView.Adapter<ClienteReservaAd
             estado = itemView.findViewById(R.id.textViewEstado);
             iconoTaxi = itemView.findViewById(R.id.imageViewTaxi);
             textoTaxi = itemView.findViewById(R.id.textViewTaxi);
+            buttonChat = itemView.findViewById(R.id.buttonChat);
         }
     }
 

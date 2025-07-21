@@ -64,6 +64,10 @@
             android:name=".cliente.ClienteReservasActivity"
             android:exported="false" />
         <activity
+            android:name=".cliente.ClienteChatActivity"
+            android:exported="false"
+            android:parentActivityName=".cliente.ClienteReservasActivity" />
+        <activity
             android:name=".cliente.ClienteFavoritosActivity"
             android:exported="false" />
         <activity
@@ -252,6 +256,10 @@
         <activity
             android:name=".adminHotel.ChatSuperAdminActivity"
             android:exported="false" />
+        <activity
+            android:name=".adminHotel.AdminChatClienteActivity"
+            android:exported="false"
+            android:parentActivityName=".adminHotel.HuespedAdminActivity" />
 
         <activity
             android:name=".adminHotel.MensajeDetalleActivity"

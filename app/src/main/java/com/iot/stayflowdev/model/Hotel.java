@@ -36,6 +36,9 @@ public class Hotel {
     @PropertyName("geoposicion")
     private GeoPoint geoposicion;
 
+    // Campo temporal para el ID del administrador (no persistido en Firestore)
+    private transient String adminId;
+
     // Constructor para los campos obligatorios
     public Hotel(String nombre, String administradorAsignado) {
         this.nombre = nombre;
