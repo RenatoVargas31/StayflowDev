@@ -8,10 +8,12 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.iot.stayflowdev.adminHotel.model.UsuarioResumen;
 import com.iot.stayflowdev.model.Reserva;
 import com.iot.stayflowdev.adminHotel.model.NotificacionCheckout;
 import com.iot.stayflowdev.model.User;
@@ -20,10 +22,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class AdminHotelViewModel extends ViewModel {
 
@@ -46,8 +50,8 @@ public class AdminHotelViewModel extends ViewModel {
                 hotelIdCache = id;
                 Log.d("AdminVM", "Hotel ID cacheado: " + id);
                 cargarDescripcionHotel();
-                cargarNotificacionesCheckout(); // ✅ Se llama SOLO cuando hotelId está listo
-                iniciarActualizacionAutomatica(); // También automático
+                cargarNotificacionesCheckout();
+                iniciarActualizacionAutomatica();
             } else {
                 Log.e("AdminVM", "Hotel ID no obtenido aún.");
             }
@@ -135,7 +139,7 @@ public class AdminHotelViewModel extends ViewModel {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("reservas")
                 .whereEqualTo("idHotel", hotelId)
-                .whereEqualTo("estado", "sin checkout") // Cambio: buscar solo reservas "sin checkout"
+                .whereEqualTo("estado", "sin checkout")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     Log.d("NotificationDebug", "Reservas sin checkout encontradas: " + queryDocumentSnapshots.size());
@@ -164,19 +168,9 @@ public class AdminHotelViewModel extends ViewModel {
                     calendarHoy.add(Calendar.DAY_OF_MONTH, -2); // Volver a ayer
                     Timestamp inicioAyer = new Timestamp(calendarHoy.getTime());
 
-                    Log.d("NotificationDebug", "Inicio hoy: " + inicioHoy.toDate());
-                    Log.d("NotificationDebug", "Fin hoy: " + finHoy.toDate());
-                    Log.d("NotificationDebug", "Inicio ayer: " + inicioAyer.toDate());
-
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Reserva reserva = doc.toObject(Reserva.class);
                         reserva.setId(doc.getId());
-
-                        Log.d("NotificationDebug", "Procesando reserva: " + reserva.getId());
-                        Log.d("NotificationDebug", "Estado: " + reserva.getEstado());
-                        Log.d("NotificationDebug", "Fecha fin: " + (reserva.getFechaFin() != null ? reserva.getFechaFin().toDate() : "null"));
-                        Log.d("NotificationDebug", "ID Hotel reserva: " + reserva.getIdHotel());
-                        Log.d("NotificationDebug", "ID Usuario: " + reserva.getIdUsuario());
 
                         // Obtener datos del usuario para el nombre
                         obtenerNombreUsuario(reserva.getIdUsuario(), nombreUsuario -> {
@@ -184,40 +178,17 @@ public class AdminHotelViewModel extends ViewModel {
                             String tipoNotificacion = "";
 
                             if (fechaCheckout != null) {
-                                Log.d("NotificationDebug", "Comparando fechas - Checkout: " + fechaCheckout.toDate());
-
                                 // Determinar tipo de notificación comparando solo fechas (sin horas)
                                 if (fechaCheckout.compareTo(inicioHoy) < 0) {
                                     // Checkout era ayer o antes = VENCIDO
                                     tipoNotificacion = "CHECKOUT_VENCIDO";
-                                    Log.d("NotificationDebug", "Tipo: CHECKOUT_VENCIDO");
                                 } else if (fechaCheckout.compareTo(inicioHoy) >= 0 && fechaCheckout.compareTo(finHoy) < 0) {
                                     // Checkout es hoy = HOY
                                     tipoNotificacion = "CHECKOUT_HOY";
-                                    Log.d("NotificationDebug", "Tipo: CHECKOUT_HOY");
-                                } else {
-                                    Log.d("NotificationDebug", "No genera notificación - checkout futuro");
                                 }
-                            } else {
-                                Log.d("NotificationDebug", "fechaFin es null");
                             }
 
                             if (!tipoNotificacion.isEmpty()) {
-                                // Obtener información de habitaciones
-                                String tipoHabitacion = "Habitación";
-                                int cantidadHabitaciones = 1;
-
-                                if (reserva.getHabitaciones() != null && !reserva.getHabitaciones().isEmpty()) {
-                                    Reserva.Habitacion primeraHabitacion = reserva.getHabitaciones().get(0);
-                                    tipoHabitacion = primeraHabitacion.getTipo();
-                                    cantidadHabitaciones = 0;
-
-                                    // Sumar todas las habitaciones
-                                    for (Reserva.Habitacion hab : reserva.getHabitaciones()) {
-                                        cantidadHabitaciones += hab.getCantidad();
-                                    }
-                                }
-
                                 NotificacionCheckout notificacion = new NotificacionCheckout(
                                         reserva.getId(),
                                         reserva.getIdUsuario(),
@@ -225,19 +196,17 @@ public class AdminHotelViewModel extends ViewModel {
                                         fechaCheckout,
                                         reserva.getCostoTotal(),
                                         tipoNotificacion,
-                                        "sin checkout" // Estado fijo para todas las notificaciones
+                                        "sin checkout"
                                 );
                                 notificacion.setId("notif_" + reserva.getId());
 
                                 synchronized (notificaciones) {
                                     notificaciones.add(notificacion);
-                                    Log.d("NotificationDebug", "Notificación agregada: " + tipoNotificacion);
                                 }
                             }
 
                             // Verificar si hemos procesado todas las reservas
                             if (contador.incrementAndGet() == totalDocumentos) {
-                                Log.d("NotificationDebug", "Total notificaciones generadas: " + notificaciones.size());
                                 actualizarNotificaciones(notificaciones);
                             }
                         });
@@ -256,8 +225,6 @@ public class AdminHotelViewModel extends ViewModel {
             listener.onNombreObtenido("Usuario");
             return;
         }
-
-        Log.d("AdminHotelViewModel", "Obteniendo nombre para usuario: " + idUsuario);
 
         FirebaseFirestore.getInstance()
                 .collection("usuarios")
@@ -282,16 +249,6 @@ public class AdminHotelViewModel extends ViewModel {
                         }
 
                         listener.onNombreObtenido(nombre);
-
-                        // Log de todos los campos para debugging
-                        Log.d("AdminHotelViewModel", "Campos del usuario:");
-                        Log.d("AdminHotelViewModel", "- nombre: " + documentSnapshot.getString("nombre"));
-                        Log.d("AdminHotelViewModel", "- email: " + documentSnapshot.getString("email"));
-                        Log.d("AdminHotelViewModel", "- displayName: " + documentSnapshot.getString("displayName"));
-                        Log.d("AdminHotelViewModel", "- firstName: " + documentSnapshot.getString("firstName"));
-                        Log.d("AdminHotelViewModel", "- apellidos: " + documentSnapshot.getString("apellidos"));
-                        Log.d("AdminHotelViewModel", "Nombre final usado: " + nombre);
-
                     } else {
                         Log.w("AdminHotelViewModel", "Usuario no existe en Firestore: " + idUsuario);
                         listener.onNombreObtenido("Usuario");
@@ -410,5 +367,207 @@ public class AdminHotelViewModel extends ViewModel {
                 )
                 .addOnSuccessListener(aVoid -> onSuccess.run())
                 .addOnFailureListener(e -> onFailure.run());
+    }
+
+    public LiveData<String> obtenerHotelIdAdministrador() {
+        MutableLiveData<String> hotelIdLiveData = new MutableLiveData<>();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+        if (uid == null) {
+            hotelIdLiveData.setValue(null);
+            return hotelIdLiveData;
+        }
+
+        db.collection("usuarios")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists() && "adminhotel".equalsIgnoreCase(snapshot.getString("rol"))) {
+                        String hotelId = snapshot.getString("hotelAsignado");
+                        hotelIdLiveData.setValue(hotelId);
+                    } else {
+                        hotelIdLiveData.setValue(null);
+                    }
+                })
+                .addOnFailureListener(e -> hotelIdLiveData.setValue(null));
+
+        return hotelIdLiveData;
+    }
+
+    public void obtenerNombresUsuarios(List<UsuarioResumen> listaResumen, Consumer<List<UsuarioResumen>> callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        List<UsuarioResumen> listaConNombres = new ArrayList<>();
+        AtomicInteger pendientes = new AtomicInteger(listaResumen.size());
+
+        for (UsuarioResumen resumen : listaResumen) {
+            db.collection("usuarios")
+                    .document(resumen.getIdUsuario())
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        String nombres = snapshot.getString("nombres");
+                        String apellidos = snapshot.getString("apellidos");
+                        String nombreCompleto = (nombres != null ? nombres : "") + " " + (apellidos != null ? apellidos : "");
+                        resumen.setNombre(nombreCompleto.trim().isEmpty() ? "(sin nombre)" : nombreCompleto.trim());
+
+                        listaConNombres.add(resumen);
+
+                        if (pendientes.decrementAndGet() == 0) {
+                            callback.accept(listaConNombres);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        resumen.setNombre("(error)");
+                        listaConNombres.add(resumen);
+
+                        if (pendientes.decrementAndGet() == 0) {
+                            callback.accept(listaConNombres);
+                        }
+                    });
+        }
+
+        // En caso de lista vacía
+        if (listaResumen.isEmpty()) {
+            callback.accept(listaConNombres);
+        }
+    }
+
+    // ===== MÉTODOS DE REPORTES SIN FILTROS =====
+
+    // MÉTODO PARA VENTAS SIN FILTROS
+    public LiveData<Map<String, Double>> obtenerVentasTotalesPorUsuario(String hotelId) {
+        MutableLiveData<Map<String, Double>> liveData = new MutableLiveData<>();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Log.d("VENTAS_DEBUG", "Obteniendo ventas para hotel: " + hotelId);
+
+        db.collection("reservas")
+                .whereEqualTo("idHotel", hotelId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d("VENTAS_DEBUG", "Documentos encontrados: " + querySnapshot.size());
+
+                    Map<String, Double> ventasPorUsuario = new HashMap<>();
+
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        try {
+                            Reserva reserva = doc.toObject(Reserva.class);
+                            if (reserva != null) {
+                                Log.d("VENTAS_DEBUG", "Procesando reserva: " + doc.getId() +
+                                        " | Usuario: " + reserva.getIdUsuario() +
+                                        " | Estado: " + reserva.getEstado() +
+                                        " | Costo: " + reserva.getCostoTotal());
+
+                                // Verificar estado válido
+                                if (reserva.getIdUsuario() != null &&
+                                        reserva.getEstado() != null &&
+                                        (reserva.getEstado().equalsIgnoreCase("completada") ||
+                                                reserva.getEstado().equalsIgnoreCase("confirmada"))) {
+
+                                    String idUsuario = reserva.getIdUsuario();
+                                    double monto = 0;
+
+                                    try {
+                                        // Manejar costoTotal como String o Double
+                                        if (reserva.getCostoTotal() != null) {
+                                            String costoStr = reserva.getCostoTotal().toString().replaceAll("[^0-9.]", "");
+                                            if (!costoStr.isEmpty()) {
+                                                monto = Double.parseDouble(costoStr);
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        Log.w("VENTAS_DEBUG", "Error parseando costo: " + reserva.getCostoTotal());
+                                        monto = 0;
+                                    }
+
+                                    // Acumular ventas por usuario
+                                    ventasPorUsuario.put(idUsuario,
+                                            ventasPorUsuario.getOrDefault(idUsuario, 0.0) + monto);
+
+                                    Log.d("VENTAS_DEBUG", "Agregado - Usuario: " + idUsuario +
+                                            " | Monto: " + monto +
+                                            " | Total acumulado: " + ventasPorUsuario.get(idUsuario));
+                                } else {
+                                    Log.d("VENTAS_DEBUG", "Reserva ignorada - Estado inválido o datos faltantes");
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("VENTAS_DEBUG", "Error procesando documento: " + e.getMessage());
+                        }
+                    }
+
+                    Log.d("VENTAS_DEBUG", "Resultado final - Usuarios con ventas: " + ventasPorUsuario.size());
+                    for (Map.Entry<String, Double> entry : ventasPorUsuario.entrySet()) {
+                        Log.d("VENTAS_DEBUG", "Usuario: " + entry.getKey() + " = S/. " + entry.getValue());
+                    }
+
+                    liveData.setValue(ventasPorUsuario);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("VENTAS_DEBUG", "Error obteniendo ventas: " + e.getMessage());
+                    liveData.setValue(new HashMap<>());
+                });
+
+        return liveData;
+    }
+
+    // MÉTODO PARA RESERVAS SIN FILTROS
+    public LiveData<Map<String, Integer>> obtenerReservasPorUsuario(String hotelId) {
+        MutableLiveData<Map<String, Integer>> liveData = new MutableLiveData<>();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Log.d("RESERVAS_DEBUG", "Obteniendo reservas para hotel: " + hotelId);
+
+        db.collection("reservas")
+                .whereEqualTo("idHotel", hotelId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d("RESERVAS_DEBUG", "Documentos encontrados: " + querySnapshot.size());
+
+                    Map<String, Integer> conteoPorUsuario = new HashMap<>();
+
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        try {
+                            Reserva reserva = doc.toObject(Reserva.class);
+                            if (reserva != null) {
+                                Log.d("RESERVAS_DEBUG", "Procesando reserva: " + doc.getId() +
+                                        " | Usuario: " + reserva.getIdUsuario() +
+                                        " | Estado: " + reserva.getEstado());
+
+                                // Verificar estado válido
+                                if (reserva.getIdUsuario() != null &&
+                                        reserva.getEstado() != null &&
+                                        (reserva.getEstado().equalsIgnoreCase("completada") ||
+                                                reserva.getEstado().equalsIgnoreCase("confirmada"))) {
+
+                                    String idUsuario = reserva.getIdUsuario();
+                                    conteoPorUsuario.put(idUsuario,
+                                            conteoPorUsuario.getOrDefault(idUsuario, 0) + 1);
+
+                                    Log.d("RESERVAS_DEBUG", "Agregado - Usuario: " + idUsuario +
+                                            " | Total reservas: " + conteoPorUsuario.get(idUsuario));
+                                } else {
+                                    Log.d("RESERVAS_DEBUG", "Reserva ignorada - Estado inválido o datos faltantes");
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("RESERVAS_DEBUG", "Error procesando documento: " + e.getMessage());
+                        }
+                    }
+
+                    Log.d("RESERVAS_DEBUG", "Resultado final - Usuarios con reservas: " + conteoPorUsuario.size());
+                    for (Map.Entry<String, Integer> entry : conteoPorUsuario.entrySet()) {
+                        Log.d("RESERVAS_DEBUG", "Usuario: " + entry.getKey() + " = " + entry.getValue() + " reservas");
+                    }
+
+                    liveData.setValue(conteoPorUsuario);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RESERVAS_DEBUG", "Error obteniendo reservas: " + e.getMessage());
+                    liveData.setValue(new HashMap<>());
+                });
+
+        return liveData;
     }
 }

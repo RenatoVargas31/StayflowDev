@@ -118,12 +118,6 @@
             android:name=".superAdmin.UserDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".superAdmin.DriverVerificationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".superAdmin.FullScreenImageActivity"
-            android:exported="false" />
-        <activity
             android:name=".superAdmin.SystemMetricsActivity"
             android:exported="false" />
         <activity

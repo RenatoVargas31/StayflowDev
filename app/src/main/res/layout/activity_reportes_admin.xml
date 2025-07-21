@@ -85,61 +85,119 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupFiltros"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipDiario"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Diario"
-                    android:checked="true" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipMensual"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Mensual" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAnual"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Anual" />
-            </com.google.android.material.chip.ChipGroup>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ventas por servicio"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="?attr/colorOnSurface" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerServicios"
+            <!-- SECCIÓN DE VENTAS -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ventas por usuario"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="?attr/colorOnSurface" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerUsuarios"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ventas Totales por Usuario"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerServicios"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SECCIÓN DE RESERVAS -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cantidad de Reservas por Usuario"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerUsuarios"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SECCIÓN DE BOTONES DE DESCARGA -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Generar Reportes PDF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDescargarVentas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Descargar PDF de Ventas por Usuario"
+                        android:layout_marginBottom="12dp"
+                        app:icon="@drawable/ic_download"
+                        app:iconPadding="8dp"
+                        android:textColor="@color/white"
+                        style="@style/Widget.Material3.Button" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDescargarReservas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Descargar PDF de Reservas por Usuario"
+                        app:icon="@drawable/ic_download"
+                        app:iconPadding="8dp"
+                        android:textColor="@color/white"
+                        style="@style/Widget.Material3.Button" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>

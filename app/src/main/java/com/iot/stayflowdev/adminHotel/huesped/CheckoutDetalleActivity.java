@@ -131,25 +131,36 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
 
         codigoReserva = intent.getStringExtra("codigoReserva");
         String costoTotal = intent.getStringExtra("costoTotal");
-        String tarjeta = intent.getStringExtra("tarjeta");
+        // REMOVIDO: String tarjeta = intent.getStringExtra("tarjeta");
 
         // Log para debugging
         android.util.Log.d("CheckoutDetalle", "Nombre recibido: '" + nombre + "'");
         android.util.Log.d("CheckoutDetalle", "Código reserva: " + codigoReserva);
         android.util.Log.d("CheckoutDetalle", "ID Usuario recibido: " + idUsuario);
 
-
         // Validar y usar nombre por defecto si es necesario
         if (nombre == null || nombre.trim().isEmpty() || nombre.equalsIgnoreCase("Usuario") || nombre.equalsIgnoreCase("null")) {
             if (idUsuario != null && !idUsuario.trim().isEmpty()) {
                 obtenerNombreUsuario(idUsuario); // Usar directamente
+                obtenerTarjetaUsuario(idUsuario); // NUEVO: Obtener tarjeta del usuario
             } else if (codigoReserva != null) {
                 obtenerNombreDesdeReserva(codigoReserva); // Fallback
+                // También obtener tarjeta desde la reserva
+                obtenerUsuarioDesdeReservaYTarjeta(codigoReserva);
             } else {
                 establecerTituloCheckout("Huésped");
+                // Usar tarjeta por defecto
+                TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                if (tvTarjetaNumero != null) {
+                    tvTarjetaNumero.setText("•••• 1234");
+                }
             }
         } else {
             establecerTituloCheckout(nombre); // Nombre válido
+            // Si tenemos el ID del usuario, obtener su tarjeta
+            if (idUsuario != null && !idUsuario.trim().isEmpty()) {
+                obtenerTarjetaUsuario(idUsuario);
+            }
         }
 
         // Parsear costo total de la reserva
@@ -190,21 +201,45 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
             }
         }
 
-        // Mostrar en las vistas solo si tenemos un nombre válido
-        if (nombre != null && !nombre.equals("Huésped")) {
-            establecerTituloCheckout(nombre);
-        }
-
+        // REMOVIDO: Configuración manual de tarjeta
         // Buscar tvTarjetaNumero con verificación de null
-        TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
-        if (tvTarjetaNumero != null) {
-            tvTarjetaNumero.setText(tarjeta != null ? tarjeta : "•••• 1234");
-        }
+        // TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+        // if (tvTarjetaNumero != null) {
+        //     tvTarjetaNumero.setText(tarjeta != null ? tarjeta : "•••• 1234");
+        // }
 
         // Actualizar subtotal
         if (tvSubtotalHospedaje != null) {
             tvSubtotalHospedaje.setText(String.format("S/. %.2f", montoTotalReserva));
         }
+    }
+
+    private void obtenerUsuarioDesdeReservaYTarjeta(String reservaId) {
+        FirebaseFirestore.getInstance()
+                .collection("reservas")
+                .document(reservaId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String idUsuario = doc.getString("idUsuario");
+                        if (idUsuario != null) {
+                            obtenerTarjetaUsuario(idUsuario);
+                        } else {
+                            // Usuario no encontrado, usar tarjeta por defecto
+                            TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                            if (tvTarjetaNumero != null) {
+                                tvTarjetaNumero.setText("•••• 1234");
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CheckoutDetalle", "Error obteniendo reserva para tarjeta", e);
+                    TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                    if (tvTarjetaNumero != null) {
+                        tvTarjetaNumero.setText("•••• 1234");
+                    }
+                });
     }
 
     private void obtenerNombreDesdeReserva(String reservaId) {
@@ -285,6 +320,58 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
             android.util.Log.d("CheckoutDetalle", "Título establecido: Checkout de " + nombre);
         }
     }
+
+    private void obtenerTarjetaUsuario(String idUsuario) {
+        FirebaseFirestore.getInstance()
+                .collection("tarjetasCredito")
+                .whereEqualTo("id", idUsuario)
+                .whereEqualTo("activa", true) //
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Tomar la primera tarjeta activa encontrada
+                        com.google.firebase.firestore.DocumentSnapshot tarjetaDoc = querySnapshot.getDocuments().get(0);
+
+                        String numeroEnmascarado = tarjetaDoc.getString("numeroEnmascarado");
+                        String tipo = tarjetaDoc.getString("tipo");
+
+                        // Actualizar la vista con la información de la tarjeta
+                        TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                        if (tvTarjetaNumero != null) {
+                            if (numeroEnmascarado != null && !numeroEnmascarado.isEmpty()) {
+                                tvTarjetaNumero.setText(numeroEnmascarado);
+                            } else {
+                                // Fallback: extraer últimos 4 dígitos del número completo
+                                String numeroCompleto = tarjetaDoc.getString("numero");
+                                if (numeroCompleto != null && numeroCompleto.length() >= 4) {
+                                    String ultimos4 = numeroCompleto.substring(numeroCompleto.length() - 4);
+                                    tvTarjetaNumero.setText("•••• " + ultimos4);
+                                } else {
+                                    tvTarjetaNumero.setText("•••• ****");
+                                }
+                            }
+                        }
+
+                        android.util.Log.d("CheckoutDetalle", "Tarjeta encontrada: " + numeroEnmascarado);
+                    } else {
+                        // No se encontró tarjeta activa, usar valor por defecto
+                        TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                        if (tvTarjetaNumero != null) {
+                            tvTarjetaNumero.setText("•••• 1234");
+                        }
+                        android.util.Log.d("CheckoutDetalle", "No se encontró tarjeta activa para el usuario");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CheckoutDetalle", "Error obteniendo tarjeta del usuario", e);
+                    // En caso de error, usar valor por defecto
+                    TextView tvTarjetaNumero = findViewById(R.id.tvTarjetaNumero);
+                    if (tvTarjetaNumero != null) {
+                        tvTarjetaNumero.setText("•••• 1234");
+                    }
+                });
+    }
+
 
     private void cargarHabitaciones(String[] tipos, int[] cantidades, String[] precios) {
         containerHabitaciones.removeAllViews();
@@ -474,12 +561,23 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
     private void guardarDaniosYCompletarCheckout(List<Reserva.Danio> danios) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Actualizar tanto los daños como el estado
+        // Calcular nuevo costo total
+        double totalDaniosNuevos = 0;
+        for (Reserva.Danio danio : danios) {
+            try {
+                totalDaniosNuevos += Double.parseDouble(danio.getPrecio().replaceAll("[^0-9.]", ""));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        double totalDaniosCompleto = totalDaniosOriginales + totalDaniosNuevos;
+        double nuevoCostoTotal = montoTotalReserva + totalDaniosCompleto;
+
         db.collection("reservas")
                 .document(codigoReserva)
                 .update(
                         "danios", danios,
-                        "estado", "completada"
+                        "estado", "completada",
+                        "costoTotal", String.format("%.2f", nuevoCostoTotal)
                 )
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, "¡Checkout completado exitosamente!", Toast.LENGTH_SHORT).show();
@@ -489,6 +587,7 @@ public class CheckoutDetalleActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error al completar checkout: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
 
     // Clase auxiliar para mantener referencias a los componentes de cada daño
     private static class DanioItem {

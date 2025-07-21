@@ -37,7 +37,6 @@ public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.Servic
         holder.tvNombre.setText("Servicio: " + servicio.getNombre());
         holder.tvDescripcion.setText("Descripción: " +servicio.getDescripcion());
         String precioTexto = servicio.getEsGratis() != null && servicio.getEsGratis() ? "Gratis" : "S/. " + servicio.getPrecio();
-        holder.tvPrecio.setText("Precio: " +precioTexto);
 
         holder.btnEditar.setOnClickListener(v -> actionListener.onEditar(servicio));
         holder.btnEliminar.setOnClickListener(v -> actionListener.onEliminar(servicio));
@@ -54,7 +53,7 @@ public class ServicioAdapter extends RecyclerView.Adapter<ServicioAdapter.Servic
     }
 
     public static class ServicioViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvDescripcion, tvPrecio;
+        TextView tvNombre, tvDescripcion;
         MaterialButton btnEditar, btnEliminar; // En lugar de ImageButton
 
         public ServicioViewHolder(@NonNull View itemView) {
