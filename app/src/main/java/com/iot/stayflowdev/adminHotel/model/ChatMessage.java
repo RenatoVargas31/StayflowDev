@@ -3,17 +3,6 @@ package com.iot.stayflowdev.adminHotel.model;
 import com.google.firebase.Timestamp;
 
 public class ChatMessage {
-    private String message;
-
-    public ChatMessage(String message) {
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    //------------------------------------------
 
     private String id;
     private String chatId;
@@ -25,8 +14,10 @@ public class ChatMessage {
     private Timestamp timestamp;
     private boolean read;
 
+    // Constructor vacío requerido por Firestore
     public ChatMessage() {}
 
+    // Constructor completo para uso al enviar un mensaje
     public ChatMessage(String chatId, String senderId, String senderName,
                        String receiverId, String receiverName, String content,
                        Timestamp timestamp, boolean read) {
@@ -40,6 +31,7 @@ public class ChatMessage {
         this.read = read;
     }
 
+    // Getters y setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -54,13 +46,10 @@ public class ChatMessage {
 
     public void setRead(boolean read) { this.read = read; }
 
-    // Método para generar ID de chat único entre dos usuarios
+    // Método para generar ID único de chat entre dos usuarios
     public static String generateChatId(String userId1, String userId2) {
-        // Ordenar alfabéticamente para que siempre sea el mismo ID independientemente del orden
-        if (userId1.compareTo(userId2) < 0) {
-            return userId1 + "_" + userId2;
-        } else {
-            return userId2 + "_" + userId1;
-        }
+        return (userId1.compareTo(userId2) < 0)
+                ? userId1 + "_" + userId2
+                : userId2 + "_" + userId1;
     }
 }

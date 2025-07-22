@@ -1,10 +1,14 @@
 package com.iot.stayflowdev.cliente;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,13 +21,18 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.iot.stayflowdev.R;
 import com.iot.stayflowdev.databinding.ActivityReservaResumenBinding;
 import com.iot.stayflowdev.model.Hotel;
 import com.iot.stayflowdev.model.Reserva;
+import com.iot.stayflowdev.model.TarjetaCredito;
 import com.iot.stayflowdev.viewmodels.HotelViewModel;
+import com.iot.stayflowdev.viewmodels.TarjetaCreditoViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,10 +45,12 @@ public class ReservaResumenActivity extends AppCompatActivity {
 
     private ActivityReservaResumenBinding binding;
     private HotelViewModel hotelViewModel;
+    private TarjetaCreditoViewModel tarjetaCreditoViewModel;
     private FirebaseFirestore db;
     private Reserva reserva;
     private Hotel hotel;
     private boolean modoVisualizacion = false;
+    private Dialog tarjetaDialog;
 
     private static final String TAG = "ReservaResumen";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -59,8 +70,9 @@ public class ReservaResumenActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Inicializar ViewModel
+        // Inicializar ViewModels
         hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
+        tarjetaCreditoViewModel = new ViewModelProvider(this).get(TarjetaCreditoViewModel.class);
         db = FirebaseFirestore.getInstance();
 
         // Verificar si estamos en modo visualización
@@ -70,8 +82,8 @@ public class ReservaResumenActivity extends AppCompatActivity {
         // Configurar toolbar
         configurarToolbar();
 
-        // Configurar botón confirmar según el modo
-        configurarBotonConfirmar();
+        // Observar si el usuario tiene tarjeta de crédito registrada
+        configurarObservadoresTarjeta();
 
         // Obtener datos de la reserva
         obtenerReservaDelIntent();
@@ -81,15 +93,60 @@ public class ReservaResumenActivity extends AppCompatActivity {
         binding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
-    private void configurarBotonConfirmar() {
+    private void configurarObservadoresTarjeta() {
+        // Verificar si estamos en modo visualización
         if (modoVisualizacion) {
-            // En modo visualización, ocultar el botón ya que existe una flecha para volver
-            binding.btnConfirmarReserva.setVisibility(View.GONE);
-            binding.containerBotonFijo.setVisibility(View.GONE); // También ocultar el contenedor para mejor apariencia
-        } else {
-            // En modo creación (comportamiento original)
-            binding.btnConfirmarReserva.setVisibility(View.VISIBLE);
-            binding.containerBotonFijo.setVisibility(View.VISIBLE);
+            return; // En modo visualización no necesitamos verificar tarjeta
+        }
+
+        // Verificar si el usuario tiene tarjeta registrada
+        tarjetaCreditoViewModel.verificarTarjeta();
+
+        // Observar si el usuario tiene tarjeta
+        tarjetaCreditoViewModel.getHasTarjeta().observe(this, hasTarjeta -> {
+            if (hasTarjeta != null) {
+                configurarBotonSegunTarjeta(hasTarjeta);
+            }
+        });
+
+        // Observar mensajes de éxito
+        tarjetaCreditoViewModel.getSuccessMessage().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                tarjetaCreditoViewModel.limpiarMensajes();
+
+                // Cerrar diálogo si está abierto
+                if (tarjetaDialog != null && tarjetaDialog.isShowing()) {
+                    tarjetaDialog.dismiss();
+                }
+
+                // Verificar nuevamente si ahora tiene tarjeta
+                tarjetaCreditoViewModel.verificarTarjeta();
+            }
+        });
+
+        // Observar mensajes de error
+        tarjetaCreditoViewModel.getErrorMessage().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                tarjetaCreditoViewModel.limpiarMensajes();
+            }
+        });
+    }
+
+    private void configurarBotonSegunTarjeta(boolean tieneTarjeta) {
+        if (modoVisualizacion) {
+            // En modo visualización, ocultamos todo el contenedor
+            binding.containerBotonFijo.setVisibility(View.GONE);
+            return;
+        }
+
+        // Asegurarnos de que el contenedor sea visible
+        binding.containerBotonFijo.setVisibility(View.VISIBLE);
+
+        if (tieneTarjeta) {
+            // Si tiene tarjeta, mostrar botón de confirmar reserva
+            binding.btnConfirmarReserva.setText("Confirmar Reserva");
             binding.btnConfirmarReserva.setOnClickListener(v -> {
                 // Deshabilitar botón para evitar múltiples clics
                 binding.btnConfirmarReserva.setEnabled(false);
@@ -97,8 +154,25 @@ public class ReservaResumenActivity extends AppCompatActivity {
 
                 guardarReservaEnFirestore();
             });
+        } else {
+            // Si no tiene tarjeta, mostrar botón para registrar tarjeta
+            binding.btnConfirmarReserva.setText("Registrar Tarjeta para Continuar");
+            binding.btnConfirmarReserva.setOnClickListener(v -> {
+                mostrarDialogoTarjetaCredito();
+            });
         }
     }
+
+    private void configurarBotonConfirmar() {
+        // La verificación real del botón se hace en configurarBotonSegunTarjeta
+        // después de verificar si el usuario tiene tarjeta
+        if (modoVisualizacion) {
+            // En modo visualización, ocultar el botón ya que existe una flecha para volver
+            binding.btnConfirmarReserva.setVisibility(View.GONE);
+            binding.containerBotonFijo.setVisibility(View.GONE);
+        }
+    }
+
     private void obtenerReservaDelIntent() {
         try {
             String reservaJson = getIntent().getStringExtra("reserva_data");
@@ -432,5 +506,147 @@ public class ReservaResumenActivity extends AppCompatActivity {
     private void mostrarErrorGuardado(String mensaje) {
         Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
         Log.e(TAG, "Error en guardado: " + mensaje);
+    }
+
+    private void mostrarDialogoTarjetaCredito() {
+        // Crear diálogo personalizado
+        tarjetaDialog = new Dialog(this);
+        tarjetaDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        tarjetaDialog.setContentView(R.layout.dialog_regitro_tarjeta_credito);
+        tarjetaDialog.setCancelable(true);
+
+        // Obtener referencias a las vistas del diálogo
+        TextInputLayout tilNumeroTarjeta = tarjetaDialog.findViewById(R.id.til_numero_tarjeta);
+        TextInputEditText etNumeroTarjeta = tarjetaDialog.findViewById(R.id.et_numero_tarjeta);
+        TextInputLayout tilTitular = tarjetaDialog.findViewById(R.id.til_titular);
+        TextInputEditText etTitular = tarjetaDialog.findViewById(R.id.et_titular);
+        TextInputLayout tilFechaExpiracion = tarjetaDialog.findViewById(R.id.til_fecha_expiracion);
+        TextInputEditText etFechaExpiracion = tarjetaDialog.findViewById(R.id.et_fecha_expiracion);
+        TextInputLayout tilCvv = tarjetaDialog.findViewById(R.id.til_cvv);
+        TextInputEditText etCvv = tarjetaDialog.findViewById(R.id.et_cvv);
+        MaterialButton btnCancelar = tarjetaDialog.findViewById(R.id.btn_cancelar);
+        MaterialButton btnRegistrar = tarjetaDialog.findViewById(R.id.btn_registrar);
+
+        // Detectar tipo de tarjeta mientras se escribe
+        etNumeroTarjeta.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Formatear número de tarjeta con espacios cada 4 dígitos
+                String input = s.toString().replaceAll("\\s+", "");
+                StringBuilder formatted = new StringBuilder();
+
+                for (int i = 0; i < input.length(); i++) {
+                    if (i > 0 && i % 4 == 0) {
+                        formatted.append(" ");
+                    }
+                    formatted.append(input.charAt(i));
+                }
+
+                if (!s.toString().equals(formatted.toString())) {
+                    etNumeroTarjeta.setText(formatted.toString());
+                    etNumeroTarjeta.setSelection(formatted.length());
+                }
+
+                // Detectar tipo de tarjeta
+                String tipo = detectarTipoTarjeta(input);
+                tarjetaDialog.findViewById(R.id.tv_tipo_tarjeta).setVisibility(View.VISIBLE);
+                ((android.widget.TextView) tarjetaDialog.findViewById(R.id.tv_tipo_tarjeta)).setText(tipo);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Formatear fecha de expiración automáticamente (MM/YY)
+        etFechaExpiracion.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String input = s.toString();
+                if (input.length() == 2 && before == 0) {
+                    // Agregar barra después de introducir los 2 primeros dígitos (mes)
+                    etFechaExpiracion.setText(input + "/");
+                    etFechaExpiracion.setSelection(input.length() + 1);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Configurar botones
+        btnCancelar.setOnClickListener(v -> tarjetaDialog.dismiss());
+
+        btnRegistrar.setOnClickListener(v -> {
+            // Obtener valores de los campos
+            String numeroTarjeta = etNumeroTarjeta.getText().toString().replaceAll("\\s+", "");
+            String titular = etTitular.getText().toString().trim();
+            String fechaExpiracion = etFechaExpiracion.getText().toString();
+            String cvv = etCvv.getText().toString();
+
+            // Validar campos
+            if (numeroTarjeta.isEmpty() || titular.isEmpty() || fechaExpiracion.isEmpty() || cvv.isEmpty()) {
+                Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Validar formato de fecha
+            if (!fechaExpiracion.matches("\\d{2}/\\d{2}")) {
+                tilFechaExpiracion.setError("Formato inválido. Use MM/AA");
+                return;
+            }
+
+            // Extraer mes y año
+            String[] fechaParts = fechaExpiracion.split("/");
+            String mes = fechaParts[0];
+            String anio = "20" + fechaParts[1]; // Convertir 2 dígitos a 4 dígitos
+
+            // Validar mes
+            int mesInt = Integer.parseInt(mes);
+            if (mesInt < 1 || mesInt > 12) {
+                tilFechaExpiracion.setError("Mes inválido (1-12)");
+                return;
+            }
+
+            // Validar fecha de expiración (no vencida)
+            int anioInt = Integer.parseInt(anio);
+            int mesActual = Calendar.getInstance().get(Calendar.MONTH) + 1; // Calendar.MONTH es 0-based
+            int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+
+            if (anioInt < anioActual || (anioInt == anioActual && mesInt < mesActual)) {
+                tilFechaExpiracion.setError("La tarjeta está vencida");
+                return;
+            }
+
+            // Crear objeto TarjetaCredito
+            TarjetaCredito tarjeta = new TarjetaCredito(numeroTarjeta, titular, mes, anio, cvv);
+
+            // Guardar tarjeta
+            tarjetaCreditoViewModel.guardarTarjeta(tarjeta);
+        });
+
+        // Mostrar diálogo
+        tarjetaDialog.show();
+    }
+
+    private String detectarTipoTarjeta(String numero) {
+        if (numero.isEmpty()) {
+            return "Tarjeta";
+        } else if (numero.startsWith("4")) {
+            return "Visa";
+        } else if (numero.startsWith("5") || numero.startsWith("2")) {
+            return "Mastercard";
+        } else if (numero.startsWith("34") || numero.startsWith("37")) {
+            return "American Express";
+        } else if (numero.startsWith("6")) {
+            return "Discover";
+        } else {
+            return "Tarjeta";
+        }
     }
 }
