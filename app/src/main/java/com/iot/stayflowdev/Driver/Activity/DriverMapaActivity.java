@@ -160,11 +160,11 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         arrivalTime = findViewById(R.id.arrival_time);
         arrivalTimeDetailed = findViewById(R.id.arrival_time_detailed);
         distanceValue = findViewById(R.id.distance_value);
-       // estimatedCost = findViewById(R.id.estimated_cost);
+        // estimatedCost = findViewById(R.id.estimated_cost);
         remainingDistance = findViewById(R.id.remaining_distance);
         btnCloseDestination = findViewById(R.id.btn_close_destination);
         btnStartTrip = findViewById(R.id.btn_start_trip);
-       // btnContactPassenger = findViewById(R.id.btn_contact_passenger);
+        // btnContactPassenger = findViewById(R.id.btn_contact_passenger);
 
         // ==================== NAVIGATION CARD ====================
         navigationCard = findViewById(R.id.navigation_card);
@@ -517,7 +517,7 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         arrivalTime.setText("-- mins");
         arrivalTimeDetailed.setText("-- mins");
         distanceValue.setText("-- km");
-      //  estimatedCost.setText("S/ --");
+        //  estimatedCost.setText("S/ --");
         remainingDistance.setText("Calculando ruta óptima...");
     }
 
@@ -525,7 +525,7 @@ public class DriverMapaActivity extends AppCompatActivity implements OnMapReadyC
         distanceValue.setText(routeInfo.distance);
         arrivalTime.setText(routeInfo.durationMinutes + " mins");
         arrivalTimeDetailed.setText(routeInfo.durationMinutes + " mins");
-       // estimatedCost.setText(String.format(Locale.getDefault(), "S/ %.2f", routeInfo.estimatedCost));
+        // estimatedCost.setText(String.format(Locale.getDefault(), "S/ %.2f", routeInfo.estimatedCost));
         remainingDistance.setText("Ruta óptima calculada");
     }
 
