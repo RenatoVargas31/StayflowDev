@@ -6,6 +6,6 @@
         android:id="@+id/action_logout"
         android:title="Cerrar sesión"
         android:icon="@drawable/ic_logout_24dp"
-        app:iconTint="@color/md_theme_primary"
+        app:iconTint="@color/white"
         app:showAsAction="always" />
 </menu>
