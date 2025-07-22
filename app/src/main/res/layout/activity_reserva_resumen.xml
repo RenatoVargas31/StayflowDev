@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Regresar"
+            android:tint="@color/white"
             android:padding="8dp"
             android:src="@drawable/ic_arrow_back" />
 
