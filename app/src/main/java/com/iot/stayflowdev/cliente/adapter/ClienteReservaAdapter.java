@@ -121,6 +121,7 @@ public class ClienteReservaAdapter extends RecyclerView.Adapter<ClienteReservaAd
             Intent intent = new Intent(context, ReservaResumenActivity.class);
             intent.putExtra("reserva_data", reservaJson);
             intent.putExtra("modo_visualizacion", true); // Indicar que es modo visualización
+            intent.putExtra("ocultar_boton_confirmar", true); // Ocultar el botón de confirmar reserva
             context.startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "Error al mostrar detalles de reserva: " + e.getMessage());

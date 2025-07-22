@@ -50,6 +50,7 @@ public class ReservaResumenActivity extends AppCompatActivity {
     private Reserva reserva;
     private Hotel hotel;
     private boolean modoVisualizacion = false;
+    private boolean ocultarBotonConfirmar = false;
     private Dialog tarjetaDialog;
 
     private static final String TAG = "ReservaResumen";
@@ -77,7 +78,12 @@ public class ReservaResumenActivity extends AppCompatActivity {
 
         // Verificar si estamos en modo visualización
         modoVisualizacion = getIntent().getBooleanExtra("modo_visualizacion", false);
+
+        // Verificar si debemos ocultar el botón de confirmar (cuando viene desde ClienteReservasActivity)
+        ocultarBotonConfirmar = getIntent().getBooleanExtra("ocultar_boton_confirmar", false);
+
         Log.d(TAG, "Modo visualización: " + modoVisualizacion);
+        Log.d(TAG, "Ocultar botón confirmar: " + ocultarBotonConfirmar);
 
         // Configurar toolbar
         configurarToolbar();
@@ -94,9 +100,11 @@ public class ReservaResumenActivity extends AppCompatActivity {
     }
 
     private void configurarObservadoresTarjeta() {
-        // Verificar si estamos en modo visualización
-        if (modoVisualizacion) {
-            return; // En modo visualización no necesitamos verificar tarjeta
+        // Verificar si estamos en modo visualización o si se debe ocultar el botón
+        if (modoVisualizacion || ocultarBotonConfirmar) {
+            // Ocultar el botón inmediatamente
+            binding.containerBotonFijo.setVisibility(View.GONE);
+            return; // No necesitamos verificar tarjeta
         }
 
         // Verificar si el usuario tiene tarjeta registrada
@@ -135,8 +143,8 @@ public class ReservaResumenActivity extends AppCompatActivity {
     }
 
     private void configurarBotonSegunTarjeta(boolean tieneTarjeta) {
-        if (modoVisualizacion) {
-            // En modo visualización, ocultamos todo el contenedor
+        // Si estamos en modo visualización o se debe ocultar el botón, ocultamos todo el contenedor
+        if (modoVisualizacion || ocultarBotonConfirmar) {
             binding.containerBotonFijo.setVisibility(View.GONE);
             return;
         }
