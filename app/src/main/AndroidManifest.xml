@@ -48,7 +48,7 @@
             android:exported="false" /> <!-- Meta-data for Google Maps API key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="API-KEY" />
+            android:value="AIzaSyArgXmLe6Bk6km2wSEN8RDpk2qbPd73ryc" />
 
         <activity
             android:name=".adminHotel.NotificacionesAdminActivity"
