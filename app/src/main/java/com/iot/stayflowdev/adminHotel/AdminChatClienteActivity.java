@@ -60,6 +60,9 @@ public class AdminChatClienteActivity extends AppCompatActivity {
         Log.d(TAG, "AdminChatClienteActivity onCreate iniciado");
         setContentView(R.layout.activity_admin_chat_cliente);
 
+        binding = ActivityAdminChatClienteBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         initializeFirebase();
         initializeViews();
         getIntentData();
