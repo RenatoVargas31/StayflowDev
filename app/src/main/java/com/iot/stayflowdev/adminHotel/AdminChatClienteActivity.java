@@ -106,12 +106,28 @@ public class AdminChatClienteActivity extends AppCompatActivity {
 
         Log.d(TAG, "Intent data - Cliente ID: " + clienteId + ", Cliente Name: " + clienteName + ", Chat ID: " + currentChatId);
 
-        if (clienteId == null) {
-            Log.e(TAG, "Error: clienteId es nulo");
-            Toast.makeText(this, "Error al cargar el chat", Toast.LENGTH_SHORT).show();
-            finish();
+        if (clienteId == null || currentChatId == null) {
+            // Buscar automáticamente el chat donde el admin es currentUserId y él es receiver o sender
+            db.collection("messages")
+                    .whereEqualTo("receiverId", currentUserId)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            ChatMessage msg = querySnapshot.getDocuments().get(0).toObject(ChatMessage.class);
+                            clienteId = msg.getSenderId();
+                            currentChatId = msg.getChatId();
+                            clienteName = msg.getSenderName();
+                            chatTitleText.setText("Chat con " + clienteName);
+                            loadMessages(); // llama aquí directamente
+                        } else {
+                            Toast.makeText(this, "No hay mensajes previos con ningún cliente", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    });
             return;
         }
+
 
         // Si no hay chat ID, generarlo
         if (currentChatId == null) {
