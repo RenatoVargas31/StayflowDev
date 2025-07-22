@@ -64,7 +64,7 @@ public class AdminChatClienteActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         initializeFirebase();
-        initializeViews();alala
+        initializeViews();
         getIntentData();
         setupRecyclerView();
         setupClickListeners();
